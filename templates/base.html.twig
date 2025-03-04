@@ -25,7 +25,57 @@
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
     </head>
-    <body>
+    <body class="font-poppins text-gray-700">
+        <!-- Header -->
+        <header class="bg-white shadow">
+            <div class="container mx-auto px-4 py-4 flex flex-wrap items-center">
+                <div class="w-full md:w-1/4 flex justify-between items-center">
+                    <!-- Logo -->
+                    <div class="logo">
+                        <a href="{{ path('app_home') }}">
+                            <img src="{{ asset('img/logo.png') }}" alt="Logo" class="h-10" />
+                        </a>
+                    </div>
+                    <!-- End Logo -->
+                    <!-- Mobile Nav (Hamburger) -->
+                    <div class="md:hidden">
+                        <img src="{{ asset('img/menu-burger.png') }}" alt="Logo" class="w-9">
+                    </div>
+                    <!-- End Mobile Nav (Hamburger) -->
+                </div>
+                <!-- Main Menu -->
+                <div class="w-full md:w-3/4 hidden md:flex justify-center">
+                    <nav class="w-full">
+                        <ul class="flex gap-10 justify-end">
+                            <li class="active">
+                                <a href="#" class="text-blue-600 font-bold">Home</a>
+                            </li>
+                            <li>
+                                <a href="contact.html" class="text-gray-600 hover:text-blue-600 font-bold">Contact</a>
+                            </li>
+                            <!-- Get Quote / Appointment Button -->
+                            <li class="flex justify-end bg-green-100">
+                                <div class="get-quote">
+                                    <a href="appointment.html"
+                                        class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                                        Login
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <!-- End Main Menu -->
+            </div>
+        </header>
+        <!-- End Header -->
+
+        <!-- Slider -->
+        <section class="container">
+            <div>
+                
+            </div>
+        </section>
         {% block body %}{% endblock %}
     </body>
 </html>
