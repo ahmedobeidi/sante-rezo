@@ -2,8 +2,22 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        <meta name="description" content="Plateforme de réservation médicale et de médecins. Profitez d'une interface intuitive pour prendre rendez-vous en toute simplicité et en toute sécurité.">
+        <meta name="keywords" content="réservation médicale, médecins, prise de rendez-vous, soins de santé, plateforme médicale">
+        <meta name="author" content="Ahmed AL-OBEIDI">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+        <title>{% block title %}SantéRézo - Réservation médicale{% endblock %}</title>
+
+        <!-- Favicon -->
+        <link rel="icon" href="img/favicon.png" />
+
+        <!-- Google Fonts -->
+        <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap"
+        rel="stylesheet" />
+
+        <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
+        
         {% block stylesheets %}
         {% endblock %}
 
