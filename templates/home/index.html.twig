@@ -6,16 +6,16 @@
 		<div class="flex items-center bg-cover bg-center h-full w-full" style="background-image: url('{{ asset('img/slider1.jpg') }}');">
 			<div class="container mx-auto px-4">
 				<div class="flex flex-col max-w-xl gap-7">
-					<h1 class="text-4xl md:text-5xl font-bold text-dark-gray">
+					<h1 class="font-poppins text-4xl md:text-5xl font-bold text-dark-gray">
 						Nous offrons
 						<span class="text-off-blue">des services</span>
 						médicaux sur lesquels vous pouvez
 						<span class="text-off-blue">compter !</span>
 					</h1>
-					<p class="text-off-gray">
+					<p class="font-nunito text-off-gray">
 						Découvrez une façon simple et sécurisée de prendre rendez-vous avec des professionnels de la santé de confiance. Notre plateforme vous met en relation avec des médecins de premier choix, garantissant des soins personnalisés selon vos besoins.
 					</p>
-					<div class="flex flex-col gap-4 md:flex-row">
+					<div class="font-nunito flex flex-col gap-4 md:flex-row">
 						<a href="#" class="bg-dark-blue text-white w-fit py-2 px-4 rounded hover:bg-dark-gray">Prendre Rendez-vous</a>
 						<a href="#" class="bg-dark-gray text-white w-fit py-2 px-4 rounded hover:bg-dark-blue">Contactez-nous</a>
 					</div>
@@ -30,8 +30,8 @@
 		<div
 			class="max-w-7xl mx-auto px-4">
 			<!-- Section Title -->
-			<div class="text-center mb-16">
-				<h2 class="text-3xl font-bold text-dark-gray">
+			<div class="font-nunito text-center mb-16">
+				<h2 class="font-poppins text-3xl font-bold text-dark-gray">
 					Nous proposons divers services pour améliorer
 					<br>
 					votre santé
@@ -43,7 +43,7 @@
 			</div>
 			<!-- Services Grid -->
 			<div
-				class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+				class="font-nunito grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 				<!-- Single Service -->
 				<div class="flex flex-row gap-5">
 					<div class="w-16">
@@ -165,13 +165,15 @@
 	<!-- End Facts -->
 
 	<!-- Start Contact -->
-	<section class="py-16">
+	<section class="pt-16">
 		<div
-			class="max-w-7xl mx-auto px-4">
+			class="font-nunito max-w-7xl mx-auto px-4">
 			<!-- Section Title -->
 			<div class="text-center mb-12">
-				<h2 class="text-3xl font-bold text-dark-gray">
-					Nous sommes toujours prêts à vous aider. <br> Contactez-nous.
+				<h2 class="font-poppins text-3xl font-bold text-dark-gray">
+					Nous sommes toujours prêts à vous aider.
+					<br>
+					Contactez-nous.
 				</h2>
 				<img src="{{ asset('img/section-img.png') }}" alt="#" class="mx-auto my-4">
 				<p class="text-gray-600">
@@ -207,4 +209,13 @@
 	</section>
 	<!-- End Contact -->
 
+	<!-- Copyright -->
+	<footer class="bg-off-blue text-white py-6 shadow">
+		<div class="max-w-7xl mx-auto px-4">
+			<div class="text-center">
+				<p>Copyright © 2025 SantéRézo, Tous droits réservés</p>
+			</div>
+		</div>
+	</footer>
+	<!-- End Copyright -->
 {% endblock %}
