@@ -11,12 +11,11 @@ module.exports = {
         'dark-blue': '#2563EB',
         'dark-gray': '#2c2d3f',
         'off-blue': '#298BE9',
-        'off-gray': '#4B5563'
+        'off-gray': '#4B5563',
+        'off-white': '#f9f9f9'
       },
       screens: {
-
         '3xl': '2400px',
-       
       },
     },
   },

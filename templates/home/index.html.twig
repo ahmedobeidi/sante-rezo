@@ -1,9 +1,24 @@
 {% extends 'base.html.twig' %}
 
+{% block stylesheets %}
+<style>
+    /* Mobile background image  */
+    .welcome-bg {
+        background-image: url("{{ asset('img/welcome-sm.jpg') }}");
+    }
+
+    @media (min-width: 1280px) {
+        .welcome-bg {
+            background-image: url("{{ asset('img/welcome-md.jpg') }}");
+        }
+    }
+</style>
+{% endblock %}
+
 {% block main %}
 	<!-- Welcome Section -->
 	<section class="h-[100vh] w-full">
-		<div class="flex items-center bg-cover bg-center h-full w-full" style="background-image: url('{{ asset('img/slider1.jpg') }}');">
+		<div class="flex items-center welcome-bg bg-cover bg-center h-full w-full">
 			<div class="container mx-auto px-4">
 				<div class="flex flex-col max-w-xl gap-7">
 					<h1 class="font-poppins text-4xl md:text-5xl font-bold text-dark-gray">
@@ -37,7 +52,7 @@
 					votre santé
 				</h2>
 				<img src="{{ asset('img/section-img.png') }}" alt="#" class="mx-auto my-4">
-				<p class="text-gray-600">
+				<p class="text-off-gray">
 					Découvrez une sélection de services conçus pour optimiser votre bien-être et garantir des soins de qualité.
 				</p>
 			</div>
@@ -53,7 +68,7 @@
 						<h4 class="text-xl font-bold mb-2 text-dark-gray">
 							Traitement Général
 						</h4>
-						<p class="text-gray-600">
+						<p class="text-off-gray">
 							Profitez d'une prise en charge globale pour vos besoins médicaux quotidiens.
 						</p>
 					</div>
@@ -81,7 +96,7 @@
 						<h4 class="text-xl font-bold mb-2 text-dark-gray">
 							Chirurgie Cardiaque
 						</h4>
-						<p class="text-gray-600">
+						<p class="text-off-gray">
 							Bénéficiez de soins experts et d'une prise en charge complète pour vos interventions cardiaques.
 						</p>
 					</div>
@@ -95,7 +110,7 @@
 						<h4 class="text-xl font-bold mb-2 text-dark-gray">
 							Traitement des Oreilles
 						</h4>
-						<p class="text-gray-600">
+						<p class="text-off-gray">
 							Recevez des soins spécialisés pour prévenir et traiter les problèmes d'audition.
 						</p>
 					</div>
@@ -109,7 +124,7 @@
 						<h4 class="text-xl font-bold mb-2 text-dark-gray">
 							Problèmes de Vision
 						</h4>
-						<p class="text-gray-600">
+						<p class="text-off-gray">
 							Accédez à des consultations ophtalmologiques pour corriger et améliorer votre vue.
 						</p>
 					</div>
@@ -123,7 +138,7 @@
 						<h4 class="text-xl font-bold mb-2 text-dark-gray">
 							Transfusion Sanguine
 						</h4>
-						<p class="text-gray-600">
+						<p class="text-off-gray">
 							Assurez-vous un accompagnement médical sûr et professionnel lors de vos transfusions.
 						</p>
 					</div>
@@ -176,7 +191,7 @@
 					Contactez-nous.
 				</h2>
 				<img src="{{ asset('img/section-img.png') }}" alt="#" class="mx-auto my-4">
-				<p class="text-gray-600">
+				<p class="text-off-gray">
 					Obtenez une assistance rapide et personnalisée pour tous vos besoins médicaux.
 				</p>
 			</div>

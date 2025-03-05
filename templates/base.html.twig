@@ -20,7 +20,9 @@
 		<link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap" rel="stylesheet"/>
 		<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wdth,wght,YTLC@0,6..12,75..125,200..1000,440..540;1,6..12,75..125,200..1000,440..540&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
-		<link rel="stylesheet" href="{{ asset('styles/app.css') }}"> {% block stylesheets %}{% endblock %}
+		<link rel="stylesheet" href="{{ asset('styles/app.css') }}"> 
+		
+		{% block stylesheets %}{% endblock %}
 
 		{% block javascripts %}
 			{% block importmap %}
@@ -28,9 +30,9 @@
 			{% endblock %}
 		{% endblock %}
 	</head>
-	<body>
+	<body class="bg-off-white">
 		<!-- Header -->
-		<header class="bg-white fixed top-0 left-0 right-0 shadow z-50">
+		<header class="bg-off-white fixed top-0 left-0 right-0 shadow z-50">
 			<div class="container mx-auto p-4 flex flex-wrap items-center">
 				<div
 					class="w-full md:w-1/4 flex justify-between items-center">
@@ -50,7 +52,7 @@
 				<!-- Main Menu -->
 				<div class="w-full md:w-3/4 hidden md:flex justify-center">
 					{% block navbar %}
-						<nav class="w-full font-nunito">
+						<nav class="w-full font">
 							<ul class="flex gap-10 justify-end">
 								<li class="active">
 									<a href="{{ path('app_home') }}" class="text-off-blue font-bold">Accueil</a>
@@ -59,7 +61,7 @@
 									<a href="#" class="text-off-gray hover:text-off-blue font-bold">Contact</a>
 								</li>
 								<!-- Get Quote / Appointment Button -->
-								<li class="flex justify-end bg-green-100">
+								<li class="flex justify-end">
 									<div class="get-quote">
 										<a href="appointment.html" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue">
 											Se connecter
