@@ -137,7 +137,8 @@
 	<section class="relative py-16 text-white bg-cover bg-center bg-no-repeat" style="background-image: url('{{ asset('img/fact.jpg') }}');">
 		<div class="absolute inset-0 bg-off-blue opacity-80"></div>
 		<div class="relative max-w-7xl mx-auto px-4">
-			<div class="flex flex-col justify-center gap-10 md:flex-row">
+			<div
+				class="flex flex-col justify-center gap-10 md:flex-row">
 				<!-- Fact 1 -->
 				<div class="flex flex-col md:flex-row gap-5 items-center">
 					<div>
@@ -162,4 +163,48 @@
 		</div>
 	</section>
 	<!-- End Facts -->
+
+	<!-- Start Contact -->
+	<section class="py-16">
+		<div
+			class="max-w-7xl mx-auto px-4">
+			<!-- Section Title -->
+			<div class="text-center mb-12">
+				<h2 class="text-3xl font-bold text-dark-gray">
+					Nous sommes toujours prêts à vous aider. <br> Contactez-nous.
+				</h2>
+				<img src="{{ asset('img/section-img.png') }}" alt="#" class="mx-auto my-4">
+				<p class="text-gray-600">
+					Obtenez une assistance rapide et personnalisée pour tous vos besoins médicaux.
+				</p>
+			</div>
+			<div
+				class="grid grid-cols-1 items-center md:grid-cols-2 gap-8">
+				<!-- Form Column -->
+				<div>
+					<form action="#" class="space-y-6">
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<input type="text" name="name" placeholder="Nom" class="border border-gray-300 rounded p-2">
+							<input type="email" name="email" placeholder="Email" class="border border-gray-300 rounded p-2">
+						</div>
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<input type="text" name="phone" placeholder="Téléphone" class="border border-gray-300 rounded p-2">
+						</div>
+						<textarea name="message" placeholder="Écrivez votre message ici..." class="border border-gray-300 rounded p-2 w-full"></textarea>
+						<div class="flex flex-col md:flex-row items-center gap-4">
+							<button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+								Prendre rendez-vous
+							</button>
+						</div>
+					</form>
+				</div>
+				<!-- Image Column -->
+				<div class="flex justify-center items-center">
+					<img src="{{ asset('img/contact-img.png') }}" alt="Image de contact" class="w-full max-w-md rounded">
+				</div>
+			</div>
+		</div>
+	</section>
+	<!-- End Contact -->
+
 {% endblock %}
