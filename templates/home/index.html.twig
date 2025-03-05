@@ -2,31 +2,132 @@
 
 {% block main %}
 	<!-- Welcome Section -->
-	<section class="h-[100vh] w-full"> 
-        <div class="flex items-center bg-cover bg-center h-full w-full" style="background-image: url('{{ asset('img/slider1.jpg') }}');">
-            <div class="container mx-auto px-4">
-                <div class="flex flex-col max-w-xl gap-7">
-                    <h1 class="text-4xl md:text-5xl font-bold text-dark-gray">
-                        We Provide
-                        <span class="text-off-blue">Medical</span>
-                        Services
-                                                            That You Can
-                        <span class="text-off-blue">Trust!</span>
-                    </h1>
-                    <p class="text-off-gray">
-                        Discover a seamless and secure way to book appointments with trusted healthcare professionals. Our platform connects you with top-rated doctors, ensuring personalized care at your convenience.
-                    </p>
-                    <div class="flex flex-col gap-4 md:flex-row">
-                        <a href="#" class="bg-dark-blue text-white w-fit py-2 px-4 rounded hover:bg-dark-gray">Get Appointment</a>
-                        <a href="#" class="bg-dark-gray text-white w-fit py-2 px-4 rounded hover:bg-dark-blue">Contact Now</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+	<section class="h-[100vh] w-full">
+		<div class="flex items-center bg-cover bg-center h-full w-full" style="background-image: url('{{ asset('img/slider1.jpg') }}');">
+			<div class="container mx-auto px-4">
+				<div class="flex flex-col max-w-xl gap-7">
+					<h1 class="text-4xl md:text-5xl font-bold text-dark-gray">
+						Nous offrons
+						<span class="text-off-blue">des services</span>
+						médicaux
+						                                                                                                    sur lesquels vous pouvez
+						<span class="text-off-blue">compter !</span>
+					</h1>
+					<p class="text-off-gray">
+						Découvrez une façon simple et sécurisée de prendre rendez-vous avec des professionnels de la santé de confiance. Notre plateforme vous met en relation avec des médecins de premier choix, garantissant des soins personnalisés selon vos besoins.
+					</p>
+					<div class="flex flex-col gap-4 md:flex-row">
+						<a href="#" class="bg-dark-blue text-white w-fit py-2 px-4 rounded hover:bg-dark-gray">Prendre Rendez-vous</a>
+						<a href="#" class="bg-dark-gray text-white w-fit py-2 px-4 rounded hover:bg-dark-blue">Contactez-nous</a>
+					</div>
+				</div>
+			</div>
+		</div>
 	</section>
-    <!-- End Welcome Section -->
-    {# <div>
-        dsfsdf
-    </div> #}
-	<!-- End Slider -->
+	<!-- End Welcome Section -->
+
+	<!-- Start Service -->
+	<section class="py-20">
+		<div class="max-w-7xl mx-auto px-4">
+			<!-- Section Title -->
+			<div class="text-center mb-16">
+				<h2 class="text-3xl font-bold text-dark-gray">
+					Nous proposons divers services pour améliorer <br> votre santé
+				</h2>
+				<img src="{{ asset('img/section-img.png') }}" alt="#" class="mx-auto my-4">
+				<p class="text-gray-600">
+					Découvrez une sélection de services conçus pour optimiser votre bien-être et garantir des soins de qualité.
+				</p>
+			</div>
+			<!-- Services Grid -->
+			<div
+				class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+				<!-- Single Service -->
+				<div class="flex flex-row gap-5">
+					<div class="w-16">
+						<img src="{{ asset('img/general.png') }}" alt="Traitement Général" class="w-full">
+					</div>
+                    <div>
+                        <h4 class="text-xl font-bold mb-2 text-dark-gray">
+                            Traitement Général
+                        </h4>
+                        <p class="text-gray-600">
+                            Profitez d'une prise en charge globale pour vos besoins médicaux quotidiens.
+                        </p>
+                    </div>
+				</div>
+				<!-- Single Service -->
+				<div class="flex flex-row gap-5">
+					<div class="w-16">
+						<img src="{{ asset('img/teeth.png') }}" alt="Blanchiment Dentaire" class="w-full">
+					</div>
+                    <div>
+						<h4 class="text-xl font-bold mb-2 text-dark-gray">
+							Blanchiment Dentaire
+						</h4>
+                        <p class="text-gray-600">
+                            Obtenez un sourire éclatant grâce à nos techniques de blanchiment avancées.
+                        </p>
+                    </div>
+				</div>
+				<!-- Single Service -->
+				<div class="flex flex-row gap-5">
+					<div class="w-16">
+						<img src="{{ asset('img/heart.png') }}" alt="Chirurgie Cardiaque" class="w-full">
+					</div>
+                    <div>
+						<h4 class="text-xl font-bold mb-2 text-dark-gray">
+							Chirurgie Cardiaque
+						</h4>
+                        <p class="text-gray-600">
+                            Bénéficiez de soins experts et d'une prise en charge complète pour vos interventions cardiaques.
+                        </p>
+                    </div>
+				</div>
+				<!-- Single Service -->
+				<div class="flex flex-row gap-5">
+					<div class="w-16">
+						<img src="{{ asset('img/ear.png') }}" alt="Traitement des Oreilles" class="w-full">
+					</div>
+                    <div>
+						<h4 class="text-xl font-bold mb-2 text-dark-gray">
+							Traitement des Oreilles
+						</h4>
+                        <p class="text-gray-600">
+                            Recevez des soins spécialisés pour prévenir et traiter les problèmes d'audition.
+                        </p>
+                    </div>
+				</div>
+				<!-- Single Service -->
+				<div class="flex flex-row gap-5">
+					<div class="w-16">
+						<img src="{{ asset('img/vision.png') }}" alt="Problèmes de Vision" class="w-full">
+					</div>
+                    <div>
+						<h4 class="text-xl font-bold mb-2 text-dark-gray">
+							Problèmes de Vision
+						</h4>
+                        <p class="text-gray-600">
+                            Accédez à des consultations ophtalmologiques pour corriger et améliorer votre vue.
+                        </p>
+                    </div>
+				</div>
+				<!-- Single Service -->
+				<div class="flex flex-row gap-5">
+					<div class="w-16">
+						<img src="{{ asset('img/blood.png') }}" alt="Transfusion Sanguine" class="w-full">
+					</div>
+                    <div>
+						<h4 class="text-xl font-bold mb-2 text-dark-gray">
+							Transfusion Sanguine
+						</h4>
+                        <p class="text-gray-600">
+                            Assurez-vous un accompagnement médical sûr et professionnel lors de vos transfusions.
+                        </p>
+                    </div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<!-- End Service -->
 {% endblock %}

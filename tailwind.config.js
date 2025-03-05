@@ -11,7 +11,12 @@ module.exports = {
         'dark-gray': '#2c2d3f',
         'off-blue': '#298BE9',
         'off-gray': '#4B5563'
-      }
+      },
+      screens: {
+
+        '3xl': '2400px',
+       
+      },
     },
   },
   plugins: [],
