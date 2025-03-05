@@ -6,6 +6,12 @@ module.exports = {
       fontFamily: {
         poppins: ['Poppins', 'sans-serif'], 
       },
+      colors: {
+        'dark-blue': '#2563EB',
+        'dark-gray': '#2c2d3f',
+        'off-blue': '#298BE9',
+        'off-gray': '#4B5563'
+      }
     },
   },
   plugins: [],

@@ -1,81 +1,80 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="description" content="Plateforme de réservation médicale et de médecins. Profitez d'une interface intuitive pour prendre rendez-vous en toute simplicité et en toute sécurité.">
-        <meta name="keywords" content="réservation médicale, médecins, prise de rendez-vous, soins de santé, plateforme médicale">
-        <meta name="author" content="Ahmed AL-OBEIDI">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+	<head>
+		<meta charset="UTF-8">
+		<meta name="description" content="Plateforme de réservation médicale et de médecins. Profitez d'une interface intuitive pour prendre rendez-vous en toute simplicité et en toute sécurité.">
+		<meta name="keywords" content="réservation médicale, médecins, prise de rendez-vous, soins de santé, plateforme médicale">
+		<meta name="author" content="Ahmed AL-OBEIDI">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
 
-        <title>{% block title %}SantéRézo - Réservation médicale{% endblock %}</title>
+		<title>
+			{% block title %}SantéRézo - Réservation médicale
+			{% endblock %}
+		</title>
 
-        <!-- Favicon -->
-        <link rel="icon" href="{{ asset('img/favicon.png') }}" />
+		<!-- Favicon -->
+		<link
+		rel="icon" href="{{ asset('img/favicon.png') }}"/>
 
-        <!-- Google Fonts -->
-        <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap"
-        rel="stylesheet" />
+		<!-- Google Fonts -->
+		<link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap" rel="stylesheet"/>
 
-        <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
-        
-        {% block stylesheets %}
-        {% endblock %}
+		<link rel="stylesheet" href="{{ asset('styles/app.css') }}"> {% block stylesheets %}{% endblock %}
 
-        {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
-        {% endblock %}
-    </head>
-    <body class="font-poppins text-gray-700">
-        <!-- Header -->
-        <header class="bg-white shadow">
-            <div class="container mx-auto px-4 py-4 flex flex-wrap items-center">
-                <div class="w-full md:w-1/4 flex justify-between items-center">
-                    <!-- Logo -->
-                    <div class="logo">
-                        <a href="{{ path('app_home') }}">
-                            <img src="{{ asset('img/logo.png') }}" alt="Logo" class="h-10" />
-                        </a>
-                    </div>
-                    <!-- End Logo -->
-                    <!-- Mobile Nav (Hamburger) -->
-                    <div class="md:hidden">
-                        <img src="{{ asset('img/menu-burger.png') }}" alt="Logo" class="w-9">
-                    </div>
-                    <!-- End Mobile Nav (Hamburger) -->
-                </div>
-                <!-- Main Menu -->
-                <div class="w-full md:w-3/4 hidden md:flex justify-center">
-                    <nav class="w-full">
-                        <ul class="flex gap-10 justify-end">
-                            <li class="active">
-                                <a href="#" class="text-blue-600 font-bold">Home</a>
-                            </li>
-                            <li>
-                                <a href="contact.html" class="text-gray-600 hover:text-blue-600 font-bold">Contact</a>
-                            </li>
-                            <!-- Get Quote / Appointment Button -->
-                            <li class="flex justify-end bg-green-100">
-                                <div class="get-quote">
-                                    <a href="appointment.html"
-                                        class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
-                                        Login
-                                    </a>
-                                </div>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-                <!-- End Main Menu -->
-            </div>
-        </header>
-        <!-- End Header -->
-
-        <!-- Slider -->
-        <section class="container">
-            <div>
-                
-            </div>
-        </section>
-        {% block body %}{% endblock %}
-    </body>
+		{% block javascripts %}
+			{% block importmap %}
+				{{ importmap('app') }}
+			{% endblock %}
+		{% endblock %}
+	</head>
+	<body class="font-poppins text-dark-gray">
+		<!-- Header -->
+		<header class="bg-white fixed top-0 left-0 right-0 shadow z-50">
+			<div class="container mx-auto px-4 py-4 flex flex-wrap items-center">
+				<div
+					class="w-full md:w-1/4 flex justify-between items-center">
+					<!-- Logo -->
+					<div class="logo">
+						<a href="{{ path('app_home') }}">
+							<img src="{{ asset('img/logo.png') }}" alt="Logo" class="h-10"/>
+						</a>
+					</div>
+					<!-- End Logo -->
+					<!-- Mobile Nav (Hamburger) -->
+					<div class="md:hidden">
+						<img src="{{ asset('img/menu-burger.png') }}" alt="Menu" class="w-9">
+					</div>
+					<!-- End Mobile Nav (Hamburger) -->
+				</div>
+				<!-- Main Menu -->
+				<div class="w-full md:w-3/4 hidden md:flex justify-center">
+					{% block navbar %}
+						<nav class="w-full">
+							<ul class="flex gap-10 justify-end">
+								<li class="active">
+									<a href="{{ path('app_home') }}" class="text-off-blue font-bold">Home</a>
+								</li>
+								<li>
+									<a href="contact.html" class="text-off-gray hover:text-off-blue font-bold">Contact</a>
+								</li>
+								<!-- Get Quote / Appointment Button -->
+								<li class="flex justify-end bg-green-100">
+									<div class="get-quote">
+										<a href="appointment.html" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue">
+											Login
+										</a>
+									</div>
+								</li>
+							</ul>
+						</nav>
+					{% endblock %}
+				</div>
+				<!-- End Main Menu -->
+			</div>
+		</header> 
+		<!-- End Header -->
+		<main>
+			{% block main %}{% endblock %}
+		</main>
+	</body>
 </html>
