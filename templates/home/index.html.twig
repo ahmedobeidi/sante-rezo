@@ -1,20 +1,5 @@
 {% extends 'base.html.twig' %}
 
-{% block stylesheets %}
-<style>
-    /* Mobile background image  */
-    .welcome-bg {
-        background-image: url("{{ asset('img/welcome-sm.jpg') }}");
-    }
-
-    @media (min-width: 1280px) {
-        .welcome-bg {
-            background-image: url("{{ asset('img/welcome-md.jpg') }}");
-        }
-    }
-</style>
-{% endblock %}
-
 {% block main %}
 	<!-- Welcome Section -->
 	<section class="h-[100vh] w-full">
@@ -82,7 +67,7 @@
 						<h4 class="text-xl font-bold mb-2 text-dark-gray">
 							Blanchiment Dentaire
 						</h4>
-						<p class="text-gray-600">
+						<p class="text-off-gray">
 							Obtenez un sourire éclatant grâce à nos techniques de blanchiment avancées.
 						</p>
 					</div>
@@ -149,7 +134,7 @@
 	<!-- End Service -->
 
 	<!-- Start Facts -->
-	<section class="relative py-16 text-white bg-cover bg-center bg-no-repeat" style="background-image: url('{{ asset('img/fact.jpg') }}');">
+	<section class="relative py-16 text-white fact-bg bg-cover bg-center bg-no-repeat">
 		<div class="absolute inset-0 bg-off-blue opacity-80"></div>
 		<div class="relative max-w-7xl mx-auto px-4">
 			<div
@@ -199,17 +184,17 @@
 				class="grid grid-cols-1 items-center md:grid-cols-2 gap-8">
 				<!-- Form Column -->
 				<div>
-					<form action="#" class="space-y-6">
+					<form id="contact" action="#" class="space-y-6">
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<input type="text" name="name" placeholder="Nom" class="border border-gray-300 rounded p-2">
-							<input type="email" name="email" placeholder="Email" class="border border-gray-300 rounded p-2">
+							<input type="text" name="name" placeholder="Nom" class="border border-gray-300 rounded p-2 focus:border-off-blue">
+							<input type="email" name="email" placeholder="Email" class="border border-gray-300 rounded p-2 focus:border-off-blue">
 						</div>
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<input type="text" name="phone" placeholder="Téléphone" class="border border-gray-300 rounded p-2">
+							<input type="text" name="phone" placeholder="Téléphone" class="border border-gray-300 rounded p-2 focus:border-off-blue">
 						</div>
-						<textarea name="message" placeholder="Écrivez votre message ici..." class="border border-gray-300 rounded p-2 w-full"></textarea>
+						<textarea name="message" placeholder="Écrivez votre message ici..." class="border border-gray-300 rounded p-2 w-full focus:border-off-blue"></textarea>
 						<div class="flex flex-col md:flex-row items-center gap-4">
-							<button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+							<button type="submit" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue">
 								Prendre rendez-vous
 							</button>
 						</div>

@@ -1,0 +1,15 @@
+ /* Mobile background image  */
+ .welcome-bg {
+    background-image: url("../img/welcome-sm.jpg");
+}
+
+.fact-bg {
+    background-image: url("../img/fact.jpg");
+}
+
+/* Desktop background image  */
+@media (min-width: 1280px) {
+    .welcome-bg {
+        background-image: url("../img/welcome-md.jpg");
+    }
+}

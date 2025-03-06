@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="scroll-smooth">
 	<head>
 		<meta charset="UTF-8">
 		<meta name="description" content="Plateforme de réservation médicale et de médecins. Profitez d'une interface intuitive pour prendre rendez-vous en toute simplicité et en toute sécurité.">
@@ -20,7 +20,8 @@
 		<link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap" rel="stylesheet"/>
 		<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wdth,wght,YTLC@0,6..12,75..125,200..1000,440..540;1,6..12,75..125,200..1000,440..540&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
-		<link rel="stylesheet" href="{{ asset('styles/app.css') }}"> 
+		<link rel="stylesheet" href="{{ asset('styles/app.css') }}">
+		<link rel="stylesheet" href="{{ asset('styles/custom.css') }}">
 		
 		{% block stylesheets %}{% endblock %}
 
@@ -52,18 +53,18 @@
 				<!-- Main Menu -->
 				<div class="w-full md:w-3/4 hidden md:flex justify-center">
 					{% block navbar %}
-						<nav class="w-full font">
+						<nav class="w-full font-poppins">
 							<ul class="flex gap-10 justify-end">
 								<li class="active">
-									<a href="{{ path('app_home') }}" class="text-off-blue font-bold">Accueil</a>
+									<a href="{{ path('app_home') }}" class="text-off-blue font-bold text-[16px]">Accueil</a>
 								</li>
 								<li>
-									<a href="#" class="text-off-gray hover:text-off-blue font-bold">Contact</a>
+									<a href="#contact" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Contact</a>
 								</li>
 								<!-- Get Quote / Appointment Button -->
 								<li class="flex justify-end">
 									<div class="get-quote">
-										<a href="appointment.html" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue">
+										<a href="appointment.html" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px]">
 											Se connecter
 										</a>
 									</div>
