@@ -16,8 +16,8 @@
 						Découvrez une façon simple et sécurisée de prendre rendez-vous avec des professionnels de la santé de confiance. Notre plateforme vous met en relation avec des médecins de premier choix, garantissant des soins personnalisés selon vos besoins.
 					</p>
 					<div class="font-nunito flex flex-col gap-4 md:flex-row">
-						<a href="#" class="bg-dark-blue text-white w-fit py-2 px-4 rounded hover:bg-dark-gray">Prendre Rendez-vous</a>
-						<a href="#" class="bg-dark-gray text-white w-fit py-2 px-4 rounded hover:bg-dark-blue">Contactez-nous</a>
+						<a href="{{ path('app_login') }}" class="bg-dark-blue text-white w-fit py-2 px-4 rounded hover:bg-dark-gray">Prendre Rendez-vous</a>
+						<a href="#contact" class="bg-dark-gray text-white w-fit py-2 px-4 rounded hover:bg-dark-blue">Contactez-nous</a>
 					</div>
 				</div>
 			</div>
@@ -45,7 +45,7 @@
 			<div
 				class="font-nunito grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 				<!-- Single Service -->
-				<div class="flex flex-row gap-5">
+				<article class="flex flex-row gap-5">
 					<div class="w-16">
 						<img src="{{ asset('img/general.png') }}" alt="Traitement Général" class="w-full">
 					</div>
@@ -57,9 +57,9 @@
 							Profitez d'une prise en charge globale pour vos besoins médicaux quotidiens.
 						</p>
 					</div>
-				</div>
+				</article>
 				<!-- Single Service -->
-				<div class="flex flex-row gap-5">
+				<article class="flex flex-row gap-5">
 					<div class="w-16">
 						<img src="{{ asset('img/teeth.png') }}" alt="Blanchiment Dentaire" class="w-full">
 					</div>
@@ -71,9 +71,9 @@
 							Obtenez un sourire éclatant grâce à nos techniques de blanchiment avancées.
 						</p>
 					</div>
-				</div>
+				</article>
 				<!-- Single Service -->
-				<div class="flex flex-row gap-5">
+				<article class="flex flex-row gap-5">
 					<div class="w-16">
 						<img src="{{ asset('img/heart.png') }}" alt="Chirurgie Cardiaque" class="w-full">
 					</div>
@@ -85,9 +85,9 @@
 							Bénéficiez de soins experts et d'une prise en charge complète pour vos interventions cardiaques.
 						</p>
 					</div>
-				</div>
+				</article>
 				<!-- Single Service -->
-				<div class="flex flex-row gap-5">
+				<article class="flex flex-row gap-5">
 					<div class="w-16">
 						<img src="{{ asset('img/ear.png') }}" alt="Traitement des Oreilles" class="w-full">
 					</div>
@@ -99,9 +99,9 @@
 							Recevez des soins spécialisés pour prévenir et traiter les problèmes d'audition.
 						</p>
 					</div>
-				</div>
+				</article>
 				<!-- Single Service -->
-				<div class="flex flex-row gap-5">
+				<article class="flex flex-row gap-5">
 					<div class="w-16">
 						<img src="{{ asset('img/vision.png') }}" alt="Problèmes de Vision" class="w-full">
 					</div>
@@ -113,9 +113,9 @@
 							Accédez à des consultations ophtalmologiques pour corriger et améliorer votre vue.
 						</p>
 					</div>
-				</div>
+				</article>
 				<!-- Single Service -->
-				<div class="flex flex-row gap-5">
+				<article class="flex flex-row gap-5">
 					<div class="w-16">
 						<img src="{{ asset('img/blood.png') }}" alt="Transfusion Sanguine" class="w-full">
 					</div>
@@ -127,7 +127,7 @@
 							Assurez-vous un accompagnement médical sûr et professionnel lors de vos transfusions.
 						</p>
 					</div>
-				</div>
+				</article>
 			</div>
 		</div>
 	</section>
@@ -137,8 +137,7 @@
 	<section class="relative py-16 text-white fact-bg bg-cover bg-center bg-no-repeat">
 		<div class="absolute inset-0 bg-off-blue opacity-80"></div>
 		<div class="relative max-w-7xl mx-auto px-4">
-			<div
-				class="flex flex-col justify-center gap-10 md:flex-row">
+			<div class="flex flex-col justify-center gap-10 md:flex-row font-poppins">
 				<!-- Fact 1 -->
 				<div class="flex flex-col md:flex-row gap-5 items-center">
 					<div>
@@ -184,15 +183,15 @@
 				class="grid grid-cols-1 items-center md:grid-cols-2 gap-8">
 				<!-- Form Column -->
 				<div>
-					<form id="contact" action="#" class="space-y-6">
+					<form id="contact" action="#" class="space-y-6 font-poppins">
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<input type="text" name="name" placeholder="Nom" class="border border-gray-300 rounded p-2 focus:border-off-blue">
-							<input type="email" name="email" placeholder="Email" class="border border-gray-300 rounded p-2 focus:border-off-blue">
+							<input type="text" name="name" placeholder="Nom" class="border-2 border-gray-300 rounded p-2 focus:border-off-blue">
+							<input type="email" name="email" placeholder="Email" class="border-2 border-gray-300 rounded p-2 focus:border-off-blue">
 						</div>
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<input type="text" name="phone" placeholder="Téléphone" class="border border-gray-300 rounded p-2 focus:border-off-blue">
+							<input type="text" name="phone" placeholder="Téléphone" class="border-2 border-gray-300 rounded p-2 focus:border-off-blue">
 						</div>
-						<textarea name="message" placeholder="Écrivez votre message ici..." class="border border-gray-300 rounded p-2 w-full focus:border-off-blue"></textarea>
+						<textarea name="message" placeholder="Écrivez votre message ici..." class="border-2 border-gray-300 rounded p-2 w-full focus:border-off-blue"></textarea>
 						<div class="flex flex-col md:flex-row items-center gap-4">
 							<button type="submit" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue">
 								Prendre rendez-vous
@@ -211,7 +210,7 @@
 
 	<!-- Copyright -->
 	<footer class="bg-off-blue text-white py-6 shadow">
-		<div class="max-w-7xl mx-auto px-4">
+		<div class="max-w-7xl mx-auto px-4 font-poppins">
 			<div class="text-center">
 				<p>Copyright © 2025 SantéRézo, Tous droits réservés</p>
 			</div>

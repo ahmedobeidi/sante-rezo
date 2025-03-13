@@ -7,9 +7,17 @@
     background-image: url("../img/fact.jpg");
 }
 
+.registration {
+    background-image: url("../img/registration.jpg");
+}
+
 /* Desktop background image  */
 @media (min-width: 1280px) {
     .welcome-bg {
         background-image: url("../img/welcome-md.jpg");
     }
+}
+
+.custom-shadow {
+    box-shadow: 10px 10px 0px 0px #4B5563;
 }
