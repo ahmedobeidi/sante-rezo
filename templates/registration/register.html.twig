@@ -53,6 +53,11 @@
 					{{ form_widget(registrationForm.plainPassword.second) }}
 				</div>
 
+				<div class="flex flex-row gap-1">
+					{{ form_widget(registrationForm.agreeTerms) }}
+					{{ form_label(registrationForm.agreeTerms) }}
+				</div>
+
 				<button type="submit" class="text-center bg-off-blue text-off-white py-3 hover:bg-dark-gray">S'inscrire</button>
 
 				<div class="text-center">

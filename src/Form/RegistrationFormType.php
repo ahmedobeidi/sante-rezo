@@ -3,7 +3,9 @@
 namespace App\Form;
 
 use App\Entity\User;
+use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
@@ -65,7 +67,21 @@ class RegistrationFormType extends AbstractType
                         'message' => 'Votre mot de passe doit comporter au moins 6 caractères, dont au moins un chiffre, une majuscule et une minuscule',
                     ]),
                 ],
-        ]   );
+            ])->add('agreeTerms', CheckboxType::class, [
+                'mapped' => false,
+                'constraints' => [
+                    new IsTrue([
+                        'message' => 'You should agree to our terms.',
+                    ]),
+                ],
+                'attr' => [
+                    'id' => 'accept-terms',
+                    'required' => true,
+                ],
+                'label' => "J'ai lu et j'accepte les <a href='#!' target='_blank' class='text-off-blue'>conditions d'utilisation </a>",
+                'label_html' => true,
+
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
