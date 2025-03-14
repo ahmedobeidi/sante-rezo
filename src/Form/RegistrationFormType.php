@@ -4,13 +4,11 @@ namespace App\Form;
 
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Regex;
@@ -31,7 +29,7 @@ class RegistrationFormType extends AbstractType
                 'constraints' => [
                     new Regex([
                         'pattern' => '/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
-                        'message' => 'Please enter a valid email',
+                        'message' => 'Veuillez entrer une adresse e-mail valide',
                     ])
                 ],
             ])
@@ -39,32 +37,32 @@ class RegistrationFormType extends AbstractType
                 'type' => PasswordType::class,
                 'mapped' => false,
                 'first_options'  => [
-                    'label' => 'Password',
+                    'label' => 'Mot de passe',
                     'attr'  => [
                         'class' => 'border border-off-gray rounded p-2 focus:border-2 border-opacity-25',
-                        'placeholder' => 'Password'
+                        'placeholder' => 'Mot de passe'
                     ],
                 ],
                 'second_options' => [
-                    'label' => 'Repeat Password',
+                    'label' => 'Répéter le mot de passe',
                     'attr'  => [
                         'class' => 'border border-off-gray rounded p-2 focus:border-2 border-opacity-25',
-                        'placeholder' => 'Repeat Password'
+                        'placeholder' => 'Répéter le mot de passe'
                     ],
                 ],
-                'invalid_message' => 'The password fields must match.',
+                'invalid_message' => 'Les mots de passe doivent correspondre',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please enter a password',
+                        'message' => 'Veuillez entrer un mot de passe',
                     ]),
                     new Length([
                         'min' => 6,
-                        'minMessage' => 'Your password should be at least {{ limit }} characters',
+                        'minMessage' => 'Votre mot de passe doit comporter au moins {{ limit }} caractères',
                         'max' => 4096,
                     ]),
                     new Regex([
                         'pattern' => '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/',
-                        'message' => 'Your password must contain uppercase, lowercase, number, and be at least 6 characters long.',
+                        'message' => 'Votre mot de passe doit comporter au moins 6 caractères, dont au moins un chiffre, une majuscule et une minuscule',
                     ]),
                 ],
         ]   );

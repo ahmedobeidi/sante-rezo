@@ -3,61 +3,40 @@
 {% block title %}Log in
 {% endblock %}
 
-{% block navbar %}
-	<nav class="w-full font-poppins">
-		<ul class="flex gap-10 justify-end">
-			<li class="active">
-				<a href="{{ path('app_home') }}" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Accueil</a>
-			</li>
-			<li class="active">
-				<a href="{{ path('app_home') }}" class="text-off-blue  font-bold text-[16px]">Connexion</a>
-			</li>
-		</ul>
-	</nav>
-{% endblock %}
-
 {% block main %}
-	<section class="flex flex-col justify-center items-center h-[100vh] w-full bg-gray-50">
-		<div class="w-11/12 rounded shadow py-5">
-			<div class="bg-cover bg-center bg-no-repeat w-full registration"></div>
-			<form method="post" class="flex flex-col gap-5 w-full">
-				{% if error %}
-					<div class="bg-red-100 text-red-700 p-2 rounded">
-						{{ error.messageKey|trans(error.messageData, 'security') }}
+	<section class="flex items-center justify-center w-full h-[100vh]">
+		<div class="flex flex-col lg:flex-row w-11/12 sm:w-2/3 lg:w-2/3 border-2 border-opacity-50 rounded-lg">
+			<div class="registration w-full lg:w-1/2 aspect-[3/2] bg-cover bg-center bg-no-repeat"></div>
+			<div class="flex flex-col gap-5 w-full lg:w-1/2 p-7 lg:py-12 lg:px-10 bg-slate-100">
+				<h3 class="font-poppins text-2xl border-5 font-medium">Se connecter</h3>
+				<form method="post" class="flex flex-col gap-5 w-full">
+					<input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+					{% if error %}
+						<div class="bg-red-100 text-red-700 p-2 rounded">
+							{{ error.messageKey|trans(error.messageData, 'security') }}
+						</div>
+					{% endif %}
+					
+					<div>
+						<label for="username" class="block text-sm font-medium text-gray-700">Email</label>
+						<input type="email" name="_username" id="username" value="{{ last_username }}" autocomplete="email" required autofocus class="mt-1 block w-full border border-gray-300 rounded p-2" placeholder="Email">
 					</div>
-				{% endif %}
 
-				{% if app.user %}
-					<div class="mb-3">
-						You are logged in as
-						{{ app.user.userIdentifier }},
-						<a href="{{ path('app_logout') }}" class="text-gray-700 hover:underline">Logout</a>
+					<div>
+						<label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
+						<input type="password" name="_password" id="password" autocomplete="current-password" required class="mt-1 block w-full border border-gray-300 rounded p-2" placeholder="Mot de passe">
 					</div>
-				{% endif %}
 
-				<h1 class="text-2xl font-bold mb-3 text-off-blue">Please sign in</h1>
+					<button type="submit" class="text-center bg-off-blue text-off-white py-3 hover:bg-dark-gray">
+						Se connecter
+					</button>
+				</form>
 
-				<div>
-					<label for="username" class="block text-sm font-medium text-gray-700">Email</label>
-					<input type="email" name="_username" id="username" value="{{ last_username }}" autocomplete="email" required autofocus class="mt-1 block w-full border border-gray-300 rounded p-2">
-				</div>
-
-				<div>
-					<label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-					<input type="password" name="_password" id="password" autocomplete="current-password" required class="mt-1 block w-full border border-gray-300 rounded p-2">
-				</div>
-
-				<input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-
-				<a type="submit" class="w-full bg-dark-gray text-white py-2 text-center rounded hover:bg-gray-700">
-					Sign in
-				</a>
-			</form>
-
-			<p class="text-gray-700 text-center">
-				Already have an account?
-				<a href="{{ path('app_register') }}" class="underline hover:text-gray-900">Signup</a>
-			</p>
+				<p class="text-gray-700 text-center">
+					Vous n'avez pas de compte ?
+					<a href="{{ path('app_register') }}" class="underline text-off-blue">S'inscrire</a>
+				</p>
+			</div>
 		</div>
 	</section>
 {% endblock %}
