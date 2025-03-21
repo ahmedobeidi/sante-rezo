@@ -1,65 +1,100 @@
 <!DOCTYPE html>
 <html class="scroll-smooth">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="description" content="Plateforme de réservation médicale et de médecins. Profitez d'une interface intuitive pour prendre rendez-vous en toute simplicité et en toute sécurité.">
-		<meta name="keywords" content="réservation médicale, médecins, prise de rendez-vous, soins de santé, plateforme médicale">
-		<meta name="author" content="Ahmed AL-OBEIDI">
-		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Plateforme de réservation médicale et de médecins. Profitez d'une interface intuitive pour prendre rendez-vous en toute simplicité et en toute sécurité." />
+    <meta name="keywords" content="réservation médicale, médecins, prise de rendez-vous, soins de santé, plateforme médicale" />
+    <meta name="author" content="Ahmed AL-OBEIDI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-		<title>
-			{% block title %}SantéRézo - Réservation médicale
-			{% endblock %}
-		</title>
+    <title>
+      {% block title %}
+        SantéRézo - Réservation médicale
+      {% endblock %}
+    </title>
 
-		<!-- Favicon -->
-		<link
-		rel="icon" href="{{ asset('img/favicon.png') }}"/>
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('img/favicon.png') }}" />
 
-		<!-- Google Fonts -->
-		<link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap" rel="stylesheet"/>
-		<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wdth,wght,YTLC@0,6..12,75..125,200..1000,440..540;1,6..12,75..125,200..1000,440..540&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wdth,wght,YTLC@0,6..12,75..125,200..1000,440..540;1,6..12,75..125,200..1000,440..540&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
 
-		<link rel="stylesheet" href="{{ asset('styles/app.css') }}">
-		<link rel="stylesheet" href="{{ asset('styles/custom.css') }}">
-		
-		{% block stylesheets %}{% endblock %}
+    <link rel="stylesheet" href="{{ asset('styles/app.css') }}" />
+    <link rel="stylesheet" href="{{ asset('styles/custom.css') }}" />
 
-		{% block javascripts %}
-			{% block importmap %}
-				{{ importmap('app') }}
-			{% endblock %}
-		{% endblock %}
-	</head>
-	<body class="bg-off-white">
-		<!-- Header -->
-		<header class="bg-off-white fixed top-0 left-0 right-0 shadow z-50">
-			<div class="container mx-auto p-4 flex flex-wrap items-center">
-				<div
-					class="w-full md:w-1/4 flex justify-between items-center">
-					<!-- Logo -->
-					<div class="logo">
-						<a href="{{ path('app_home') }}">
-							<img src="{{ asset('img/logo.png') }}" alt="Logo" class="h-10"/>
-						</a>
-					</div>
-					<!-- End Logo -->
-					<!-- Mobile Nav (Hamburger) -->
-					<div class="md:hidden">
-						<img src="{{ asset('img/menu-burger.png') }}" alt="Menu" class="w-9">
-					</div>
-					<!-- End Mobile Nav (Hamburger) -->
-				</div>
-				<!-- Main Menu -->
-				<div class="w-full md:w-3/4 hidden md:flex justify-center">
-					{% block navbar %}{% endblock %}
-				</div>
-				<!-- End Main Menu -->
-			</div>
-		</header> 
-		<!-- End Header -->
-		<main>
-			{% block main %}{% endblock %}
-		</main>
-	</body>
+    {% block stylesheets %}
+
+    {% endblock %}
+
+    {% block javascripts %}
+      {% block importmap %}
+        {{ importmap('app') }}
+      {% endblock %}
+      <script defer>
+        const initializeMobileMenu = () => {
+          const menuToggle = document.getElementById('menu-toggle')
+          const mobileNav = document.getElementById('mobile-nav')
+        
+          if (!menuToggle || !mobileNav) return
+        
+          const burgerUrl = '{{ asset("img/menu-burger.png") }}'
+          const exitUrl = '{{ asset("img/exit.png") }}'
+        
+          const toggleMenu = () => {
+            mobileNav.classList.toggle('hidden')
+            document.body.classList.toggle('overflow-hidden')
+            menuToggle.setAttribute('src', mobileNav.classList.contains('hidden') ? burgerUrl : exitUrl)
+          }
+        
+          menuToggle.addEventListener('click', toggleMenu)
+        
+          mobileNav.querySelectorAll('a').forEach((link) => {
+            link.addEventListener('click', toggleMenu)
+          })
+        }
+        
+        // Initialize when the DOM is ready
+        document.addEventListener('turbo:load', initializeMobileMenu)
+      </script>
+    {% endblock %}
+  </head>
+  <body class="bg-off-white">
+    <!-- Header -->
+    <header class="bg-off-white fixed top-0 left-0 right-0 shadow z-50">
+      <div class="container mx-auto p-4 flex flex-wrap items-center">
+        <div class="w-full md:w-1/4 flex justify-between items-center">
+          <!-- Logo -->
+          <div class="logo">
+            <a href="{{ path('app_home') }}"><img src="{{ asset('img/logo.png') }}" alt="Logo" class="h-10" /></a>
+          </div>
+          <!-- End Logo -->
+          <!-- Mobile Menu Icon -->
+          <div class="md:hidden">
+            <img id="menu-toggle" src="{{ asset('img/menu-burger.png') }}" alt="Menu" class="w-9 cursor-pointer" />
+          </div>
+          <!-- End Mobile Menu Icon -->
+        </div>
+        <!-- Main Menu -->
+        <div class="w-full md:w-3/4 hidden md:flex justify-center">
+          {% block navbarDesktop %}{% endblock %}
+        </div>
+        <!-- End Main Menu -->
+      </div>
+    </header>
+    <!-- End Header -->
+
+    <!-- Mobile Navigation: Full screen overlay -->
+    <div id="mobile-nav" class="fixed inset-0 bg-off-white hidden z-40" data-turbo-permanent>
+      {% block navbarMobile %}
+
+      {% endblock %}
+    </div>
+
+    <main>
+      {% block main %}
+
+      {% endblock %}
+    </main>
+  </body>
 </html>

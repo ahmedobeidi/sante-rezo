@@ -46,10 +46,10 @@ class RegistrationFormType extends AbstractType
                     ],
                 ],
                 'second_options' => [
-                    'label' => 'Répéter le mot de passe',
+                    'label' => 'Confirmer le mot de passe',
                     'attr'  => [
                         'class' => 'border border-off-gray rounded p-2 focus:border-2 border-opacity-25',
-                        'placeholder' => 'Répéter le mot de passe'
+                        'placeholder' => 'Confirmer le mot de passe'
                     ],
                 ],
                 'invalid_message' => 'Les mots de passe doivent correspondre',
@@ -71,14 +71,14 @@ class RegistrationFormType extends AbstractType
                 'mapped' => false,
                 'constraints' => [
                     new IsTrue([
-                        'message' => 'You should agree to our terms.',
+                        'message' => 'Vous devez accepter les conditions',
                     ]),
                 ],
                 'attr' => [
                     'id' => 'accept-terms',
                     'required' => true,
                 ],
-                'label' => "J'ai lu et j'accepte les <a href='#!' target='_blank' class='text-off-blue'>conditions d'utilisation </a>",
+                'label' => "J'ai lu et j'accepte <a href='#!' target='_blank' class='text-off-blue'>les conditions d'utilisation </a>",
                 'label_html' => true,
 
             ]);

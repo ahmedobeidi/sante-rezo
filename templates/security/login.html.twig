@@ -3,6 +3,14 @@
 {% block title %}Log in
 {% endblock %}
 
+{% block navbarDesktop %}
+  {% include 'partials/login_desktop_navbar.html.twig' %}
+{% endblock %}
+
+{% block navbarMobile %}
+  {% include 'partials/register_mobile_navbar.html.twig' %}
+{% endblock %}
+
 {% block main %}
 	<section class="flex items-center justify-center w-full h-[100vh]">
 		<div class="flex flex-col lg:flex-row w-11/12 sm:w-2/3 lg:w-2/3 border-2 border-opacity-50 rounded-lg">
