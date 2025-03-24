@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block navbarMobile %}
-  {% include './partials/home_mobile_navbar.html.twig' %}
+  {% include 'partials/home_mobile_navbar.html.twig' %}
 {% endblock %}
 
 {% block main %}
@@ -23,7 +23,7 @@
           <p class="font-nunito text-off-gray">Découvrez une façon simple et sécurisée de prendre rendez-vous avec des professionnels de la santé de confiance. Notre plateforme vous met en relation avec des médecins de premier choix, garantissant des soins personnalisés selon vos besoins.</p>
           <div class="font-nunito flex flex-col gap-4 md:flex-row">
             <a href="{{ path('app_login') }}" class="bg-dark-blue text-white w-fit py-2 px-4 rounded hover:bg-dark-gray">Prendre Rendez-vous</a>
-            <a href="#contact" class="bg-dark-gray text-white w-fit py-2 px-4 rounded hover:bg-dark-blue">Contactez-nous</a>
+            <a href="/#contact" class="bg-dark-gray text-white w-fit py-2 px-4 rounded hover:bg-dark-blue">Contactez-nous</a>
           </div>
         </div>
       </div>

@@ -4,17 +4,24 @@
       <a href="{{ path('app_home') }}" class="text-off-blue font-bold text-[16px]">Accueil</a>
     </li>
     <li>
-      <a href="#contact" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Contact</a>
+      <a href="/#contact" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Contact</a>
     </li>
 
-    <li class="flex justify-end">
-      <div>
-        {% if app.user %}
+    {% if app.user %}
+      <li>
+        <a href="{{ path('app_patient_profile') }}" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Mon Compte</a>
+      </li>
+      <li class="flex justify-end">
+        <div>
           <a href="{{ path('app_logout') }}" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px]">Déconnexion</a>
-        {% else %}
-          <a href="{{ path('app_login') }}" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px]">Se connecter</a>
-        {% endif %}
-      </div>
-    </li>
+        </div>
+      </li>
+      {% else %}
+      <li class="flex justify-end">
+        <div>
+            <a href="{{ path('app_login') }}" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px]">Se connecter</a>
+        </div>
+      </li>
+    {% endif %}
   </ul>
 </nav>
