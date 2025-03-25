@@ -1,20 +1,50 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello PatientController!{% endblock %}
-
-{% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
-
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Users/Dev404/Documents/Developer/Ahmed/Final/SantéRézo/src/Controller/PatientController.php</code></li>
-        <li>Your template at <code>C:/Users/Dev404/Documents/Developer/Ahmed/Final/SantéRézo/templates/patient/index.html.twig</code></li>
+{% block navbarDesktop %}
+  <nav class="w-full font-poppins">
+    <ul class="flex gap-10 justify-end">
+      <li class="active">
+        <a href="{{ path('app_home') }}" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Accueil</a>
+      </li>
+      <li>
+        <a href="/#contact" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Contact</a>
+      </li>
+      <li>
+        <a href="{{ path('app_patient_profile') }}" class="text-off-blue font-bold text-[16px]">Mon Compte</a>
+      </li>
+      <li class="flex justify-end">
+        <div>
+          <a href="{{ path('app_logout') }}" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px]">Déconnexion</a>
+        </div>
+      </li>
     </ul>
-</div>
+  </nav>
+{% endblock %}
+
+{% block navbarMobile %}
+  <ul class="flex flex-col items-center justify-center h-full">
+    <li class="mb-6">
+      <a href="#" class="text-off-blue text-2xl">Accueil</a>
+    </li>
+    <li class="mb-6">
+      <a href="/#contact" class="text-off-gray text-2xl">Contact</a>
+    </li>
+
+    {% if app.user %}
+      <li class="mb-6">
+        <a href="{{ path('app_patient_profile') }}" class="text-off-gray text-2xl">Mon Compte</a>
+      </li>
+      <li class="mb-6">
+        <a href="{{ path('app_logout') }}" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px]">Déconnexion</a>
+      </li>
+    {% else %}
+      <li class="mb-6">
+        <a href="{{ path('app_login') }}" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px]">Se connecter</a>
+      </li>
+    {% endif %}
+  </ul>
+{% endblock %}
+
+{% block main %}
+   
 {% endblock %}
