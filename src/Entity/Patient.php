@@ -66,7 +66,7 @@ class Patient
         return $this->profileImage;
     }
 
-    public function setProfileImage(string $profileImage): static
+    public function setProfileImage(?string $profileImage): static
     {
         $this->profileImage = $profileImage;
 

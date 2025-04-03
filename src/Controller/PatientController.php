@@ -41,11 +41,8 @@ final class PatientController extends AbstractController
 
     #[Route('/patient/update', name: 'app_patient_update', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
-    public function update(
-        Request $request,
-        EntityManagerInterface $entityManager,
-        TokenStorageInterface $tokenStorage
-    ): Response {
+    public function update(Request $request, EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage): Response
+    {
         /** @var User $user */
         $user = $this->getUser();
         $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
@@ -124,11 +121,8 @@ final class PatientController extends AbstractController
     }
 
     #[Route('/patient/upload-image', name: 'app_patient_upload_image', methods: ['POST'])]
-    public function uploadImage(
-        Request $request, 
-        EntityManagerInterface $entityManager,
-        SluggerInterface $slugger
-    ): Response {
+    public function uploadImage(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
+    {
         /** @var User $user */
         $user = $this->getUser();
         $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
@@ -142,17 +136,17 @@ final class PatientController extends AbstractController
         if ($profileImage) {
             $originalFilename = pathinfo($profileImage->getClientOriginalName(), PATHINFO_FILENAME);
             $safeFilename = $slugger->slug($originalFilename);
-            $newFilename = $safeFilename.'-'.uniqid().'.'.$profileImage->guessExtension();
+            $newFilename = $safeFilename . '-' . uniqid() . '.' . $profileImage->guessExtension();
 
             try {
                 $profileImage->move(
-                    $this->getParameter('kernel.project_dir').'/public/uploads/profiles',
+                    $this->getParameter('kernel.project_dir') . '/public/uploads/profiles',
                     $newFilename
                 );
 
                 // Delete old image if exists
                 if ($patient->getProfileImage()) {
-                    $oldFile = $this->getParameter('kernel.project_dir').'/public/uploads/profiles/'.$patient->getProfileImage();
+                    $oldFile = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles/' . $patient->getProfileImage();
                     if (file_exists($oldFile)) {
                         unlink($oldFile);
                     }
@@ -167,6 +161,32 @@ final class PatientController extends AbstractController
             }
         }
 
+        return $this->redirectToRoute('app_patient_profile');
+    }
+
+    #[Route('/patient/delete-image', name: 'app_patient_delete_image', methods: ['POST'])]
+    public function deleteImage(EntityManagerInterface $entityManager): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
+
+        if (!$patient || !$patient->getProfileImage()) {
+            $this->addFlash('error', 'Aucune photo de profil à supprimer');
+            return $this->redirectToRoute('app_patient_profile');
+        }
+
+        // Delete the file
+        $oldFile = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles/' . $patient->getProfileImage();
+        if (file_exists($oldFile)) {
+            unlink($oldFile);
+        }
+
+        // Remove reference from database
+        $patient->setProfileImage(null);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Photo de profil supprimée avec succès');
         return $this->redirectToRoute('app_patient_profile');
     }
 }
