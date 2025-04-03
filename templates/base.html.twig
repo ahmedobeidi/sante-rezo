@@ -59,10 +59,10 @@
       document.addEventListener('turbo:load', initializeMobileMenu)
     </script>
   </head>
-  <body class="bg-off-white">
+  <body class="bg-off-white min-h-screen flex flex-col">
     <!-- Header -->
-    <header class="bg-off-white fixed top-0 left-0 right-0 shadow z-50 h-[70px]">
-      <div class="container mx-auto p-4 flex flex-wrap items-center">
+    <header class="bg-off-white fixed top-0 left-0 right-0 shadow-lg z-50">
+      <div class="h-[75px] container mx-auto p-4 flex flex-wrap items-center">
         <div class="w-full md:w-1/4 flex justify-between items-center">
           <!-- Logo -->
           <div class="logo">
@@ -78,6 +78,7 @@
         <!-- Main Menu -->
         <div class="w-full md:w-3/4 hidden md:flex justify-center">
           {% block navbarDesktop %}
+
           {% endblock %}
         </div>
         <!-- End Main Menu -->
@@ -88,13 +89,23 @@
     <!-- Mobile Navigation: Full screen overlay -->
     <div id="mobile-nav" class="fixed inset-0 bg-off-white hidden z-40" data-turbo-permanent>
       {% block navbarMobile %}
+
       {% endblock %}
     </div>
 
-    <main>
+    <main class="flex-grow">
       {% block main %}
 
       {% endblock %}
     </main>
+    <!-- Copyright -->
+    <footer class="bg-dark-blue text-white py-6 shadow mt-auto">
+      <div class="max-w-7xl mx-auto px-4 font-poppins">
+        <div class="text-center">
+          <p>Copyright © 2025 SantéRézo, Tous droits réservés</p>
+        </div>
+      </div>
+    </footer>
+    <!-- End Copyright -->
   </body>
 </html>
