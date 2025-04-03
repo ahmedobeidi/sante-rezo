@@ -38,34 +38,62 @@ final class PatientController extends AbstractController
     }
 
     #[Route('/patient/update', name: 'app_patient_update', methods: ['POST'])]
-    #[IsGranted('ROLE_USER')]
-    public function update(
-        Request $request, 
-        EntityManagerInterface $entityManager,
-        TokenStorageInterface $tokenStorage
-    ): Response {
-        /** @var User $user */
-        $user = $this->getUser();
-        $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
+#[IsGranted('ROLE_USER')]
+public function update(
+    Request $request, 
+    EntityManagerInterface $entityManager,
+    TokenStorageInterface $tokenStorage
+): Response {
+    /** @var User $user */
+    $user = $this->getUser();
+    $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
 
-        if (!$patient) {
-            throw $this->createNotFoundException('Patient not found');
-        }
+    if (!$patient) {
+        throw $this->createNotFoundException('Patient not found');
+    }
 
-        // Get form data
-        $firstName = $request->request->get('firstName');
-        $lastName = $request->request->get('lastName');
-        $city = $request->request->get('city');
-        $address = $request->request->get('address');
+    // Get form data
+    $firstName = $request->request->get('firstName');
+    $lastName = $request->request->get('lastName');
+    $city = $request->request->get('city');
+    $address = $request->request->get('address');
 
-        // Update patient data
+    // Check if trying to empty existing data
+    if (($patient->getFirstName() && empty($firstName)) ||
+        ($patient->getLastName() && empty($lastName)) ||
+        ($patient->getCity() && empty($city)) ||
+        ($patient->getAddress() && empty($address))) {
+        $this->addFlash('error', 'Les champs peuvent être modifiés mais ne peuvent pas être vidés une fois remplis');
+        return $this->redirectToRoute('app_patient_profile');
+    }
+
+    // Check if any data has changed
+    $hasChanges = false;
+    
+    if (!empty($firstName) && $firstName !== $patient->getFirstName()) {
         $patient->setFirstName($firstName);
+        $hasChanges = true;
+    }
+    if (!empty($lastName) && $lastName !== $patient->getLastName()) {
         $patient->setLastName($lastName);
+        $hasChanges = true;
+    }
+    if (!empty($city) && $city !== $patient->getCity()) {
         $patient->setCity($city);
+        $hasChanges = true;
+    }
+    if (!empty($address) && $address !== $patient->getAddress()) {
         $patient->setAddress($address);
+        $hasChanges = true;
+    }
 
+    // Only proceed if there are changes
+    if ($hasChanges) {
         // Check if all fields are filled to grant ROLE_PATIENT
-        if ($firstName && $lastName && $city && $address) {
+        if ($patient->getFirstName() && 
+            $patient->getLastName() && 
+            $patient->getCity() && 
+            $patient->getAddress()) {
             if (!in_array('ROLE_PATIENT', $user->getRoles())) {
                 $roles = $user->getRoles();
                 $roles[] = 'ROLE_PATIENT';
@@ -84,8 +112,9 @@ final class PatientController extends AbstractController
 
         $entityManager->persist($patient);
         $entityManager->flush();
-
         $this->addFlash('success', 'Profil mis à jour avec succès');
-        return $this->redirectToRoute('app_patient_profile');
     }
+
+    return $this->redirectToRoute('app_patient_profile');
+}
 }
