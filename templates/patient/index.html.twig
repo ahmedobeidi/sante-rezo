@@ -51,11 +51,11 @@
 
     {# Flash messages #}
     {% for message in app.flashes('success') %}
-        <div class="container mx-auto px-4 mb-4">
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                <p>{{ message }}</p>
-            </div>
+      <div class="container mx-auto px-4 mb-4">
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+          <p>{{ message }}</p>
         </div>
+      </div>
     {% endfor %}
 
     <div class="container mx-auto px-4 py-8">
@@ -74,21 +74,21 @@
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('update-patient') }}" />
             <div class="flex flex-col md:flex-row gap-4">
               <div class="w-full">
-                <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-                <input type="text" id="firstName" name="firstName" value="{{ patient.firstName }}" class="p-3 border border-gray-300 rounded-md w-full" />
+                <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                <input type="text" id="lastName" name="lastName" value="{{ patient.lastName }}" class="p-3 border border-gray-300 rounded-md w-full" placeholder="Nom" />
               </div>
               <div class="w-full">
-                <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
-                <input type="text" id="lastName" name="lastName" value="{{ patient.lastName }}" class="p-3 border border-gray-300 rounded-md w-full" />
+                <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+                <input type="text" id="firstName" name="firstName" value="{{ patient.firstName }}" class="p-3 border border-gray-300 rounded-md w-full" placeholder="Prénom" />
               </div>
             </div>
             <div class="w-full">
               <label for="city" class="block text-sm font-medium text-gray-700 mb-1">Ville</label>
-              <input type="text" id="city" name="city" value="{{ patient.city }}" class="p-3 border border-gray-300 rounded-md w-full" />
+              <input type="text" id="city" name="city" value="{{ patient.city }}" class="p-3 border border-gray-300 rounded-md w-full" placeholder="Ville" />
             </div>
             <div class="w-full">
               <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-              <input type="text" id="address" name="address" value="{{ patient.address }}" class="p-3 border border-gray-300 rounded-md w-full" />
+              <input type="text" id="address" name="address" value="{{ patient.address }}" class="p-3 border border-gray-300 rounded-md w-full" placeholder="Adresse" />
             </div>
             <button type="submit" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px] w-full md:w-auto md:self-end">Enregistrer</button>
           </form>
