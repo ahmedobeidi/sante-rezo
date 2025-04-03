@@ -57,11 +57,6 @@ class RegistrationFormType extends AbstractType
                     new NotBlank([
                         'message' => 'Veuillez entrer un mot de passe',
                     ]),
-                    new Length([
-                        'min' => 6,
-                        'minMessage' => 'Votre mot de passe doit comporter au moins {{ limit }} caractères',
-                        'max' => 4096,
-                    ]),
                     new Regex([
                         'pattern' => '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/',
                         'message' => 'Votre mot de passe doit comporter au moins 6 caractères, dont au moins un chiffre, une majuscule et une minuscule',

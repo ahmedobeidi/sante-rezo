@@ -48,6 +48,16 @@
 {% block main %}
   <section class="mt-[90px] w-full font-poppins bg-off-test">
     <div class="flex justify-center py-4 text-xl font-semibold text-dark-gray">Mon Compte</div>
+
+    {# Flash messages #}
+    {% for message in app.flashes('success') %}
+        <div class="container mx-auto px-4 mb-4">
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                <p>{{ message }}</p>
+            </div>
+        </div>
+    {% endfor %}
+
     <div class="container mx-auto px-4 py-8">
       <div class="flex flex-col md:flex-row gap-6">
         <!-- Profile Image div -->
@@ -60,27 +70,28 @@
 
         <!-- Form inputs div -->
         <div class="w-full md:w-2/3 bg-off-white p-6 rounded-3xl shadow-lg border-2 border-dotted border-dark-blue">
-          <div class="flex flex-col gap-4">
+          <form action="{{ path('app_patient_update') }}" method="POST" class="flex flex-col gap-4">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('update-patient') }}" />
             <div class="flex flex-col md:flex-row gap-4">
               <div class="w-full">
-                <label for="nom" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-                <input type="text" id="nom" placeholder="Nom" class="p-3 border border-gray-300 rounded-md w-full" />
+                <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                <input type="text" id="firstName" name="firstName" value="{{ patient.firstName }}" class="p-3 border border-gray-300 rounded-md w-full" />
               </div>
               <div class="w-full">
-                <label for="prenom" class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
-                <input type="text" id="prenom" placeholder="Prénom" class="p-3 border border-gray-300 rounded-md  w-full" />
+                <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+                <input type="text" id="lastName" name="lastName" value="{{ patient.lastName }}" class="p-3 border border-gray-300 rounded-md w-full" />
               </div>
             </div>
             <div class="w-full">
               <label for="city" class="block text-sm font-medium text-gray-700 mb-1">Ville</label>
-              <input type="text" id="city" placeholder="City" class="p-3 border border-gray-300 rounded-md  w-full" />
+              <input type="text" id="city" name="city" value="{{ patient.city }}" class="p-3 border border-gray-300 rounded-md w-full" />
             </div>
             <div class="w-full">
               <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-              <input type="text" id="address" placeholder="Adresse" class="p-3 border border-gray-300 rounded-md  w-full" />
+              <input type="text" id="address" name="address" value="{{ patient.address }}" class="p-3 border border-gray-300 rounded-md w-full" />
             </div>
-            <button class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px] w-full md:w-auto md:self-end">Enregistrer</button>
-          </div>
+            <button type="submit" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px] w-full md:w-auto md:self-end">Enregistrer</button>
+          </form>
         </div>
       </div>
     </div>
