@@ -104,20 +104,20 @@
             <div class="flex flex-col md:flex-row gap-4">
               <div class="w-full">
                 <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-                <input type="text" id="lastName" name="lastName" value="{{ patient.lastName }}" class="p-3 border border-gray-300 rounded-md w-full" placeholder="Nom" {% if patient.lastName %}required{% endif %} />
+                <input type="text" id="lastName" name="lastName" value="{{ patient.lastName }}" class="p-3 border border-dotted border-gray-500 rounded-md w-full" placeholder="Nom" {% if patient.lastName %}required{% endif %} />
               </div>
               <div class="w-full">
                 <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
-                <input type="text" id="firstName" name="firstName" value="{{ patient.firstName }}" class="p-3 border border-gray-300 rounded-md w-full" placeholder="Prénom" {% if patient.firstName %}required{% endif %}/>
+                <input type="text" id="firstName" name="firstName" value="{{ patient.firstName }}" class="p-3 border border-dotted border-gray-500 rounded-md w-full" placeholder="Prénom" {% if patient.firstName %}required{% endif %}/>
               </div>
             </div>
             <div class="w-full">
               <label for="city" class="block text-sm font-medium text-gray-700 mb-1">Ville</label>
-              <input type="text" id="city" name="city" value="{{ patient.city }}" class="p-3 border border-gray-300 rounded-md w-full" placeholder="Ville" {% if patient.city %}required{% endif %} />
+              <input type="text" id="city" name="city" value="{{ patient.city }}" class="p-3 border border-dotted border-gray-500 rounded-md w-full" placeholder="Ville" {% if patient.city %}required{% endif %} />
             </div>
             <div class="w-full">
               <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-              <input type="text" id="address" name="address" value="{{ patient.address }}" class="p-3 border border-gray-300 rounded-md w-full" placeholder="Adresse" {% if patient.address %}required{% endif %}/>
+              <input type="text" id="address" name="address" value="{{ patient.address }}" class="p-3 border border-dotted border-gray-500 rounded-md w-full" placeholder="Adresse" {% if patient.address %}required{% endif %}/>
             </div>
             <button type="submit" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px] w-full md:w-auto md:self-end">Enregistrer</button>
           </form>
