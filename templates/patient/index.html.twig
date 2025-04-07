@@ -124,5 +124,70 @@
         </div>
       </div>
     </div>
+
+     <!-- Add this after the existing patient profile form -->
+    <div class="container mx-auto px-4 py-8">    
+        <div class="flex flex-col">
+          <button 
+            type="button" 
+            class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px] w-full md:w-auto md:self-end"
+            onclick="document.getElementById('edit-password-form').classList.toggle('hidden')"
+          >
+            Modifier le mot de passe
+          </button>
+
+          <form 
+            id="edit-password-form" 
+            action="{{ path('app_patient_handle_reset_password_form') }}" 
+            method="POST" 
+            class="flex flex-col gap-4 mt-4 hidden p-6 rounded-3xl shadow-lg border-2 border-dotted border-dark-blue"
+          >
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('update-password') }}" />
+
+            <div class="w-full">
+              <label for="current_password" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe actuel</label>
+              <input 
+                type="password" 
+                id="current_password" 
+                name="current_password" 
+                class="p-3 border border-dotted border-gray-500 rounded-md w-full" 
+                placeholder="Mot de passe actuel" 
+                required 
+              />
+            </div>
+
+            <div class="w-full">
+              <label for="new_password" class="block text-sm font-medium text-gray-700 mb-1">Nouveau mot de passe</label>
+              <input 
+                type="password" 
+                id="new_password" 
+                name="new_password" 
+                class="p-3 border border-dotted border-gray-500 rounded-md w-full" 
+                placeholder="Nouveau mot de passe" 
+                required 
+              />
+            </div>
+
+            <div class="w-full">
+              <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1">Confirmer le mot de passe</label>
+              <input 
+                type="password" 
+                id="confirm_password" 
+                name="confirm_password" 
+                class="p-3 border border-dotted border-gray-500 rounded-md w-full" 
+                placeholder="Confirmer le mot de passe" 
+                required 
+              />
+            </div>
+
+            <button 
+              type="submit" 
+              class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px] w-full md:w-auto md:self-end"
+            >
+              Enregistrer
+            </button>
+          </form>
+        </div>
+      </div>
   </section>
 {% endblock %}
