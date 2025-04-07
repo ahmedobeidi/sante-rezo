@@ -74,16 +74,16 @@ class RegistrationController extends AbstractController
         $id = $request->query->get('id'); // retrieve the user id from the url
 
         // Verify the user id exists and is not null
-        if (null === $id) {
-            $this->addFlash('error', 'L\'id n\a pas été trouvé dans l\'url signée');
+        if ($id === null) {
+            // $this->addFlash('error', 'L\'id n\a pas été trouvé dans l\'url signée');
             return $this->redirectToRoute('app_home');
         }
 
         $user = $userRepository->find($id);
 
         // Ensure the user exists in persistence
-        if (null === $user) {
-            $this->addFlash('error', 'Aucun utilisateur ne correspond à l\'id de l\'url signée');
+        if ($user === null) {
+            // $this->addFlash('error', 'Aucun utilisateur ne correspond à l\'id de l\'url signée');
 
             return $this->redirectToRoute('app_home');
         }
