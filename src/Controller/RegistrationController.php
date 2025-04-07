@@ -52,7 +52,7 @@ class RegistrationController extends AbstractController
             $this->sendVerificationEmail($user);
 
             $this->addFlash(
-                'verify_email',
+                'success',
                 'Un e-mail de confirmation a été envoyé. Veuillez vérifier votre boîte de réception.'
             );
 
@@ -73,8 +73,6 @@ class RegistrationController extends AbstractController
 
         $id = $request->query->get('id'); // retrieve the user id from the url
 
-        
-
         // Verify the user id exists and is not null
         if (null === $id) {
             $this->addFlash('error', 'L\'id n\a pas été trouvé dans l\'url signée');
@@ -90,13 +88,11 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_home');
         }
 
-        // dd("hello");
-
         try {
 
             $this->emailVerifier->handleEmailConfirmation($request, $user);
 
-            $this->addFlash('verify_email', 'Votre adresse e-mail a été vérifiée.');
+            $this->addFlash('success', 'Votre adresse e-mail a été vérifiée.');
             return $this->redirectToRoute('app_login');
 
         } catch (VerifyEmailExceptionInterface $exception) {
