@@ -54,6 +54,13 @@ class SecurityController extends AbstractController
         MailerInterface $mailer,
         EntityManagerInterface $entityManager
     ): Response {
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($user) {
+            return $this->redirectToRoute('app_home');
+        }
             
         if ($request->isMethod('POST')) {
             $email = $request->request->get('email');
@@ -104,6 +111,21 @@ class SecurityController extends AbstractController
 
         if ($request->isMethod('POST')) {
             $newPassword = $request->request->get('password');
+            $confirmPassword = $request->request->get('confirm_password');
+
+            // Check if passwords match
+            if ($newPassword !== $confirmPassword) {
+                $this->addFlash('error', 'Les mots de passe ne correspondent pas.');
+                return $this->redirectToRoute('app_reset_password', ['token' => $token]);
+            }
+
+            // Validate password strength (optional)
+            if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/', $newPassword)) {
+                $this->addFlash('error', 'Le mot de passe doit comporter au moins 6 caractères, dont une majuscule, une minuscule et un chiffre.');
+                return $this->redirectToRoute('app_reset_password', ['token' => $token]);
+            }
+
+            // Update the user's password
             $user->setPassword($passwordHasher->hashPassword($user, $newPassword));
             $user->setResetToken(null); // Clear the reset token
             $entityManager->persist($user);

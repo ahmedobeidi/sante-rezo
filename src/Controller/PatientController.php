@@ -26,6 +26,10 @@ final class PatientController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
+        if ($user->isDeleted()) {
+            throw $this->createAccessDeniedException('Votre compte a été supprimé.');
+        }
+
         $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
 
         if (!$patient) {
@@ -237,5 +241,24 @@ final class PatientController extends AbstractController
     
         $this->addFlash('success', 'Votre mot de passe a été mis à jour avec succès.');
         return $this->redirectToRoute('app_patient_profile');
+    }
+
+    #[Route('/patient/delete-account', name: 'app_patient_delete_account', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function deleteAccount(EntityManagerInterface $entityManager): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        // Mark the account as deleted
+        $user->setIsDeleted(true);
+        $user->setDeletedDate(new \DateTimeImmutable());
+
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        // Log the user out
+        $this->addFlash('success', 'Votre compte a été supprimé avec succès.');
+        return $this->redirectToRoute('app_logout');
     }
 }

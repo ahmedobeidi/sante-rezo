@@ -15,6 +15,10 @@ class UserChecker implements UserCheckerInterface
             return;
         }
 
+        if ($user->isDeleted()) {
+            throw new CustomUserMessageAuthenticationException('Votre compte a été supprimé.');
+        }
+
         if (!$user->isVerified()) {
             throw new CustomUserMessageAuthenticationException(
                 'Votre compte n\'est pas vérifié. Veuillez vérifier votre e-mail'

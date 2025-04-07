@@ -189,5 +189,19 @@
           </form>
         </div>
       </div>
+
+        <!-- Delete my account -->
+      <div class="container mx-auto px-4 pb-6">
+        <form action="{{ path('app_patient_delete_account') }}" method="POST" class="flex flex-col">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token('delete-account') }}" />
+          <button 
+            type="submit" 
+            class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 text-[16px] w-full md:w-auto md:self-end"
+            onclick="return confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')"
+          >
+            Supprimer mon compte
+          </button>
+        </form>
+      </div>
   </section>
 {% endblock %}
