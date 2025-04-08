@@ -26,6 +26,11 @@ final class PatientController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
+        // Ensure the user does not have ROLE_ADMIN or ROLE_DOCTOR
+        if (in_array('ROLE_ADMIN', $user->getRoles()) || in_array('ROLE_DOCTOR', $user->getRoles())) {
+            return $this->redirectToRoute('app_home');
+        }
+
         if ($user->isDeleted()) {
             throw $this->createAccessDeniedException('Votre compte a été supprimé.');
         }
