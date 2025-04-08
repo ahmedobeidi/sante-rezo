@@ -13,7 +13,7 @@
       {% if app.user %}
         {% if 'ROLE_ADMIN' in app.user.roles %}
           <li>
-            <a href="" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Dashboard</a>
+            <a href="{{ path('app_admin') }}" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Dashboard</a>
           </li>
         {% elseif 'ROLE_USER' in app.user.roles %}
           <li>
