@@ -7,21 +7,14 @@
 {% block navbarDesktop %}
   <nav class="w-full font-poppins">
     <ul class="flex gap-10 justify-end">
-      <li class="active">
+      <li>
         <a href="{{ path('app_home') }}" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Accueil</a>
       </li>
       <li>
         <a href="/#contact" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Contact</a>
       </li>
-
-      <li class="flex justify-end">
-        <div>
-          {% if app.user %}
-            <a href="{{ path('app_logout') }}" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px]">Déconnexion</a>
-          {% else %}
-            <a href="{{ path('app_register') }}" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px]">S'inscrire</a>
-          {% endif %}
-        </div>
+      <li>
+        <a href="{{ path('app_register') }}" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px]">S'inscrire</a>
       </li>
     </ul>
   </nav>
@@ -30,19 +23,13 @@
 {% block navbarMobile %}
   <ul class="flex flex-col items-center justify-center h-full">
     <li class="mb-6">
-      <a href="#" class="text-off-gray text-2xl">Accueil</a>
+      <a href="{{ path('app_home') }}" class="text-off-gray hover:text-off-blue text-2xl">Accueil</a>
     </li>
     <li class="mb-6">
-      <a href="/#contact" class="text-off-gray text-2xl">Contact</a>
+      <a href="/#contact" class="text-off-gray hover:text-off-blue text-2xl">Contact</a>
     </li>
     <li class="mb-6">
-      <div>
-        {% if app.user %}
-          <a href="{{ path('app_logout') }}" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px]">Déconnexion</a>
-        {% else %}
-          <a href="{{ path('app_register') }}" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px]">S'inscrire</a>
-        {% endif %}
-      </div>
+      <a href="{{ path('app_register') }}" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-2xl">S'inscrire</a>
     </li>
   </ul>
 {% endblock %}

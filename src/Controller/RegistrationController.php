@@ -29,6 +29,7 @@ class RegistrationController extends AbstractController
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher
     ): Response {
+        
         if ($this->getUser()) {
             return $this->redirectToRoute('app_home');
         }
