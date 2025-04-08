@@ -125,4 +125,29 @@ class RegistrationController extends AbstractController
                 ->htmlTemplate('registration/confirmation_email.html.twig')
         );
     }
+    
+    // Special route for doctor account activation that combines email verification and password reset
+    #[Route('/activate-doctor-account/{token}', name: 'app_activate_doctor_account')]
+    public function activateDoctorAccount(string $token, EntityManagerInterface $entityManager): Response
+    {
+        // Find the user by reset token
+        $user = $entityManager->getRepository(User::class)->findOneBy(['resetToken' => $token]);
+        
+        if (!$user) {
+            $this->addFlash('error', 'Le lien d\'activation est invalide ou a expiré.');
+            return $this->redirectToRoute('app_login');
+        }
+        
+        // Mark the email as verified
+        $user->setIsVerified(true);
+        
+        // Don't clear the reset token yet as we'll need it for password reset
+        $entityManager->flush();
+        
+        // Add a success message
+        $this->addFlash('success', 'Votre email a été vérifié! Veuillez maintenant définir votre mot de passe.');
+        
+        // Redirect to the reset password form
+        return $this->redirectToRoute('app_reset_password', ['token' => $token]);
+    }
 }

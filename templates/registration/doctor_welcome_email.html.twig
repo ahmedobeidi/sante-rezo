@@ -1,0 +1,25 @@
+{% extends 'registration/base_email.html.twig' %}
+
+{% block body %}
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
+    <h1 style="color: #3490dc; text-align: center;">Bienvenue sur SantéRézo !</h1>
+    
+    <p>Bonjour,</p>
+    
+    <p>Un compte médecin a été créé pour vous sur la plateforme SantéRézo.</p>
+    
+    <p>Pour activer votre compte et définir votre mot de passe, veuillez cliquer sur le bouton ci-dessous :</p>
+    
+    <p style="text-align: center; margin: 30px 0;">
+        <a href="{{ activationUrl }}" style="background-color: #3490dc; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">Activer mon compte</a>
+    </p>
+    
+    <p>Ce lien expirera dans 24 heures.</p>
+    
+    <p>Une fois votre compte activé, vous pourrez vous connecter et commencer à utiliser la plateforme.</p>
+    
+    <p>Si vous n'avez pas demandé ce compte, veuillez ignorer cet email ou contacter notre support.</p>
+    
+    <p>Cordialement,<br>L'équipe SantéRézo</p>
+</div>
+{% endblock %}

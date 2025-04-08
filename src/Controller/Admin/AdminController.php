@@ -42,5 +42,7 @@ class AdminController extends AbstractDashboardController
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
         yield MenuItem::linkToCrud('Users', 'fa fa-user', User::class);
         yield MenuItem::linkToCrud('Patients', 'fa fa-heart', Patient::class);
+        yield MenuItem::linkToCrud('Doctors', 'fa fa-user-md', User::class)
+            ->setController(DoctorCrudController::class);
     }
 }
