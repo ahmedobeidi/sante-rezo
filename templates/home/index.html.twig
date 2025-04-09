@@ -9,12 +9,15 @@
       <li>
         <a href="/#contact" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Contact</a>
       </li>
-
       {% if app.user %}
         {% if 'ROLE_ADMIN' in app.user.roles %}
           <li>
             <a href="{{ path('app_admin') }}" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Dashboard</a>
           </li>
+        {% elseif 'ROLE_DOCTOR' in app.user.roles %}
+          <li>
+            <a href="{{ path('app_doctor_profile') }}" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Mon Compte</a>
+          </li>  
         {% elseif 'ROLE_USER' in app.user.roles %}
           <li>
             <a href="{{ path('app_patient_profile') }}" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Mon Compte</a>
@@ -44,12 +47,15 @@
     <li class="mb-6">
       <a href="/#contact" class="text-off-gray text-2xl">Contact</a>
     </li>
-
     {% if app.user %}
       {% if 'ROLE_ADMIN' in app.user.roles %}
         <li class="mb-6">
-          <a href="" class="text-off-gray hover:text-off-blue text-2xl">Dashboard</a>
+          <a href="{{ path('app_admin') }}" class="text-off-gray hover:text-off-blue text-2xl">Dashboard</a>
         </li>
+      {% elseif 'ROLE_DOCTOR' in app.user.roles %}
+        <li class="mb-6">
+          <a href="{{ path('app_doctor_profile') }}" class="text-off-gray hover:text-off-blue text-2xl">Mon Compte</a>
+        </li>  
       {% elseif 'ROLE_USER' in app.user.roles %}
         <li class="mb-6">
           <a href="{{ path('app_patient_profile') }}" class="text-off-gray hover:text-off-blue text-2xl">Mon Compte</a>

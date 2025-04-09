@@ -27,7 +27,7 @@ final class PatientController extends AbstractController
         $user = $this->getUser();
 
         // Ensure the user does not have ROLE_ADMIN or ROLE_DOCTOR
-        if (in_array('ROLE_ADMIN', $user->getRoles()) || in_array('ROLE_DOCTOR', $user->getRoles())) {
+        if (!in_array('ROLE_PATIENT', $user->getRoles())) {
             return $this->redirectToRoute('app_home');
         }
 

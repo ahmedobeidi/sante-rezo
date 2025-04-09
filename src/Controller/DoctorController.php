@@ -2,17 +2,260 @@
 
 namespace App\Controller;
 
+use App\Entity\Doctor;
+use App\Entity\Specialty;
+use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 final class DoctorController extends AbstractController
 {
     #[Route('/doctor', name: 'app_doctor_profile')]
-    public function index(): Response
+    #[IsGranted('ROLE_USER')]
+    public function index(EntityManagerInterface $entityManager): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        // Ensure the user has ROLE_DOCTOR
+        if (!in_array('ROLE_DOCTOR', $user->getRoles())) {
+            return $this->redirectToRoute('app_home');
+        }
+
+        if ($user->isDeleted()) {
+            throw $this->createAccessDeniedException('Votre compte a été supprimé.');
+        }
+
+        $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+
+        if (!$doctor) {
+            // Create a new doctor profile if it doesn't exist
+            $doctor = new Doctor();
+            $doctor->setUser($user);
+            $entityManager->persist($doctor);
+            $entityManager->flush();
+        }
+
+        // Get all specialties for the dropdown
+        $specialties = $entityManager->getRepository(Specialty::class)->findAll();
+
         return $this->render('doctor/index.html.twig', [
-            'controller_name' => 'DoctorController',
+            'doctor' => $doctor,
+            'specialties' => $specialties,
         ]);
+    }
+
+    #[Route('/doctor/update', name: 'app_doctor_update', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function update(Request $request, EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+
+        if (!$doctor) {
+            throw $this->createNotFoundException('Profil médecin non trouvé');
+        }
+
+        // Get form data
+        $firstName = $request->request->get('firstName');
+        $lastName = $request->request->get('lastName');
+        $city = $request->request->get('city');
+        $address = $request->request->get('address');
+        $specialtyId = $request->request->get('specialty');
+
+        // Check if trying to empty existing data
+        if (($doctor->getFirstName() && empty($firstName)) ||
+            ($doctor->getLastName() && empty($lastName)) ||
+            ($doctor->getCity() && empty($city)) ||
+            ($doctor->getAddress() && empty($address))
+        ) {
+            $this->addFlash('error', 'Les champs peuvent être modifiés mais ne peuvent pas être vidés une fois remplis');
+            return $this->redirectToRoute('app_doctor_profile');
+        }
+
+        // Check if any data has changed
+        $hasChanges = false;
+
+        if (!empty($firstName) && $firstName !== $doctor->getFirstName()) {
+            $doctor->setFirstName($firstName);
+            $hasChanges = true;
+        }
+        if (!empty($lastName) && $lastName !== $doctor->getLastName()) {
+            $doctor->setLastName($lastName);
+            $hasChanges = true;
+        }
+        if (!empty($city) && $city !== $doctor->getCity()) {
+            $doctor->setCity($city);
+            $hasChanges = true;
+        }
+        if (!empty($address) && $address !== $doctor->getAddress()) {
+            $doctor->setAddress($address);
+            $hasChanges = true;
+        }
+
+        // Handle specialty
+        if (!empty($specialtyId)) {
+            $specialty = $entityManager->getRepository(Specialty::class)->find($specialtyId);
+            if ($specialty && $doctor->getSpecialty() !== $specialty) {
+                $doctor->setSpecialty($specialty);
+                $hasChanges = true;
+            }
+        }
+
+        // Only proceed if there are changes
+        if ($hasChanges) {
+            $entityManager->persist($doctor);
+            $entityManager->flush();
+            $this->addFlash('success', 'Profil mis à jour avec succès');
+        }
+
+        return $this->redirectToRoute('app_doctor_profile');
+    }
+
+    #[Route('/doctor/upload-image', name: 'app_doctor_upload_image', methods: ['POST'])]
+    public function uploadImage(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+
+        if (!$doctor) {
+            throw $this->createNotFoundException('Profil médecin non trouvé');
+        }
+
+        $profileImage = $request->files->get('profileImage');
+
+        if ($profileImage) {
+            $originalFilename = pathinfo($profileImage->getClientOriginalName(), PATHINFO_FILENAME);
+            $safeFilename = $slugger->slug($originalFilename);
+            $newFilename = $safeFilename . '-' . uniqid() . '.' . $profileImage->guessExtension();
+
+            try {
+                $profileImage->move(
+                    $this->getParameter('kernel.project_dir') . '/public/uploads/profiles',
+                    $newFilename
+                );
+
+                // Delete old image if exists
+                if ($doctor->getProfileImage()) {
+                    $oldFile = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles/' . $doctor->getProfileImage();
+                    if (file_exists($oldFile)) {
+                        unlink($oldFile);
+                    }
+                }
+
+                $doctor->setProfileImage($newFilename);
+                $entityManager->flush();
+
+                $this->addFlash('success', 'Photo de profil mise à jour avec succès');
+            } catch (FileException $e) {
+                $this->addFlash('error', 'Une erreur est survenue lors du téléchargement de l\'image');
+            }
+        }
+
+        return $this->redirectToRoute('app_doctor_profile');
+    }
+
+    #[Route('/doctor/delete-image', name: 'app_doctor_delete_image', methods: ['POST'])]
+    public function deleteImage(EntityManagerInterface $entityManager): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+
+        if (!$doctor || !$doctor->getProfileImage()) {
+            $this->addFlash('error', 'Aucune photo de profil à supprimer');
+            return $this->redirectToRoute('app_doctor_profile');
+        }
+
+        // Delete the file
+        $oldFile = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles/' . $doctor->getProfileImage();
+        if (file_exists($oldFile)) {
+            unlink($oldFile);
+        }
+
+        // Remove reference from database
+        $doctor->setProfileImage(null);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Photo de profil supprimée avec succès');
+        return $this->redirectToRoute('app_doctor_profile');
+    }
+
+    #[Route('/doctor/handle-reset-password-form', name: 'app_doctor_handle_reset_password_form', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function handleResetPasswordForm(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        UserPasswordHasherInterface $passwordHasher
+    ): Response {
+        /** @var User $user */
+        $user = $this->getUser();
+    
+        // Get form data
+        $currentPassword = $request->request->get('current_password');
+        $newPassword = $request->request->get('new_password');
+        $confirmPassword = $request->request->get('confirm_password');
+
+        // Check if any field is empty
+        if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
+            $this->addFlash('error', 'Tous les champs sont obligatoires.');
+            return $this->redirectToRoute('app_doctor_profile');
+        }
+    
+        // Validate current password
+        if (!$passwordHasher->isPasswordValid($user, $currentPassword)) {
+            $this->addFlash('error', 'Le mot de passe actuel est incorrect.');
+            return $this->redirectToRoute('app_doctor_profile');
+        }
+    
+        // Check if new passwords match
+        if ($newPassword !== $confirmPassword) {
+            $this->addFlash('error', 'Les nouveaux mots de passe ne correspondent pas.');
+            return $this->redirectToRoute('app_doctor_profile');
+        }
+
+        // Validate new password with regex
+        if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/', $newPassword)) {
+            $this->addFlash('error', 'Le nouveau mot de passe doit comporter au moins 6 caractères, dont au moins un chiffre, une majuscule et une minuscule.');
+            return $this->redirectToRoute('app_doctor_profile');
+        }
+    
+        // Update the user's password
+        $user->setPassword($passwordHasher->hashPassword($user, $newPassword));
+        $entityManager->persist($user);
+        $entityManager->flush();
+    
+        $this->addFlash('success', 'Votre mot de passe a été mis à jour avec succès.');
+        return $this->redirectToRoute('app_doctor_profile');
+    }
+
+    #[Route('/doctor/delete-account', name: 'app_doctor_delete_account', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function deleteAccount(EntityManagerInterface $entityManager): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        // Mark the account as deleted
+        $user->setIsDeleted(true);
+        $user->setDeletedDate(new \DateTimeImmutable());
+
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        // Log the user out
+        $this->addFlash('success', 'Votre compte a été supprimé avec succès.');
+        return $this->redirectToRoute('app_logout');
     }
 }

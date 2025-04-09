@@ -58,7 +58,11 @@ class AdminController extends AbstractDashboardController
         yield MenuItem::linkToCrud('Médecins', 'fa fa-stethoscope', Doctor::class)
             ->setController(DoctorEntityCrudController::class);
         
-        // Add Specialties if needed
+        // Add Specialties
         yield MenuItem::linkToCrud('Spécialités', 'fa fa-tags', Specialty::class);
+
+        // Navigation section
+        yield MenuItem::section('Navigation');
+        yield MenuItem::linkToRoute('Retour au site', 'fa fa-arrow-left', 'app_home');
     }
 }
