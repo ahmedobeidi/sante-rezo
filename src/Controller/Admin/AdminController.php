@@ -2,7 +2,9 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\Doctor;
 use App\Entity\Patient;
+use App\Entity\Specialty;
 use App\Entity\User;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
@@ -40,9 +42,23 @@ class AdminController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
-        yield MenuItem::linkToCrud('Users', 'fa fa-user', User::class);
+        
+        // Users section
+        yield MenuItem::section('Gestion des utilisateurs');
+        yield MenuItem::linkToCrud('Users', 'fa fa-users', User::class);
+        
+        // Patients section
+        yield MenuItem::section('Gestion des patients');
         yield MenuItem::linkToCrud('Patients', 'fa fa-heart', Patient::class);
-        yield MenuItem::linkToCrud('Doctors', 'fa fa-user-md', User::class)
+        
+        // Doctors section 
+        yield MenuItem::section('Gestion des médecins');
+        yield MenuItem::linkToCrud('Comptes', 'fa fa-user-md', User::class)
             ->setController(DoctorCrudController::class);
+        yield MenuItem::linkToCrud('Médecins', 'fa fa-stethoscope', Doctor::class)
+            ->setController(DoctorEntityCrudController::class);
+        
+        // Add Specialties if needed
+        yield MenuItem::linkToCrud('Spécialités', 'fa fa-tags', Specialty::class);
     }
 }

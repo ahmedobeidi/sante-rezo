@@ -87,6 +87,7 @@ class DoctorCrudController extends AbstractCrudController
             });
 
         return $actions
+            ->disable(Action::EDIT) // Disable editing doctors
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
             ->add(Crud::PAGE_DETAIL, $sendSetupEmail);
     }

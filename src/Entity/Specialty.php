@@ -29,6 +29,11 @@ class Specialty
         $this->doctors = new ArrayCollection();
     }
 
+    public function __toString(): string
+    {
+        return $this->name;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

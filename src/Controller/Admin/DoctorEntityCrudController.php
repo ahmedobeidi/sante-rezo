@@ -2,14 +2,11 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Patient;
+use App\Entity\Doctor;
+use App\Entity\Specialty;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\QueryBuilder;
-use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
-use EasyCorp\Bundle\EasyAdminBundle\Collection\FilterCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
-use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
@@ -20,11 +17,11 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\TextFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
+use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\HttpFoundation\Response;
-use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 
-class PatientCrudController extends AbstractCrudController
+class DoctorEntityCrudController extends AbstractCrudController
 {
     private AdminUrlGenerator $adminUrlGenerator;
     private EntityManagerInterface $entityManager;
@@ -37,42 +34,29 @@ class PatientCrudController extends AbstractCrudController
 
     public static function getEntityFqcn(): string
     {
-        return Patient::class;
-    }
-
-    public function createIndexQueryBuilder(SearchDto $searchDto, EntityDto $entityDto, FieldCollection $fields, FilterCollection $filters): QueryBuilder
-    {
-        $queryBuilder = parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters);
-        
-        // Join with User entity and filter by ROLE_PATIENT - database agnostic approach
-        $queryBuilder
-            ->join('entity.user', 'u')
-            ->andWhere("u.roles LIKE :role")
-            ->setParameter('role', '%ROLE_PATIENT%');
-            
-        return $queryBuilder;
+        return Doctor::class;
     }
 
     public function configureActions(Actions $actions): Actions
     {
         $deletePhoto = Action::new('deletePhoto', 'Delete Photo', 'fa fa-trash')
-            ->linkToCrudAction('deletePatientPhoto')
-            ->displayIf(static function (Patient $patient) {
-                return $patient->getProfileImage() !== null;
+            ->linkToCrudAction('deleteDoctorPhoto')
+            ->displayIf(static function (Doctor $doctor) {
+                return $doctor->getProfileImage() !== null;
             });
 
         return $actions
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
             ->add(Crud::PAGE_DETAIL, $deletePhoto)
-            ->disable(Action::NEW, Action::EDIT); // Disable both creating and editing patients
+            ->disable(Action::NEW, Action::EDIT); // Disable both creating and editing doctor profiles
     }
 
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setEntityLabelInSingular('Patient')
-            ->setEntityLabelInPlural('Patients')
-            ->setSearchFields(['firstName', 'lastName', 'city', 'address', 'user.email'])
+            ->setEntityLabelInSingular('Profil médecin')
+            ->setEntityLabelInPlural('Profils médecins')
+            ->setSearchFields(['firstName', 'lastName', 'city', 'address', 'user.email', 'specialty.name'])
             ->setDefaultSort(['id' => 'DESC'])
             ->setPaginatorPageSize(20);
     }
@@ -89,75 +73,86 @@ class PatientCrudController extends AbstractCrudController
             ->onlyOnDetail();
             
         yield TextField::new('firstName')
-            ->setHelp('Patient\'s first name');
+            ->setHelp('Prénom du médecin');
             
         yield TextField::new('lastName')
-            ->setHelp('Patient\'s last name');
+            ->setHelp('Nom du médecin');
             
         yield AssociationField::new('user')
-            ->setFormTypeOption('choice_label', 'email')
-            ->setHelp('Associated user account');
+        ->setFormTypeOption('query_builder', function ($repository) {
+            return $repository->createQueryBuilder('u')
+                ->where('u.roles LIKE :role')
+                ->setParameter('role', '%ROLE_DOCTOR%')
+                ->orderBy('u.id', 'ASC');
+        })
+        ->setFormTypeOption('choice_label', function(User $user) {
+            return sprintf('ID: %d - %s', $user->getId(), $user->getEmail());
+        })
+        ->setHelp('Sélectionnez un compte médecin (utilisateurs avec ROLE_DOCTOR)');
+            
+        yield AssociationField::new('specialty')
+            ->setHelp('Spécialité médicale');
             
         yield TextField::new('city')
-            ->setHelp('City of residence');
+            ->setHelp('Ville d\'exercice');
             
         yield TextField::new('address')
             ->hideOnIndex()
-            ->setHelp('Patient\'s address');
+            ->setHelp('Adresse du cabinet');
             
         yield ImageField::new('profileImage')
             ->setBasePath('/uploads/profiles')
             ->setUploadDir('public/uploads/profiles')
             ->setUploadedFileNamePattern('[randomhash].[extension]')
-            ->setHelp('Patient\'s profile picture');
+            ->setHelp('Photo de profil du médecin');
     }
 
-    public function deletePatientPhoto(AdminContext $context): Response
+    public function deleteDoctorPhoto(AdminContext $context): Response
     {
         // Get the entity ID from the request
         $entityId = $context->getRequest()->query->get('entityId');
         
         if (!$entityId) {
-            $this->addFlash('error', 'Patient ID is missing');
+            $this->addFlash('error', 'ID du médecin manquant');
             return $this->redirect($this->adminUrlGenerator
                 ->setController(self::class)
                 ->setAction(Action::INDEX)
                 ->generateUrl());
         }
         
-        // Fetch the Patient entity directly from the entity manager
-        $patient = $this->entityManager->getRepository(Patient::class)->find($entityId);
+        // Fetch the Doctor entity
+        $doctor = $this->entityManager->getRepository(Doctor::class)->find($entityId);
         
-        if (!$patient) {
-            $this->addFlash('error', 'Patient not found');
+        if (!$doctor) {
+            $this->addFlash('error', 'Médecin non trouvé');
             return $this->redirect($this->adminUrlGenerator
                 ->setController(self::class)
                 ->setAction(Action::INDEX)
                 ->generateUrl());
         }
         
-        if ($patient->getProfileImage()) {
+        if ($doctor->getProfileImage()) {
             // Delete the file from filesystem
-            $filePath = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles/' . $patient->getProfileImage();
+            $filePath = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles/' . $doctor->getProfileImage();
             if (file_exists($filePath)) {
                 unlink($filePath);
             }
 
             // Remove the database reference
-            $patient->setProfileImage(null);
+            $doctor->setProfileImage(null);
             $this->entityManager->flush();
 
             // Add a flash message
-            $this->addFlash('success', 'Patient profile photo has been deleted');
+            $this->addFlash('success', 'Photo de profil du médecin supprimée');
         } else {
-            $this->addFlash('info', 'No profile photo to delete');
+            $this->addFlash('info', 'Aucune photo de profil à supprimer');
         }
 
-        // Redirect back to the patient detail page
+        // Redirect back to the doctor detail page
         return $this->redirect($this->adminUrlGenerator
             ->setController(self::class)
             ->setAction(Action::DETAIL)
-            ->setEntityId($patient->getId())
+            ->setEntityId($doctor->getId())
             ->generateUrl());
     }
 }
