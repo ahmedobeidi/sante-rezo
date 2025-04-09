@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block navbarDesktop %}
+  <nav class="w-full font-poppins">
+    <ul class="flex gap-10 justify-end">
+      <li>
+        <a href="{{ path('app_home') }}" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Accueil</a>
+      </li>
+      <li>
+        <a href="/#contact" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Contact</a>
+      </li>
+      <li>
+        <a href="{{ path('app_doctor_profile') }}" class="text-off-gray font-bold text-[16px]">Mon Compte</a>
+      </li>
+      <li>
+        <a href="{{ path('app_doctor_appointments') }}" class="text-off-blue hover:text-off-blue font-bold text-[16px]">Mes Rendez-vous</a>
+      </li>
+      <li class="flex justify-end">
+        <div>
+          <a href="{{ path('app_logout') }}" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px]">Déconnexion</a>
+        </div>
+      </li>
+    </ul>
+  </nav>
+{% endblock %}
+
+{% block navbarMobile %}
+  <ul class="flex flex-col items-center justify-center h-full">
+    <li class="mb-6">
+      <a href="{{ path('app_home') }}" class="text-off-gray hover:text-off-blue text-2xl">Accueil</a>
+    </li>
+    <li class="mb-6">
+      <a href="/#contact" class="text-off-gray hover:text-off-blue text-2xl">Contact</a>
+    </li>
+    <li class="mb-6">
+      <a href="{{ path('app_doctor_profile') }}" class="text-off-gray text-2xl">Mon Compte</a>
+    </li>
+    <li class="mb-6">
+      <a href="{{ path('app_doctor_appointments') }}" class="text-off-blue hover:text-off-blue text-2xl">Mes Rendez-vous</a>
+    </li>
+    <li class="mb-6">
+      <a href="{{ path('app_logout') }}" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-2xl">Déconnexion</a>
+    </li>
+  </ul>
+{% endblock %}
+
+{% block main %}
+<section class="mt-[90px] w-full font-poppins bg-off-test">
+  <h1>Manage Appointments</h1>
+
+  <form action="{{ path('app_doctor_add_appointment') }}" method="POST">
+      <input type="datetime-local" name="date" required>
+      <button type="submit">Add Appointment</button>
+  </form>
+
+  <h2>Your Appointments</h2>
+  <ul>
+      {% for appointment in appointments %}
+          <li>{{ appointment.date|date('Y-m-d H:i') }} - {{ appointment.status }}</li>
+      {% endfor %}
+  </ul>
+</section>
+{% endblock %}

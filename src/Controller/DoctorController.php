@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Appointment;
 use App\Entity\Doctor;
 use App\Entity\Specialty;
 use App\Entity\User;
@@ -257,5 +258,51 @@ final class DoctorController extends AbstractController
         // Log the user out
         $this->addFlash('success', 'Votre compte a été supprimé avec succès.');
         return $this->redirectToRoute('app_logout');
+    }
+
+    #[Route('/doctor/appointments', name: 'app_doctor_appointments')]
+    #[IsGranted('ROLE_DOCTOR')]
+    public function manageAppointments(EntityManagerInterface $entityManager): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+
+        if (!$doctor) {
+            throw $this->createNotFoundException('Doctor profile not found.');
+        }
+
+        $appointments = $entityManager->getRepository(Appointment::class)->findBy(['doctor' => $doctor]);
+
+        return $this->render('doctor/appointments.html.twig', [
+            'appointments' => $appointments,
+        ]);
+    }
+
+    #[Route('/doctor/appointments/add', name: 'app_doctor_add_appointment', methods: ['POST'])]
+    #[IsGranted('ROLE_DOCTOR')]
+    public function addAppointment(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+
+        if (!$doctor) {
+            throw $this->createNotFoundException('Doctor profile not found.');
+        }
+
+        $date = new \DateTime($request->request->get('date'));
+
+        $appointment = new Appointment();
+        $appointment->setDoctor($doctor);
+        $appointment->setDate($date);
+        $appointment->setStatus('available');
+
+        $entityManager->persist($appointment);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Appointment added successfully.');
+
+        return $this->redirectToRoute('app_doctor_appointments');
     }
 }

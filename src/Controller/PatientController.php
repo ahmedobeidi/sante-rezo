@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Appointment;
 use App\Entity\Patient;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
@@ -265,5 +266,43 @@ final class PatientController extends AbstractController
         // Log the user out
         $this->addFlash('success', 'Votre compte a été supprimé avec succès.');
         return $this->redirectToRoute('app_logout');
+    }
+
+    #[Route('/patient/appointments', name: 'app_patient_appointments')]
+    #[IsGranted('ROLE_PATIENT')]
+    public function viewAppointments(EntityManagerInterface $entityManager): Response
+    {
+        $appointments = $entityManager->getRepository(Appointment::class)->findBy(['status' => 'available']);
+
+        return $this->render('patient/appointments.html.twig', [
+            'appointments' => $appointments,
+        ]);
+    }
+
+    #[Route('/patient/appointments/book/{id}', name: 'app_patient_book_appointment')]
+    #[IsGranted('ROLE_PATIENT')]
+    public function bookAppointment(Appointment $appointment, EntityManagerInterface $entityManager): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
+
+        if (!$patient) {
+            throw $this->createNotFoundException('Patient profile not found.');
+        }
+
+        if ($appointment->getStatus() !== 'available') {
+            $this->addFlash('error', 'This appointment is no longer available.');
+            return $this->redirectToRoute('app_patient_appointments');
+        }
+
+        $appointment->setPatient($patient);
+        $appointment->setStatus('booked');
+
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Appointment booked successfully.');
+
+        return $this->redirectToRoute('app_patient_appointments');
     }
 }
