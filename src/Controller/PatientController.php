@@ -59,7 +59,7 @@ final class PatientController extends AbstractController
         $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
 
         if (!$patient) {
-            throw $this->createNotFoundException('Patient not found');
+            throw $this->createNotFoundException('Profil patient introuvable.');
         }
 
         // Get form data
@@ -313,11 +313,11 @@ final class PatientController extends AbstractController
         $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
 
         if (!$patient) {
-            throw $this->createNotFoundException('Patient profile not found.');
+            throw $this->createNotFoundException('Profil patient introuvable');
         }
 
         if ($appointment->getStatus() !== 'available') {
-            $this->addFlash('error', 'This appointment is no longer available.');
+            $this->addFlash('error', 'Ce rendez-vous n\'est plus disponible.');
             return $this->redirectToRoute('app_patient_appointments');
         }
 
@@ -326,8 +326,30 @@ final class PatientController extends AbstractController
 
         $entityManager->flush();
 
-        $this->addFlash('success', 'Appointment booked successfully.');
+        $this->addFlash('success', 'Rendez-vous réservé avec succès.');
 
+        return $this->redirectToRoute('app_patient_appointments');
+    }
+
+    #[Route('/patient/appointments/cancel/{id}', name: 'app_patient_cancel_appointment', methods: ['POST'])]
+    #[IsGranted('ROLE_PATIENT')]
+    public function cancelAppointment(Appointment $appointment, EntityManagerInterface $entityManager): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
+
+        if (!$patient || $appointment->getPatient() !== $patient) {
+            $this->addFlash('error', 'Vous ne pouvez pas annuler ce rendez-vous.');
+            return $this->redirectToRoute('app_patient_appointments');
+        }
+
+        // Cancel the appointment
+        $appointment->setPatient(null);
+        $appointment->setStatus('available');
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Le rendez-vous a été annulé avec succès.');
         return $this->redirectToRoute('app_patient_appointments');
     }
 }

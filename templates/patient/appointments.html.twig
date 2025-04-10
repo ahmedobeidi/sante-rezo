@@ -10,7 +10,7 @@
         <a href="/#contact" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Contact</a>
       </li>
       <li>
-        <a href="{{ path('app_patient_profile') }}" class="text-off-gray font-bold text-[16px]">Mon Compte</a>
+        <a href="{{ path('app_patient_profile') }}" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Mon Compte</a>
       </li>
       <li>
         <a href="{{ path('app_patient_appointments') }}" class="text-off-blue hover:text-off-blue font-bold text-[16px]">Mes Rendez-vous</a>
@@ -48,6 +48,24 @@
 
 {% block main %}
 <section class="mt-[90px] w-full font-poppins bg-off-test py-8">
+
+  {# Flash messages #}
+  {% for message in app.flashes('success') %}
+    <div class="container mx-auto px-4 mb-10">
+      <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+        <p>{{ message }}</p>
+      </div>
+    </div>
+  {% endfor %}
+
+  {% for message in app.flashes('error') %}
+    <div class="container mx-auto px-4 mb-10">
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <p>{{ message }}</p>
+      </div>
+    </div>
+  {% endfor %}
+
   <div class="container mx-auto px-4 flex flex-col md:flex-row gap-8">
     <!-- Side Menu -->
     <aside class="w-full md:w-1/4 h-fit bg-white shadow-lg rounded-lg p-6 border border-solid border-dark-blue">
@@ -84,7 +102,16 @@
                   </div>
                 </div>
                 <p class="text-sm text-dark-gray mb-2"><strong>Adresse:</strong> {{ appointment.doctor.address }}</p>
+                <p class="text-sm text-dark-gray mb-2"><strong>Ville:</strong> {{ appointment.doctor.city }}</p>
                 <p class="text-sm text-dark-gray mb-4"><strong>Date et Heure:</strong> {{ appointment.date|date('d/m/Y H:i') }}</p>
+
+                 <!-- Annuler Button -->
+                <form action="{{ path('app_patient_cancel_appointment', { id: appointment.id }) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler ce rendez-vous ?');">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token('cancel-appointment-' ~ appointment.id) }}">
+                  <button type="submit" class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
+                    Annuler
+                  </button>
+                </form>
               </div>
             {% endfor %}
           </div>
