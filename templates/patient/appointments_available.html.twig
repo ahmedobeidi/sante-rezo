@@ -21,7 +21,7 @@
 {% if availableAppointments is not empty %}
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for appointment in availableAppointments %}
-      <div class="bg-white shadow-lg rounded-lg p-6 border border-gray-200">
+      <div class="bg-white shadow-lg rounded-lg p-6 border-2 border-dotted border-gray-400">
         <div class="flex items-center gap-4 mb-4">
           <img 
             src="{{ appointment.doctor.profileImage ? asset('uploads/profiles/' ~ appointment.doctor.profileImage) : asset('img/default2.png') }}" 

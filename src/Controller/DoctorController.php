@@ -306,7 +306,7 @@ final class DoctorController extends AbstractController
         $appointments = $paginator->paginate(
             $queryBuilder, // QueryBuilder object
             $request->query->getInt('page', 1), // Current page number, default is 1
-            4 // Number of results per page
+            3 // Number of results per page
         );
 
         return $this->render('doctor/appointments_upcoming.html.twig', [
