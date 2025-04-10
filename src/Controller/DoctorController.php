@@ -292,11 +292,14 @@ final class DoctorController extends AbstractController
             throw $this->createNotFoundException('Profil médecin introuvable.');
         }
 
-        // Fetch all appointments for the doctor
+        // Fetch only upcoming appointments for the doctor
+        $now = new \DateTime('now'); // Ensure the current date and time is used
         $queryBuilder = $entityManager->getRepository(Appointment::class)
             ->createQueryBuilder('a')
             ->where('a.doctor = :doctor')
+            ->andWhere('a.date >= :now') // Filter out past appointments
             ->setParameter('doctor', $doctor)
+            ->setParameter('now', $now->format('Y-m-d H:i:s')) // Format the date for comparison
             ->orderBy('a.date', 'ASC');
 
         // Paginate the results
@@ -321,10 +324,38 @@ final class DoctorController extends AbstractController
             $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
 
             if (!$doctor) {
-                throw $this->createNotFoundException('Doctor profile not found.');
+                throw $this->createNotFoundException('Profil médecin introuvable.');
             }
 
-            $date = new \DateTime($request->request->get('date'));
+             // Get the date from the client
+            $clientDate = $request->request->get('date');
+
+            // Set the timezone for the client date
+            $timezone = new \DateTimeZone('Europe/Paris'); // Adjust to your desired timezone
+            $date = \DateTime::createFromFormat('Y-m-d\TH:i', $clientDate, $timezone);
+
+            if (!$date) {
+                $this->addFlash('error', 'La date fournie est invalide.');
+                return $this->redirectToRoute('app_doctor_appointments_add');
+            }
+
+            // Get the current server date and set the same timezone
+            $now = new \DateTime('now', $timezone);
+
+            // Check if the date is in the past
+            if ($date < $now) {
+                $this->addFlash('error', 'Vous ne pouvez pas ajouter un rendez-vous avec une date passée.');
+                return $this->redirectToRoute('app_doctor_appointments_add');
+            }
+
+            // Add one hour to the current time
+            $oneHourLater = (clone $now)->modify('+1 hour');
+
+            // Check if the date is within the next hour
+            if ($date < $oneHourLater) {
+                $this->addFlash('error', 'Vous ne pouvez pas ajouter un rendez-vous dans l\'heure qui suit.');
+                return $this->redirectToRoute('app_doctor_appointments_add');
+            }
 
             $appointment = new Appointment();
             $appointment->setDoctor($doctor);
