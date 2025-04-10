@@ -9,7 +9,11 @@
       <div class="bg-white shadow-lg rounded-lg p-6 border-2 border-dotted border-gray-400">
         <div class="flex items-center gap-4 mb-4">
           <div>
-            <h2 class="text-lg font-bold text-dark-gray">Date et Heure: {{ appointment.date|date('d/m/Y H:i') }}</h2>
+            {% set _locale = 'Europe/Paris' %}
+            <h2 class="text-lg font-bold text-dark-gray">
+              Date: {{ appointment.date|format_datetime(locale='fr',pattern="EEEE dd MMMM YYYY") }}<br>
+              Heure: {{ appointment.date|date('H:i') }}
+            </h2>
             <p class="text-sm text-off-gray"><strong>Statut:</strong> {{ appointment.status }}</p>
           </div>
         </div>
@@ -24,7 +28,17 @@
             </div>
           </form>
         {% else %}
-          <p class="text-sm text-dark-gray">Ce rendez-vous a été réservé par un patient.</p>
+          <div class="flex items-center gap-4">
+            <img 
+              src="{{ appointment.patient.profileImage ? asset('uploads/profiles/' ~ appointment.patient.profileImage) : asset('img/default2.png') }}" 
+              alt="Patient Profile Image" 
+              class="w-16 h-16 rounded-full object-cover"
+            />
+            <div>
+              <p class="text-sm text-dark-gray"><strong>Nom:</strong> {{ appointment.patient.firstName }} {{ appointment.patient.lastName }}</p>
+              <p class="text-sm text-dark-gray"><strong>Ville:</strong> {{ appointment.patient.city }}</p>
+            </div>
+          </div>
         {% endif %}
       </div>
     {% endfor %}

@@ -291,7 +291,7 @@ final class PatientController extends AbstractController
                 ->join('a.doctor', 'd')
                 ->where('a.status = :status')
                 ->andWhere('LOWER(d.firstName) LIKE :search OR LOWER(d.lastName) LIKE :search')
-                ->setParameter('status', 'available')
+                ->setParameter('status', 'disponible')
                 ->setParameter('search', '%' . strtolower($searchQuery) . '%')
                 ->getQuery()
                 ->getResult();
@@ -318,13 +318,13 @@ final class PatientController extends AbstractController
             throw $this->createNotFoundException('Profil patient introuvable');
         }
 
-        if ($appointment->getStatus() !== 'available') {
+        if ($appointment->getStatus() !== 'disponible') {
             $this->addFlash('error', 'Ce rendez-vous n\'est plus disponible.');
             return $this->redirectToRoute('app_patient_appointments');
         }
 
         $appointment->setPatient($patient);
-        $appointment->setStatus('booked');
+        $appointment->setStatus('réservé');
 
         $entityManager->flush();
 
@@ -348,7 +348,7 @@ final class PatientController extends AbstractController
 
         // Cancel the appointment
         $appointment->setPatient(null);
-        $appointment->setStatus('available');
+        $appointment->setStatus('disponible');
         $entityManager->flush();
 
         $this->addFlash('success', 'Le rendez-vous a été annulé avec succès.');
@@ -386,7 +386,7 @@ final class PatientController extends AbstractController
                 ->join('a.doctor', 'd')
                 ->where('a.status = :status')
                 ->andWhere('LOWER(d.firstName) LIKE :search OR LOWER(d.lastName) LIKE :search')
-                ->setParameter('status', 'available')
+                ->setParameter('status', 'disponible')
                 ->setParameter('search', '%' . strtolower($searchQuery) . '%')
                 ->getQuery()
                 ->getResult();

@@ -24,7 +24,7 @@ class Appointment
     private ?\DateTimeInterface $date = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $status = 'available';
+    private ?string $status = 'disponible'; // Default value in French
 
     public function getId(): ?int
     {

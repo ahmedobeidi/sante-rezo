@@ -329,7 +329,7 @@ final class DoctorController extends AbstractController
             $appointment = new Appointment();
             $appointment->setDoctor($doctor);
             $appointment->setDate($date);
-            $appointment->setStatus('available');
+            $appointment->setStatus('disponible');
 
             $entityManager->persist($appointment);
             $entityManager->flush();

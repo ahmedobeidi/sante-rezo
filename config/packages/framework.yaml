@@ -8,6 +8,11 @@ framework:
     #esi: true
     #fragments: true
 
+    default_locale: fr
+    translator:
+        fallbacks:
+            - fr
+
 when@test:
     framework:
         test: true
