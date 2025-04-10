@@ -297,11 +297,13 @@ final class PatientController extends AbstractController
                 ->getResult();
         }
 
-        return $this->render('patient/appointments.html.twig', [
-            'bookedAppointments' => $bookedAppointments,
-            'availableAppointments' => $availableAppointments,
-            'searchQuery' => $searchQuery,
-        ]);
+        // return $this->render('patient/appointments.html.twig', [
+        //     'bookedAppointments' => $bookedAppointments,
+        //     'availableAppointments' => $availableAppointments,
+        //     'searchQuery' => $searchQuery,
+        // ]);
+
+        return $this->redirectToRoute('app_patient_appointments_upcoming');
     }
 
     #[Route('/patient/appointments/book/{id}', name: 'app_patient_book_appointment')]
