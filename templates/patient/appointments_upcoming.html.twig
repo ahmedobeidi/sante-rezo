@@ -1,0 +1,38 @@
+{% extends 'patient/appointments.html.twig' %}
+
+{% block content %}
+<h2 class="text-xl font-bold text-dark-gray mb-6">Mes rendez-vous à venir</h2>
+
+{% if bookedAppointments is not empty %}
+  <div class="flex flex-col gap-6">
+    {% for appointment in bookedAppointments %}
+      <div class="bg-white shadow-lg rounded-lg p-6 border-2 border-dotted border-gray-400">
+        <div class="flex items-center gap-4 mb-4">
+          <img 
+            src="{{ appointment.doctor.profileImage ? asset('uploads/profiles/' ~ appointment.doctor.profileImage) : asset('img/default2.png') }}" 
+            alt="Doctor Profile Image" 
+            class="w-16 h-16 rounded-full object-cover"
+          />
+          <div>
+            <h2 class="text-lg font-bold text-dark-gray">{{ appointment.doctor.firstName }} {{ appointment.doctor.lastName }}</h2>
+            <p class="text-sm text-off-gray">{{ appointment.doctor.specialty ? appointment.doctor.specialty.name : 'Spécialité non spécifiée' }}</p>
+          </div>
+        </div>
+        <p class="text-sm text-dark-gray mb-2"><strong>Adresse:</strong> {{ appointment.doctor.address }}</p>
+        <p class="text-sm text-dark-gray mb-2"><strong>Ville:</strong> {{ appointment.doctor.city }}</p>
+        <p class="text-sm text-dark-gray mb-4"><strong>Date et Heure:</strong> {{ appointment.date|date('d/m/Y H:i') }}</p>
+
+        <!-- Annuler Button -->
+        <form action="{{ path('app_patient_cancel_appointment', { id: appointment.id }) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler ce rendez-vous ?');">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token('cancel-appointment-' ~ appointment.id) }}">
+          <button type="submit" class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
+            Annuler
+          </button>
+        </form>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="text-off-gray">Vous n'avez aucun rendez-vous réservé pour le moment.</p>
+{% endif %}
+{% endblock %}

@@ -352,4 +352,47 @@ final class PatientController extends AbstractController
         $this->addFlash('success', 'Le rendez-vous a été annulé avec succès.');
         return $this->redirectToRoute('app_patient_appointments');
     }
+
+    #[Route('/patient/appointments/upcoming', name: 'app_patient_appointments_upcoming')]
+    #[IsGranted('ROLE_PATIENT')]
+    public function upcomingAppointments(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
+
+        if (!$patient) {
+            throw $this->createNotFoundException('Profil patient introuvable.');
+        }
+
+        $bookedAppointments = $entityManager->getRepository(Appointment::class)->findBy(['patient' => $patient]);
+
+        return $this->render('patient/appointments_upcoming.html.twig', [
+            'bookedAppointments' => $bookedAppointments,
+        ]);
+    }
+
+    #[Route('/patient/appointments/available', name: 'app_patient_appointments_available')]
+    #[IsGranted('ROLE_PATIENT')]
+    public function availableAppointments(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $searchQuery = $request->query->get('search', '');
+        $availableAppointments = [];
+
+        if (!empty($searchQuery)) {
+            $availableAppointments = $entityManager->getRepository(Appointment::class)->createQueryBuilder('a')
+                ->join('a.doctor', 'd')
+                ->where('a.status = :status')
+                ->andWhere('LOWER(d.firstName) LIKE :search OR LOWER(d.lastName) LIKE :search')
+                ->setParameter('status', 'available')
+                ->setParameter('search', '%' . strtolower($searchQuery) . '%')
+                ->getQuery()
+                ->getResult();
+        }
+
+        return $this->render('patient/appointments_available.html.twig', [
+            'availableAppointments' => $availableAppointments,
+            'searchQuery' => $searchQuery,
+        ]);
+    }
 }

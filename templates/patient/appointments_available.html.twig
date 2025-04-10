@@ -1,0 +1,50 @@
+{% extends 'patient/appointments.html.twig' %}
+
+{% block content %}
+<h2 class="text-xl font-bold text-dark-gray mb-6">Prendre un rendez-vous</h2>
+
+<!-- Search Input -->
+<form method="GET" action="{{ path('app_patient_appointments_available') }}" class="flex flex-col gap-3 mb-6">
+  <input 
+    type="text" 
+    name="search" 
+    value="{{ searchQuery }}" 
+    placeholder="Rechercher un médecin par son nom..." 
+    class="w-full p-3 border-2 border-solid border-gray-400 rounded-md"
+  />
+  <button type="submit" class="w-fit bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue mt-2 md:mt-0">
+    Rechercher
+  </button>
+</form>
+
+<!-- Available Appointments -->
+{% if availableAppointments is not empty %}
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for appointment in availableAppointments %}
+      <div class="bg-white shadow-lg rounded-lg p-6 border border-gray-200">
+        <div class="flex items-center gap-4 mb-4">
+          <img 
+            src="{{ appointment.doctor.profileImage ? asset('uploads/profiles/' ~ appointment.doctor.profileImage) : asset('img/default2.png') }}" 
+            alt="Doctor Profile Image" 
+            class="w-16 h-16 rounded-full object-cover"
+          />
+          <div>
+            <h2 class="text-lg font-bold text-dark-gray">{{ appointment.doctor.firstName }} {{ appointment.doctor.lastName }}</h2>
+            <p class="text-sm text-off-gray">{{ appointment.doctor.specialty ? appointment.doctor.specialty.name : 'Spécialité non spécifiée' }}</p>
+          </div>
+        </div>
+        <p class="text-sm text-dark-gray mb-2"><strong>Adresse:</strong> {{ appointment.doctor.address }}</p>
+        <p class="text-sm text-dark-gray mb-4"><strong>Date et Heure:</strong> {{ appointment.date|date('d/m/Y H:i') }}</p>
+        <a 
+          href="{{ path('app_patient_book_appointment', { id: appointment.id }) }}" 
+          class="block text-center bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue"
+        >
+          Prendre Rendez-vous
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="text-off-gray">Aucun rendez-vous disponible pour le moment.</p>
+{% endif %}
+{% endblock %}

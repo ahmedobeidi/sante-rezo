@@ -67,145 +67,28 @@
   {% endfor %}
 
   <div class="container mx-auto px-4 flex flex-col md:flex-row gap-8">
+
     <!-- Side Menu -->
     <aside class="w-full md:w-1/4 h-fit bg-white shadow-lg rounded-lg p-6 border border-solid border-dark-blue">
       <h2 class="text-lg font-bold text-dark-gray mb-4">Menu</h2>
       <ul class="space-y-4 flex flex-col justify-center md:justify-start">
-        <li id="li-mes-rendez-vous" class="bg-off-blue p-2 rounded">
-          <a href="#mes-rendez-vous" class="text-off-white no-underline" onclick="showSection('mes-rendez-vous', 'li-mes-rendez-vous', event)">Mes rendez-vous à venir</a>
-        </li>
-        <li id="li-prendre-rendez-vous" class="p-2 rounded">
-          <a href="#prendre-rendez-vous" class="text-dark-blue hover:underline" onclick="showSection('prendre-rendez-vous', 'li-prendre-rendez-vous', event)">Prendre un rendez-vous</a>
-        </li>
+          <li class="{{ app.request.attributes.get('_route') == 'app_patient_appointments_upcoming' ? 'bg-off-blue' : '' }} p-2 rounded">
+              <a href="{{ path('app_patient_appointments_upcoming') }}" class="{{ app.request.attributes.get('_route') == 'app_patient_appointments_upcoming' ? 'text-off-white no-underline' : 'text-dark-blue hover:underline' }}">
+                  Mes rendez-vous à venir
+              </a>
+          </li>
+          <li class="{{ app.request.attributes.get('_route') == 'app_patient_appointments_available' ? 'bg-off-blue' : '' }} p-2 rounded">
+              <a href="{{ path('app_patient_appointments_available') }}" class="{{ app.request.attributes.get('_route') == 'app_patient_appointments_available' ? 'text-off-white no-underline' : 'text-dark-blue hover:underline' }}">
+                  Prendre un rendez-vous
+              </a>
+          </li>
       </ul>
     </aside>
 
     <!-- Main Content -->
     <div class="w-full md:w-3/4">
-      <!-- Mes rendez-vous à venir -->
-      <section id="mes-rendez-vous" class="mb-12">
-        <h2 class="text-xl font-bold text-dark-gray mb-6">Mes rendez-vous à venir</h2>
-
-        {% if bookedAppointments is not empty %}
-          <div class="flex flex-col gap-6">
-            {% for appointment in bookedAppointments %}
-              <div class="bg-white shadow-lg rounded-lg p-6 border-2 border-dotted border-gray-400">
-                <div class="flex items-center gap-4 mb-4">
-                  <img 
-                    src="{{ appointment.doctor.profileImage ? asset('uploads/profiles/' ~ appointment.doctor.profileImage) : asset('img/default2.png') }}" 
-                    alt="Doctor Profile Image" 
-                    class="w-16 h-16 rounded-full object-cover"
-                  />
-                  <div>
-                    <h2 class="text-lg font-bold text-dark-gray">{{ appointment.doctor.firstName }} {{ appointment.doctor.lastName }}</h2>
-                    <p class="text-sm text-off-gray">{{ appointment.doctor.specialty ? appointment.doctor.specialty.name : 'Spécialité non spécifiée' }}</p>
-                  </div>
-                </div>
-                <p class="text-sm text-dark-gray mb-2"><strong>Adresse:</strong> {{ appointment.doctor.address }}</p>
-                <p class="text-sm text-dark-gray mb-2"><strong>Ville:</strong> {{ appointment.doctor.city }}</p>
-                <p class="text-sm text-dark-gray mb-4"><strong>Date et Heure:</strong> {{ appointment.date|date('d/m/Y H:i') }}</p>
-
-                 <!-- Annuler Button -->
-                <form action="{{ path('app_patient_cancel_appointment', { id: appointment.id }) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler ce rendez-vous ?');">
-                  <input type="hidden" name="_csrf_token" value="{{ csrf_token('cancel-appointment-' ~ appointment.id) }}">
-                  <button type="submit" class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
-                    Annuler
-                  </button>
-                </form>
-              </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          <p class="text-off-gray">Vous n'avez aucun rendez-vous réservé pour le moment.</p>
-        {% endif %}
-      </section>
-
-      <!-- Prendre un rendez-vous -->
-      <section id="prendre-rendez-vous" class="mb-12 hidden">
-        <h2 class="text-xl font-bold text-dark-gray mb-6">Prendre un rendez-vous</h2>
-
-        <!-- Search Input -->
-        <form method="GET" action="{{ path('app_patient_appointments') }}" class="flex flex-col gap-3 mb-6">
-          <input 
-            type="text" 
-            name="search" 
-            value="{{ searchQuery }}" 
-            placeholder="Rechercher un médecin par son nom..." 
-            class="w-full p-3 border-2 border-solid border-gray-400 rounded-md"
-          />
-          <button type="submit" class="w-fit bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue mt-2 md:mt-0">
-            Rechercher
-          </button>
-        </form>
-
-        <!-- Available Appointments -->
-        {% if availableAppointments is not empty %}
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% for appointment in availableAppointments %}
-              <div class="bg-white shadow-lg rounded-lg p-6 border border-gray-200">
-                <div class="flex items-center gap-4 mb-4">
-                  <img 
-                    src="{{ appointment.doctor.profileImage ? asset('uploads/profiles/' ~ appointment.doctor.profileImage) : asset('img/default2.png') }}" 
-                    alt="Doctor Profile Image" 
-                    class="w-16 h-16 rounded-full object-cover"
-                  />
-                  <div>
-                    <h2 class="text-lg font-bold text-dark-gray">{{ appointment.doctor.firstName }} {{ appointment.doctor.lastName }}</h2>
-                    <p class="text-sm text-off-gray">{{ appointment.doctor.specialty ? appointment.doctor.specialty.name : 'Spécialité non spécifiée' }}</p>
-                  </div>
-                </div>
-                <p class="text-sm text-dark-gray mb-2"><strong>Adresse:</strong> {{ appointment.doctor.address }}</p>
-                <p class="text-sm text-dark-gray mb-4"><strong>Date et Heure:</strong> {{ appointment.date|date('d/m/Y H:i') }}</p>
-                <a 
-                  href="{{ path('app_patient_book_appointment', { id: appointment.id }) }}" 
-                  class="block text-center bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue"
-                >
-                  Prendre Rendez-vous
-                </a>
-              </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          <p class="text-off-gray">Aucun rendez-vous disponible pour le moment.</p>
-        {% endif %}
-      </section>
+      {% block content %}{% endblock %}
     </div>
+
   </div>
-</section>
-
-<script>
-  function showSection(sectionId, liId, event) {
-    // Prevent the default behavior of the <a> tag
-    if (event) {
-      event.preventDefault();
-    }
-
-    // Hide all sections
-    document.getElementById('mes-rendez-vous').classList.add('hidden');
-    document.getElementById('prendre-rendez-vous').classList.add('hidden');
-
-    // Show the selected section
-    document.getElementById(sectionId).classList.remove('hidden');
-
-    // Remove active background and text color from all list items
-    const tabs = ['li-mes-rendez-vous', 'li-prendre-rendez-vous'];
-    tabs.forEach((tabId) => {
-      const tab = document.getElementById(tabId);
-      tab.classList.remove('bg-off-blue');
-      tab.querySelector('a').classList.remove('text-off-white', 'no-underline');
-      tab.querySelector('a').classList.add('text-dark-blue'); // Reset to default text color
-    });
-
-    // Add active background and text color to the selected list item
-    const activeTab = document.getElementById(liId);
-    activeTab.classList.add('bg-off-blue');
-    activeTab.querySelector('a').classList.add('text-off-white', 'no-underline');
-    activeTab.querySelector('a').classList.remove('text-dark-blue'); // Remove default text color
-  }
-
-  // Set default active link on page load
-  document.addEventListener('DOMContentLoaded', function () {
-    showSection('mes-rendez-vous', 'li-mes-rendez-vous');
-  });
-</script>
 {% endblock %}
