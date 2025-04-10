@@ -45,19 +45,49 @@
 {% endblock %}
 
 {% block main %}
-<section class="mt-[90px] w-full font-poppins bg-off-test">
-  <h1>Manage Appointments</h1>
+<section class="mt-[90px] w-full font-poppins bg-off-test py-8">
 
-  <form action="{{ path('app_doctor_add_appointment') }}" method="POST">
-      <input type="datetime-local" name="date" required>
-      <button type="submit">Add Appointment</button>
-  </form>
+  {# Flash messages #}
+  {% for message in app.flashes('success') %}
+    <div class="container mx-auto px-4 mb-10">
+      <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+        <p>{{ message }}</p>
+      </div>
+    </div>
+  {% endfor %}
 
-  <h2>Your Appointments</h2>
-  <ul>
-      {% for appointment in appointments %}
-          <li>{{ appointment.date|date('Y-m-d H:i') }} - {{ appointment.status }}</li>
-      {% endfor %}
-  </ul>
+  {% for message in app.flashes('error') %}
+    <div class="container mx-auto px-4 mb-10">
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <p>{{ message }}</p>
+      </div>
+    </div>
+  {% endfor %}
+
+  <div class="container mx-auto px-4 flex flex-col md:flex-row gap-8">
+
+    <!-- Side Menu -->
+    <nav class="w-full md:w-1/4 h-fit bg-white shadow-lg rounded-lg p-6 border border-solid border-dark-blue">
+      <h2 class="text-lg font-bold text-dark-gray mb-4">Menu</h2>
+      <ul class="space-y-4 flex flex-col justify-center md:justify-start">
+          <li class="{{ app.request.attributes.get('_route') == 'app_doctor_appointments_upcoming' ? 'bg-off-blue' : '' }} p-2 rounded">
+              <a href="{{ path('app_doctor_appointments_upcoming') }}" class="{{ app.request.attributes.get('_route') == 'app_doctor_appointments_upcoming' ? 'text-off-white no-underline' : 'text-dark-blue hover:underline' }}">
+                  Mes rendez-vous à venir
+              </a>
+          </li>
+          <li class="{{ app.request.attributes.get('_route') == 'app_doctor_appointments_add' ? 'bg-off-blue' : '' }} p-2 rounded">
+              <a href="{{ path('app_doctor_appointments_add') }}" class="{{ app.request.attributes.get('_route') == 'app_doctor_appointments_add' ? 'text-off-white no-underline' : 'text-dark-blue hover:underline' }}">
+                  Ajouter un rendez-vous
+              </a>
+          </li>
+      </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="w-full md:w-3/4">
+      {% block content %}{% endblock %}
+    </div>
+
+  </div>
 </section>
 {% endblock %}

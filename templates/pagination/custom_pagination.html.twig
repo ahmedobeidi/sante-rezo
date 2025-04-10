@@ -1,0 +1,62 @@
+{% if pageCount > 1 %}
+    <nav aria-label="Pagination" class="py-4">
+        <ul class="flex flex-wrap justify-center items-center gap-2 md:gap-3">
+            {% if first is defined and current != first %}
+                <li>
+                    <a href="{{ path(route, query|merge({(pageParameterName): first})) }}" 
+                       class="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 bg-off-white hover:bg-off-blue text-dark-gray hover:text-white focus:ring-2 focus:ring-dark-blue focus:outline-none"
+                       aria-label="Première page">
+                        <i class="material-icons" aria-hidden="true">first_page</i>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% if previous is defined %}
+                <li>
+                    <a href="{{ path(route, query|merge({(pageParameterName): previous})) }}" 
+                       class="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 bg-off-white hover:bg-off-blue text-dark-gray hover:text-white focus:ring-2 focus:ring-dark-blue focus:outline-none"
+                       aria-label="Page précédente">
+                        <i class="material-icons" aria-hidden="true">chevron_left</i>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% for page in pagesInRange %}
+                <li>
+                    <a href="{{ path(route, query|merge({(pageParameterName): page})) }}" 
+                       class="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 {{ page == current 
+                            ? 'bg-dark-blue text-white font-medium shadow-md hover:bg-dark-blue' 
+                            : 'bg-off-white text-dark-gray hover:bg-off-blue hover:text-white' }} focus:ring-2 focus:ring-dark-blue focus:outline-none"
+                       {{ page == current ? 'aria-current="page"' : '' }}
+                       aria-label="Page {{ page }}">
+                        {{ page }}
+                    </a>
+                </li>
+            {% endfor %}
+
+            {% if next is defined %}
+                <li>
+                    <a href="{{ path(route, query|merge({(pageParameterName): next})) }}" 
+                       class="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 bg-off-white hover:bg-off-blue text-dark-gray hover:text-white focus:ring-2 focus:ring-dark-blue focus:outline-none"
+                       aria-label="Page suivante">
+                        <i class="material-icons" aria-hidden="true">chevron_right</i>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% if last is defined and current != last %}
+                <li>
+                    <a href="{{ path(route, query|merge({(pageParameterName): last})) }}" 
+                       class="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 bg-off-white hover:bg-off-blue text-dark-gray hover:text-white focus:ring-2 focus:ring-dark-blue focus:outline-none"
+                       aria-label="Dernière page">
+                        <i class="material-icons" aria-hidden="true">last_page</i>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+        
+        <div class="text-center mt-3 text-sm text-off-gray">
+            <span>Page {{ current }} sur {{ pageCount }}</span>
+        </div>
+    </nav>
+{% endif %}

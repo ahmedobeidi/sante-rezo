@@ -1,0 +1,40 @@
+{% extends 'doctor/appointments.html.twig' %}
+
+{% block content %}
+<h2 class="text-xl font-bold text-dark-gray mb-6">Mes rendez-vous à venir</h2>
+
+{% if appointments.items is not empty %}
+  <div class="flex flex-col gap-6">
+    {% for appointment in appointments.items %}
+      <div class="bg-white shadow-lg rounded-lg p-6 border-2 border-dotted border-gray-400">
+        <div class="flex items-center gap-4 mb-4">
+          <div>
+            <h2 class="text-lg font-bold text-dark-gray">Date et Heure: {{ appointment.date|date('d/m/Y H:i') }}</h2>
+            <p class="text-sm text-off-gray"><strong>Statut:</strong> {{ appointment.status }}</p>
+          </div>
+        </div>
+
+        {% if appointment.patient is null %}
+          <form action="{{ path('app_doctor_cancel_appointment', { id: appointment.id }) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler ce rendez-vous ?');">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('cancel-appointment-' ~ appointment.id) }}">
+            <div class="flex justify-end">
+              <button type="submit" class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
+                Annuler
+              </button>
+            </div>
+          </form>
+        {% else %}
+          <p class="text-sm text-dark-gray">Ce rendez-vous a été réservé par un patient.</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination Controls -->
+  <div class="mt-6">
+    {{ knp_pagination_render(appointments, 'pagination/custom_pagination.html.twig') }}
+  </div>
+{% else %}
+  <p class="text-off-gray">Vous n'avez aucun rendez-vous à venir pour le moment.</p>
+{% endif %}
+{% endblock %}

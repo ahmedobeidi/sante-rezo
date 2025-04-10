@@ -1,0 +1,15 @@
+{% extends 'doctor/appointments.html.twig' %}
+
+{% block content %}
+<h2 class="text-xl font-bold text-dark-gray mb-6">Ajouter un rendez-vous</h2>
+
+<form action="{{ path('app_doctor_appointments_add') }}" method="POST" class="flex flex-col gap-4">
+  <div>
+    <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Date et Heure</label>
+    <input type="datetime-local" id="date" name="date" required class="p-3 border border-gray-300 rounded-md w-full">
+  </div>
+  <button type="submit" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue">
+    Ajouter
+  </button>
+</form>
+{% endblock %}

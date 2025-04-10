@@ -14,9 +14,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 
 final class DoctorController extends AbstractController
 {
@@ -274,35 +274,103 @@ final class DoctorController extends AbstractController
 
         $appointments = $entityManager->getRepository(Appointment::class)->findBy(['doctor' => $doctor]);
 
-        return $this->render('doctor/appointments.html.twig', [
+        return $this->redirectToRoute('app_doctor_appointments_upcoming');
+    }
+
+    #[Route('/doctor/appointments/upcoming', name: 'app_doctor_appointments_upcoming')]
+    #[IsGranted('ROLE_DOCTOR')]
+    public function upcomingAppointments(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        PaginatorInterface $paginator
+    ): Response {
+        /** @var User $user */
+        $user = $this->getUser();
+        $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+
+        if (!$doctor) {
+            throw $this->createNotFoundException('Profil médecin introuvable.');
+        }
+
+        // Fetch all appointments for the doctor
+        $queryBuilder = $entityManager->getRepository(Appointment::class)
+            ->createQueryBuilder('a')
+            ->where('a.doctor = :doctor')
+            ->setParameter('doctor', $doctor)
+            ->orderBy('a.date', 'ASC');
+
+        // Paginate the results
+        $appointments = $paginator->paginate(
+            $queryBuilder, // QueryBuilder object
+            $request->query->getInt('page', 1), // Current page number, default is 1
+            4 // Number of results per page
+        );
+
+        return $this->render('doctor/appointments_upcoming.html.twig', [
             'appointments' => $appointments,
         ]);
     }
 
-    #[Route('/doctor/appointments/add', name: 'app_doctor_add_appointment', methods: ['POST'])]
+    #[Route('/doctor/appointments/add', name: 'app_doctor_appointments_add', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_DOCTOR')]
     public function addAppointment(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        if ($request->isMethod('POST')) {
+            /** @var User $user */
+            $user = $this->getUser();
+            $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+
+            if (!$doctor) {
+                throw $this->createNotFoundException('Doctor profile not found.');
+            }
+
+            $date = new \DateTime($request->request->get('date'));
+
+            $appointment = new Appointment();
+            $appointment->setDoctor($doctor);
+            $appointment->setDate($date);
+            $appointment->setStatus('available');
+
+            $entityManager->persist($appointment);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Rendez-vous ajouté avec succès.');
+
+            return $this->redirectToRoute('app_doctor_appointments_upcoming');
+        }
+
+        return $this->render('doctor/appointments_add.html.twig');
+    }
+
+    #[Route('/doctor/appointments/cancel/{id}', name: 'app_doctor_cancel_appointment', methods: ['POST'])]
+    #[IsGranted('ROLE_DOCTOR')]
+    public function cancelAppointment(Appointment $appointment, EntityManagerInterface $entityManager): Response
     {
         /** @var User $user */
         $user = $this->getUser();
         $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
 
         if (!$doctor) {
-            throw $this->createNotFoundException('Doctor profile not found.');
+            throw $this->createNotFoundException('Profil médecin introuvable.');
         }
 
-        $date = new \DateTime($request->request->get('date'));
+        // Check if the appointment belongs to the doctor
+        if ($appointment->getDoctor() !== $doctor) {
+            $this->addFlash('error', 'Vous ne pouvez pas annuler ce rendez-vous.');
+            return $this->redirectToRoute('app_doctor_appointments_upcoming');
+        }
 
-        $appointment = new Appointment();
-        $appointment->setDoctor($doctor);
-        $appointment->setDate($date);
-        $appointment->setStatus('available');
+        // Check if the appointment is still available
+        if ($appointment->getPatient() !== null) {
+            $this->addFlash('error', 'Ce rendez-vous ne peut pas être annulé car il a déjà été réservé par un patient.');
+            return $this->redirectToRoute('app_doctor_appointments_upcoming');
+        }
 
-        $entityManager->persist($appointment);
+        // Cancel the appointment
+        $entityManager->remove($appointment);
         $entityManager->flush();
 
-        $this->addFlash('success', 'Appointment added successfully.');
-
-        return $this->redirectToRoute('app_doctor_appointments');
+        $this->addFlash('success', 'Le rendez-vous a été annulé avec succès.');
+        return $this->redirectToRoute('app_doctor_appointments_upcoming');
     }
 }
