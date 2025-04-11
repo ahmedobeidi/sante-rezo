@@ -10,11 +10,7 @@
         <a href="/#contact" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Contact</a>
       </li>
       {% if app.user %}
-        {% if 'ROLE_ADMIN' in app.user.roles %}
-          <li>
-            <a href="{{ path('app_admin') }}" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Dashboard</a>
-          </li>
-        {% elseif 'ROLE_DOCTOR' in app.user.roles %}
+        {% if 'ROLE_DOCTOR' in app.user.roles %}
           <li>
             <a href="{{ path('app_doctor_profile') }}" class="text-off-gray hover:text-off-blue font-bold text-[16px]">Mon Compte</a>
           </li>
@@ -54,11 +50,7 @@
       <a href="/#contact" class="text-off-gray text-2xl">Contact</a>
     </li>
     {% if app.user %}
-      {% if 'ROLE_ADMIN' in app.user.roles %}
-        <li class="mb-6">
-          <a href="{{ path('app_admin') }}" class="text-off-gray hover:text-off-blue text-2xl">Dashboard</a>
-        </li>
-      {% elseif 'ROLE_DOCTOR' in app.user.roles %}
+      {% if 'ROLE_DOCTOR' in app.user.roles %}
         <li class="mb-6">
           <a href="{{ path('app_doctor_profile') }}" class="text-off-gray hover:text-off-blue text-2xl">Mon Compte</a>
         </li>
@@ -98,7 +90,23 @@
           </h1>
           <p class="font-nunito text-off-gray">Découvrez une façon simple et sécurisée de prendre rendez-vous avec des professionnels de la santé de confiance. Notre plateforme vous met en relation avec des médecins de premier choix, garantissant des soins personnalisés selon vos besoins.</p>
           <div class="font-nunito flex flex-col gap-4 md:flex-row">
-            <a href="{{ path('app_login') }}" class="bg-dark-blue text-white w-fit py-2 px-4 rounded hover:bg-dark-gray">Prendre Rendez-vous</a>
+            <a 
+              href="{% if not app.user %} 
+                        {{ path('app_login') }}
+                    {% elseif 'ROLE_PATIENT' in app.user.roles %}
+                        {{ path('app_patient_appointments_available') }}
+                    {% elseif 'ROLE_DOCTOR' in app.user.roles %}
+                        {{ path('app_doctor_appointments_upcoming') }}
+                    {% endif %}" 
+              class="bg-dark-blue text-white w-fit py-2 px-4 rounded hover:bg-dark-gray">
+              {% if not app.user %}
+                Prendre Rendez-vous
+              {% elseif 'ROLE_PATIENT' in app.user.roles %}
+                Prendre Rendez-vous
+              {% elseif 'ROLE_DOCTOR' in app.user.roles %}
+                Mes Rendez-vous
+              {% endif %}
+            </a>
             <a href="/#contact" class="bg-dark-gray text-white w-fit py-2 px-4 rounded hover:bg-dark-blue">Contactez-nous</a>
           </div>
         </div>

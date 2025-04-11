@@ -36,6 +36,9 @@ class Doctor
     #[ORM\ManyToOne(inversedBy: 'doctors')]
     private ?Specialty $specialty = null;
 
+    #[ORM\Column(type: 'boolean')]
+    private bool $isCompleted = false; // Default to false
+
     /**
      * @var Collection<int, Appointment>
      */
@@ -162,6 +165,18 @@ class Doctor
                 $appointment->setDoctor(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->isCompleted;
+    }
+
+    public function setIsCompleted(bool $isCompleted): self
+    {
+        $this->isCompleted = $isCompleted;
 
         return $this;
     }

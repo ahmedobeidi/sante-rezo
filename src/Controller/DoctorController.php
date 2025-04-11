@@ -115,11 +115,22 @@ final class DoctorController extends AbstractController
 
         // Only proceed if there are changes
         if ($hasChanges) {
-            $entityManager->persist($doctor);
-            $entityManager->flush();
-            $this->addFlash('success', 'Profil mis à jour avec succès');
+            if (
+                $doctor->getFirstName() &&
+                $doctor->getLastName() &&
+                $doctor->getCity() &&
+                $doctor->getAddress() &&
+                $doctor->getSpecialty()
+            ) {
+                $doctor->setIsCompleted(true);
+            } else {
+                $doctor->setIsCompleted(false);
+            }
         }
 
+        $entityManager->persist($doctor);
+        $entityManager->flush();
+        $this->addFlash('success', 'Profil mis à jour avec succès');
         return $this->redirectToRoute('app_doctor_profile');
     }
 
@@ -268,8 +279,9 @@ final class DoctorController extends AbstractController
         $user = $this->getUser();
         $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
 
-        if (!$doctor) {
-            throw $this->createNotFoundException('Doctor profile not found.');
+        if ((!$doctor && in_array('ROLE_DOCTOR', $user->getRoles())) || ($doctor && !$doctor->isCompleted())) {
+            $this->addFlash('error', 'Vous devez compléter votre profil pour gérer vos rendez-vous.');
+            return $this->redirectToRoute('app_doctor_profile');
         }
 
         $appointments = $entityManager->getRepository(Appointment::class)->findBy(['doctor' => $doctor]);
@@ -288,8 +300,9 @@ final class DoctorController extends AbstractController
         $user = $this->getUser();
         $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
 
-        if (!$doctor) {
-            throw $this->createNotFoundException('Profil médecin introuvable.');
+        if ((!$doctor && in_array('ROLE_DOCTOR', $user->getRoles())) || ($doctor && !$doctor->isCompleted())) {
+            $this->addFlash('error', 'Vous devez compléter votre profil pour accéder à cette page.');
+            return $this->redirectToRoute('app_doctor_profile');
         }
 
         // Fetch only upcoming appointments for the doctor
@@ -323,8 +336,9 @@ final class DoctorController extends AbstractController
             $user = $this->getUser();
             $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
 
-            if (!$doctor) {
-                throw $this->createNotFoundException('Profil médecin introuvable.');
+            if ((!$doctor && in_array('ROLE_DOCTOR', $user->getRoles())) || ($doctor && !$doctor->isCompleted())) {
+                $this->addFlash('error', 'Vous devez compléter votre profil pour ajouter un rendez-vous.');
+                return $this->redirectToRoute('app_doctor_profile');
             }
 
              // Get the date from the client
