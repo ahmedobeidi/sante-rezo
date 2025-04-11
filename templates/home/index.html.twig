@@ -93,18 +93,18 @@
             <a 
               href="{% if not app.user %} 
                         {{ path('app_login') }}
-                    {% elseif 'ROLE_PATIENT' in app.user.roles %}
-                        {{ path('app_patient_appointments_available') }}
                     {% elseif 'ROLE_DOCTOR' in app.user.roles %}
                         {{ path('app_doctor_appointments_upcoming') }}
+                    {% elseif 'ROLE_PATIENT' in app.user.roles %}
+                        {{ path('app_patient_appointments_available') }}
+                    {% elseif 'ROLE_USER' in app.user.roles %}
+                        {{ path('app_patient_appointments') }}
                     {% endif %}" 
-              class="bg-dark-blue text-white w-fit py-2 px-4 rounded hover:bg-dark-gray">
-              {% if not app.user %}
-                Prendre Rendez-vous
-              {% elseif 'ROLE_PATIENT' in app.user.roles %}
-                Prendre Rendez-vous
-              {% elseif 'ROLE_DOCTOR' in app.user.roles %}
+              class="bg-dark-blue text-white w-fit py-2 px-4 rounded hover:bg-dark-gray"> 
+              {% if app.user and 'ROLE_DOCTOR' in app.user.roles %}
                 Mes Rendez-vous
+              {% else %}
+                Prendre Rendez-vous  
               {% endif %}
             </a>
             <a href="/#contact" class="bg-dark-gray text-white w-fit py-2 px-4 rounded hover:bg-dark-blue">Contactez-nous</a>

@@ -27,11 +27,6 @@ final class PatientController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        // Ensure the user does not have ROLE_ADMIN or ROLE_DOCTOR
-        if (!in_array('ROLE_PATIENT', $user->getRoles())) {
-            return $this->redirectToRoute('app_home');
-        }
-
         if ($user->isDeleted()) {
             throw $this->createAccessDeniedException('Votre compte a été supprimé.');
         }
@@ -269,15 +264,17 @@ final class PatientController extends AbstractController
     }
 
     #[Route('/patient/appointments', name: 'app_patient_appointments')]
-    #[IsGranted('ROLE_PATIENT')]
+    #[IsGranted('ROLE_USER')]
     public function viewAppointments(Request $request, EntityManagerInterface $entityManager): Response
     {
         /** @var User $user */
         $user = $this->getUser();
         $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
 
-        if (!$patient) {
-            throw $this->createNotFoundException('Patient profile not found.');
+        // Redirect if the user does not have ROLE_PATIENT
+        if (!in_array('ROLE_PATIENT', $user->getRoles())) {
+            $this->addFlash('error', 'Vous devez compléter votre profil pour accéder à cette page.');
+            return $this->redirectToRoute('app_patient_profile');
         }
 
         // Fetch booked appointments
@@ -363,8 +360,10 @@ final class PatientController extends AbstractController
         $user = $this->getUser();
         $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
 
-        if (!$patient) {
-            throw $this->createNotFoundException('Profil patient introuvable.');
+        // Redirect if the user does not have ROLE_PATIENT
+        if (!in_array('ROLE_PATIENT', $user->getRoles())) {
+            $this->addFlash('error', 'Vous devez compléter votre profil pour accéder à cette page.');
+            return $this->redirectToRoute('app_patient_profile');
         }
 
         $bookedAppointments = $entityManager->getRepository(Appointment::class)->findBy(['patient' => $patient]);
