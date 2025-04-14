@@ -39,28 +39,14 @@ class ContactController extends AbstractController
             $contactData['email'] = $request->request->get('email', $contactData['email']);
             $contactData['message'] = $request->request->get('message', '');
             
-            $error = false;
-
             // Validate the form data
-            if (empty($contactData['firstName'])) {
-                $error = true;
-                $this->addFlash('error', 'Le prénom est obligatoire.');
-            }
-            if (empty($contactData['lastName'])) {
-                $error = true;
-                $this->addFlash('error', 'Le nom est obligatoire.');
-            }
-            if (empty($contactData['email'])) {
-                $error = true;
-                $this->addFlash('error', 'L\'email est obligatoire.');
-            }
-            if (empty($contactData['message'])) {
-                $error = true;
-                $this->addFlash('error', 'Le message est obligatoire.');
-            }
-    
-            // If there are errors, re-render the form with errors
-            if ($error) {
+            if (
+                empty($contactData['firstName']) ||
+                empty($contactData['lastName']) ||
+                empty($contactData['email']) ||
+                empty($contactData['message'])
+            ) {
+                $this->addFlash('error', 'Tous les champs sont obligatoires.');
                 return $this->redirectToRoute('app_home', ['_fragment' => 'contact']);
             }
     
