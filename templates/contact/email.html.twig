@@ -1,0 +1,28 @@
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
+    <h1 style="color: #3490dc; text-align: center;">Nouveau Message de Contact</h1>
+    
+    <p>Bonjour,</p>
+    
+    <p>Vous avez reçu un nouveau message via le formulaire de contact de SantéRézo :</p>
+    
+    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+        <tr>
+            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Prénom :</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">{{ contactData.firstName }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Nom :</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">{{ contactData.lastName }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Email :</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">{{ contactData.email }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Message :</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">{{ contactData.message }}</td>
+        </tr>
+    </table>
+    
+    <p>Cordialement,<br>L'équipe SantéRézo</p>
+</div>

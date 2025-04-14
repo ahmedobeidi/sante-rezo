@@ -21,8 +21,39 @@ final class HomeController extends AbstractController
         // Fetch the counts of doctors and patients
         $doctorCount = $doctorRepository->count([]);
         $patientCount = $patientRepository->count([]);
+
+        // Initialize contact data
+        $contactData = [
+            'firstName' => '',
+            'lastName' => '',
+            'email' => '',
+            'message' => '',
+        ];
+
+        // Pre-fill contact data if the user is logged in
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($user) {
+            $contactData['email'] = $user->getEmail();
+            // Check roles and fetch additional data
+            if (in_array('ROLE_DOCTOR', $user->getRoles())) {
+                $doctor = $doctorRepository->findOneBy(['user' => $user]);
+                if ($doctor) {
+                    $contactData['firstName'] = $doctor->getFirstName();
+                    $contactData['lastName'] = $doctor->getLastName();
+                }
+            } elseif (in_array('ROLE_PATIENT', $user->getRoles())) {
+                $patient = $patientRepository->findOneBy(['user' => $user]);
+                if ($patient) {
+                    $contactData['firstName'] = $patient->getFirstName();
+                    $contactData['lastName'] = $patient->getLastName();
+                }
+            }
+        }
         
         return $this->render('home/index.html.twig', [
+            'contactData' => $contactData,
             'doctorCount' => $doctorCount,
             'patientCount' => $patientCount,
         ]);
