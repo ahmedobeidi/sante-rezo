@@ -305,8 +305,11 @@ final class DoctorController extends AbstractController
             return $this->redirectToRoute('app_doctor_profile');
         }
 
+        // Set timezone to ensure correct filtering
+        $timezone = new \DateTimeZone('Europe/Paris');
+        $now = new \DateTime('now', $timezone);
+
         // Fetch only upcoming appointments for the doctor
-        $now = new \DateTime('now'); // Ensure the current date and time is used
         $queryBuilder = $entityManager->getRepository(Appointment::class)
             ->createQueryBuilder('a')
             ->where('a.doctor = :doctor')
