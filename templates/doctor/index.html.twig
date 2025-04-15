@@ -111,17 +111,6 @@
               </div>
             </div>
             <div class="w-full">
-              <label for="specialty" class="block text-sm font-medium text-gray-700 mb-1">Spécialité</label>
-              <select id="specialty" name="specialty" class="p-3 border border-dotted border-gray-500 rounded-md w-full">
-                <option value="">Sélectionnez une spécialité</option>
-                {% for specialty in specialties %}
-                  <option value="{{ specialty.id }}" {% if doctor.specialty and doctor.specialty.id == specialty.id %}selected{% endif %}>
-                    {{ specialty.name }}
-                  </option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="w-full">
               <label for="city" class="block text-sm font-medium text-gray-700 mb-1">Ville</label>
               <input type="text" id="city" name="city" value="{{ doctor.city }}" class="p-3 border border-dotted border-gray-500 rounded-md w-full" placeholder="Ville" {% if doctor.city %}required{% endif %} />
             </div>
