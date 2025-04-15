@@ -369,9 +369,11 @@ final class PatientController extends AbstractController
             $this->addFlash('error', 'Vous devez compléter votre profil pour accéder à cette page.');
             return $this->redirectToRoute('app_patient_profile');
         }
+        // Set timezone to ensure correct filtering
+        $timezone = new \DateTimeZone('Europe/Paris');
+        $now = new \DateTime('now', $timezone);
 
         // Fetch only upcoming appointments for the patient
-        $now = new \DateTime('now');
         $queryBuilder = $entityManager->getRepository(Appointment::class)
             ->createQueryBuilder('a')
             ->where('a.patient = :patient')
