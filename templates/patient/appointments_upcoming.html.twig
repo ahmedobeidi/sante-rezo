@@ -25,12 +25,19 @@
         <!-- Annuler Button -->
         <form action="{{ path('app_patient_cancel_appointment', { id: appointment.id }) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler ce rendez-vous ?');">
           <input type="hidden" name="_csrf_token" value="{{ csrf_token('cancel-appointment-' ~ appointment.id) }}">
-          <button type="submit" class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
-            Annuler
-          </button>
+          <div class="flex justify-end">
+            <button type="submit" class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
+              Annuler
+            </button>
+          </div>
         </form>
       </div>
     {% endfor %}
+  </div>
+
+  <!-- Pagination Controls -->
+  <div class="mt-6">
+    {{ knp_pagination_render(bookedAppointments, 'pagination/custom_pagination.html.twig') }}
   </div>
 {% else %}
   <p class="text-off-gray">Vous n'avez aucun rendez-vous réservé pour le moment.</p>

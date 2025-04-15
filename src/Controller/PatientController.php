@@ -6,6 +6,7 @@ use App\Entity\Appointment;
 use App\Entity\Patient;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -354,8 +355,11 @@ final class PatientController extends AbstractController
 
     #[Route('/patient/appointments/upcoming', name: 'app_patient_appointments_upcoming')]
     #[IsGranted('ROLE_PATIENT')]
-    public function upcomingAppointments(Request $request, EntityManagerInterface $entityManager): Response
-    {
+    public function upcomingAppointments(
+        Request $request, 
+        EntityManagerInterface $entityManager,
+        PaginatorInterface $paginator
+    ): Response {
         /** @var User $user */
         $user = $this->getUser();
         $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
@@ -366,7 +370,22 @@ final class PatientController extends AbstractController
             return $this->redirectToRoute('app_patient_profile');
         }
 
-        $bookedAppointments = $entityManager->getRepository(Appointment::class)->findBy(['patient' => $patient]);
+        // Fetch only upcoming appointments for the patient
+        $now = new \DateTime('now');
+        $queryBuilder = $entityManager->getRepository(Appointment::class)
+            ->createQueryBuilder('a')
+            ->where('a.patient = :patient')
+            ->andWhere('a.date >= :now') // Filter out past appointments
+            ->setParameter('patient', $patient)
+            ->setParameter('now', $now->format('Y-m-d H:i:s'))
+            ->orderBy('a.date', 'ASC');
+
+        // Paginate the results
+        $bookedAppointments = $paginator->paginate(
+            $queryBuilder, // QueryBuilder object
+            $request->query->getInt('page', 1), // Current page number, default is 1
+            3 // Number of results per page
+        );
 
         return $this->render('patient/appointments_upcoming.html.twig', [
             'bookedAppointments' => $bookedAppointments,
