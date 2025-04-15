@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\Doctor;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
@@ -14,7 +15,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -54,20 +57,20 @@ class DoctorCrudController extends AbstractCrudController
 
     public static function getEntityFqcn(): string
     {
-        return User::class;
+        return Doctor::class;
     }
 
-    public function createIndexQueryBuilder(SearchDto $searchDto, EntityDto $entityDto, FieldCollection $fields, FilterCollection $filters): QueryBuilder
-    {
-        $queryBuilder = parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters);
+    // public function createIndexQueryBuilder(SearchDto $searchDto, EntityDto $entityDto, FieldCollection $fields, FilterCollection $filters): QueryBuilder
+    // {
+    //     $queryBuilder = parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters);
         
-        // Filter to only show doctors
-        $queryBuilder
-            ->andWhere("entity.roles LIKE :role")
-            ->setParameter('role', '%ROLE_DOCTOR%');
+    //     // Filter to only show doctors
+    //     $queryBuilder
+    //         ->andWhere("entity.roles LIKE :role")
+    //         ->setParameter('role', '%ROLE_DOCTOR%');
             
-        return $queryBuilder;
-    }
+    //     return $queryBuilder;
+    // }
 
     public function configureCrud(Crud $crud): Crud
     {
@@ -97,8 +100,16 @@ class DoctorCrudController extends AbstractCrudController
         yield IdField::new('id')
             ->onlyOnDetail();
 
-        yield EmailField::new('email')
-            ->setHelp('The doctor\'s email address');
+        yield TextField::new('email')
+            ->setHelp('The doctor\'s email address')
+            ->setFormTypeOption('mapped', false);
+
+
+        yield AssociationField::new('specialty')
+            ->setLabel('Spécialité')
+            ->setHelp('Sélectionnez la spécialité du médecin')
+            //  // Only show this field when creating a new doctor
+            ->autocomplete();
 
         if ($pageName === Crud::PAGE_NEW) {
             // For new doctors, we don't show/set password - it will be auto-generated
@@ -118,9 +129,18 @@ class DoctorCrudController extends AbstractCrudController
      */
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
-        /** @var User $user */
-        $user = $entityInstance;
-        
+        // /** @var User $user */
+        // $user = $entityInstance;
+
+        /**
+         * @var Doctor $doctor
+         */
+        $doctor = $entityInstance;
+        $email = $this->getContext()->getRequest()->request->all('Doctor')['email'];
+        // We create a new user instance
+        $user = new User();
+        $user->setEmail($email);
+
         // Generate a random password
         $tempPassword = bin2hex(random_bytes(8));
         
@@ -132,8 +152,12 @@ class DoctorCrudController extends AbstractCrudController
         // Generate a token for account setup
         $token = $this->tokenGenerator->generateToken();
         $user->setResetToken($token);
+
+        $doctor->setUser($user);
+
         
         // Persist the user
+        $this->entityManager->persist($doctor);
         parent::persistEntity($entityManager, $user);
         
         // Send account setup email
