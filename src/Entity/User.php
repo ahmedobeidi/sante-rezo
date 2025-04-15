@@ -48,6 +48,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $deletedDate = null;
 
+    public function __toString()
+    {
+        return $this->email;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

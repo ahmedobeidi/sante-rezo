@@ -63,12 +63,12 @@ class DoctorCrudController extends AbstractCrudController
     // public function createIndexQueryBuilder(SearchDto $searchDto, EntityDto $entityDto, FieldCollection $fields, FilterCollection $filters): QueryBuilder
     // {
     //     $queryBuilder = parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters);
-        
+
     //     // Filter to only show doctors
     //     $queryBuilder
     //         ->andWhere("entity.roles LIKE :role")
     //         ->setParameter('role', '%ROLE_DOCTOR%');
-            
+
     //     return $queryBuilder;
     // }
 
@@ -85,8 +85,8 @@ class DoctorCrudController extends AbstractCrudController
     {
         $sendSetupEmail = Action::new('sendSetupEmail', 'Send Setup Email', 'fa fa-envelope')
             ->linkToCrudAction('sendAccountSetupEmail')
-            ->displayIf(static function (User $user) {
-                return !$user->isVerified();
+            ->displayIf(static function (Doctor $doctor) {
+                return !$doctor->getUser()->isVerified();
             });
 
         return $actions
@@ -102,8 +102,13 @@ class DoctorCrudController extends AbstractCrudController
 
         yield TextField::new('email')
             ->setHelp('The doctor\'s email address')
-            ->setFormTypeOption('mapped', false);
+            ->setFormTypeOption('mapped', false)
+            ->hideOnDetail()
+            ->hideOnIndex();
 
+        yield AssociationField::new('user')
+            ->hideWhenCreating()
+            ->hideWhenUpdating();
 
         yield AssociationField::new('specialty')
             ->setLabel('Spécialité')
@@ -119,9 +124,23 @@ class DoctorCrudController extends AbstractCrudController
                 ->setHelp('Password will be auto-generated and a setup email will be sent');
         }
 
-        yield BooleanField::new('isVerified')
+        yield BooleanField::new('user.isVerified')
+            ->setLabel('Email Verified')
+            ->renderAsSwitch(false)
+            ->formatValue(function ($value, Doctor $doctor) {
+                // dd($doctor);
+                return $doctor->getUser() && $doctor->getUser()->isVerified() ? 'Yes' : 'No'; // English values
+            })
             ->onlyOnDetail()
             ->setHelp('Whether the doctor has verified their email');
+
+        // yield TextField::new('emailVerificationStatus')
+        //     ->setLabel('Email Verified')
+        //     ->formatValue(function ($value, Doctor $doctor) {
+        //         return $doctor->getUser() && $doctor->getUser()->isVerified() ? 'Yes' : 'No';
+        //     })
+        //     ->onlyOnDetail()
+        //     ->setHelp('Whether the doctor has verified their email');
     }
 
     /**
@@ -143,26 +162,26 @@ class DoctorCrudController extends AbstractCrudController
 
         // Generate a random password
         $tempPassword = bin2hex(random_bytes(8));
-        
+
         // Set roles and hash password
         $user->setRoles(['ROLE_USER', 'ROLE_DOCTOR']);
         $user->setPassword($this->passwordHasher->hashPassword($user, $tempPassword));
         $user->setIsVerified(false);
-        
+
         // Generate a token for account setup
         $token = $this->tokenGenerator->generateToken();
         $user->setResetToken($token);
 
         $doctor->setUser($user);
 
-        
+
         // Persist the user
         $this->entityManager->persist($doctor);
         parent::persistEntity($entityManager, $user);
-        
+
         // Send account setup email
         $this->sendWelcomeEmail($user);
-        
+
         $this->addFlash('success', 'Doctor account created. Setup email sent to ' . $user->getEmail());
     }
 
@@ -173,19 +192,19 @@ class DoctorCrudController extends AbstractCrudController
     {
         /** @var User $user */
         $user = $context->getEntity()->getInstance();
-        
+
         // Generate a new token if not exists
         if (!$user->getResetToken()) {
             $token = $this->tokenGenerator->generateToken();
             $user->setResetToken($token);
             $this->entityManager->flush();
         }
-        
+
         // Send the setup email
         $this->sendWelcomeEmail($user);
-        
+
         $this->addFlash('success', 'Setup email sent to ' . $user->getEmail());
-        
+
         return $this->redirect($context->getReferrer());
     }
 
