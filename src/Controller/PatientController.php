@@ -394,21 +394,33 @@ final class PatientController extends AbstractController
 
     #[Route('/patient/appointments/available', name: 'app_patient_appointments_available')]
     #[IsGranted('ROLE_PATIENT')]
-    public function availableAppointments(Request $request, EntityManagerInterface $entityManager): Response
-    {
+    public function availableAppointments(
+        Request $request, 
+        EntityManagerInterface $entityManager,
+        PaginatorInterface $paginator
+    ): Response {
         $searchQuery = $request->query->get('search', '');
-        $availableAppointments = [];
-
+    
+        // Create the query builder for available appointments
+        $queryBuilder = $entityManager->getRepository(Appointment::class)->createQueryBuilder('a')
+            ->join('a.doctor', 'd')
+            ->where('a.status = :status');
+            
+        // Add search filter if a search query is provided
         if (!empty($searchQuery)) {
-            $availableAppointments = $entityManager->getRepository(Appointment::class)->createQueryBuilder('a')
-                ->join('a.doctor', 'd')
-                ->where('a.status = :status')
-                ->andWhere('LOWER(d.firstName) LIKE :search OR LOWER(d.lastName) LIKE :search')
-                ->setParameter('status', 'disponible')
-                ->setParameter('search', '%' . strtolower($searchQuery) . '%')
-                ->getQuery()
-                ->getResult();
+            $queryBuilder->andWhere('LOWER(d.firstName) LIKE :search OR LOWER(d.lastName) LIKE :search')
+                ->setParameter('search', '%' . strtolower($searchQuery) . '%');
         }
+        
+        $queryBuilder->setParameter('status', 'disponible')
+            ->orderBy('a.date', 'ASC');
+            
+        // Paginate the results
+        $availableAppointments = $paginator->paginate(
+            $queryBuilder,
+            $request->query->getInt('page', 1),
+            3 // Results per page
+        );
 
         return $this->render('patient/appointments_available.html.twig', [
             'availableAppointments' => $availableAppointments,
