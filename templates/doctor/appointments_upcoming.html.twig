@@ -4,42 +4,83 @@
 <h2 class="text-xl font-bold text-dark-gray mb-6">Mes rendez-vous à venir</h2>
 
 {% if appointments.items is not empty %}
+  {# Group appointments by day #}
+  {% set appointmentsByDay = {} %}
+  {% for appointment in appointments.items %}
+    {% set dateKey = appointment.date|date('Y-m-d') %}
+    {% if appointmentsByDay[dateKey] is not defined %}
+      {% set appointmentsByDay = appointmentsByDay|merge({(dateKey): []}) %}
+    {% endif %}
+    {% set appointmentsByDay = appointmentsByDay|merge({
+      (dateKey): appointmentsByDay[dateKey]|merge([appointment])
+    }) %}
+  {% endfor %}
+  
   <div class="flex flex-col gap-6">
-    {% for appointment in appointments.items %}
+    {% for dateKey, dayAppointments in appointmentsByDay %}
       <div class="bg-white shadow-lg rounded-lg p-6 border-2 border-dotted border-gray-400">
-        <div class="flex items-center gap-4 mb-4">
-          <div>
-            {% set _locale = 'Europe/Paris' %}
-            <h2 class="text-lg font-bold text-dark-gray">
-              Date: {{ appointment.date|format_datetime(locale='fr',pattern="EEEE dd MMMM YYYY") }}<br>
-              Heure: {{ appointment.date|date('H:i') }}
-            </h2>
-            <p class="text-sm text-off-gray"><strong>Statut:</strong> {{ appointment.status }}</p>
-          </div>
+        <div class="mb-4">
+          <h2 class="text-xl font-bold text-dark-gray">
+            {{ dayAppointments[0].date|format_datetime(locale='fr',pattern="EEEE dd MMMM YYYY") }}
+          </h2>
+          <div class="h-1 w-20 bg-off-blue mt-2 mb-4"></div>
         </div>
-
-        {% if appointment.patient is null %}
-          <form action="{{ path('app_doctor_cancel_appointment', { id: appointment.id }) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler ce rendez-vous ?');">
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token('cancel-appointment-' ~ appointment.id) }}">
-            <div class="flex justify-end">
-              <button type="submit" class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
-                Annuler
-              </button>
+        
+        <div class="space-y-6">
+          {% for appointment in dayAppointments %}
+            <div class="{% if not loop.last %}pb-4 border-b border-gray-200{% endif %}">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                  <div class="bg-off-blue text-white p-2 rounded-lg">
+                    <span class="font-bold">{{ appointment.date|date('H:i') }}</span>
+                  </div>
+                  
+                  <div>
+                    <p class="text-sm text-off-gray"><strong>Statut:</strong> 
+                      <span class="
+                        {% if appointment.status == 'disponible' %}text-green-600
+                        {% elseif appointment.status == 'confirmé' %}text-blue-600
+                        {% elseif appointment.status == 'annulé' %}text-red-600
+                        {% else %}text-gray-600{% endif %}
+                      ">
+                        {{ appointment.status }}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+                
+                <div>
+                  {% if appointment.patient is null %}
+                    <form action="{{ path('app_doctor_cancel_appointment', { id: appointment.id }) }}" method="POST" 
+                          onsubmit="return confirm('Êtes-vous sûr de vouloir annuler ce rendez-vous ?');"
+                          class="inline-block">
+                      <input type="hidden" name="_csrf_token" value="{{ csrf_token('cancel-appointment-' ~ appointment.id) }}">
+                      <button type="submit" class="bg-red-500 text-white py-1 px-3 rounded text-sm hover:bg-red-600">
+                        <i class="fas fa-times-circle mr-1"></i> Annuler
+                      </button>
+                    </form>
+                  {% endif %}
+                </div>
+              </div>
+              
+              {% if appointment.patient is not null %}
+                <div class="mt-3 pl-12">
+                  <div class="flex items-center gap-4 bg-gray-50 p-3 rounded-lg">
+                    <img 
+                      src="{{ appointment.patient.profileImage ? asset('uploads/profiles/' ~ appointment.patient.profileImage) : asset('img/default2.png') }}" 
+                      alt="Patient Profile Image" 
+                      class="w-12 h-12 rounded-full object-cover"
+                    />
+                    <div>
+                      <p class="text-sm text-dark-gray"><strong>Patient:</strong> {{ appointment.patient.firstName }} {{ appointment.patient.lastName }}</p>
+                      <p class="text-sm text-dark-gray"><strong>Ville:</strong> {{ appointment.patient.city }}</p>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
             </div>
-          </form>
-        {% else %}
-          <div class="flex items-center gap-4">
-            <img 
-              src="{{ appointment.patient.profileImage ? asset('uploads/profiles/' ~ appointment.patient.profileImage) : asset('img/default2.png') }}" 
-              alt="Patient Profile Image" 
-              class="w-16 h-16 rounded-full object-cover"
-            />
-            <div>
-              <p class="text-sm text-dark-gray"><strong>Nom:</strong> {{ appointment.patient.firstName }} {{ appointment.patient.lastName }}</p>
-              <p class="text-sm text-dark-gray"><strong>Ville:</strong> {{ appointment.patient.city }}</p>
-            </div>
-          </div>
-        {% endif %}
+          {% endfor %}
+        </div>
       </div>
     {% endfor %}
   </div>
