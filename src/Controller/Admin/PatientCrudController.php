@@ -59,7 +59,10 @@ class PatientCrudController extends AbstractCrudController
             ->linkToCrudAction('deletePatientPhoto')
             ->displayIf(static function (Patient $patient) {
                 return $patient->getProfileImage() !== null;
-            });
+            })
+            ->setHtmlAttributes([
+                'onclick' => 'return confirm("Voulez-vous supprimer cette photo ? Cette action est irréversible.")',
+            ]);
 
         return $actions
             ->add(Crud::PAGE_INDEX, Action::DETAIL)

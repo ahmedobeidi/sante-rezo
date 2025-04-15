@@ -83,16 +83,9 @@ class DoctorCrudController extends AbstractCrudController
 
     public function configureActions(Actions $actions): Actions
     {
-        $sendSetupEmail = Action::new('sendSetupEmail', 'Send Setup Email', 'fa fa-envelope')
-            ->linkToCrudAction('sendAccountSetupEmail')
-            ->displayIf(static function (Doctor $doctor) {
-                return !$doctor->getUser()->isVerified();
-            });
-
         return $actions
             ->disable(Action::EDIT) // Disable editing doctors
-            ->add(Crud::PAGE_INDEX, Action::DETAIL)
-            ->add(Crud::PAGE_DETAIL, $sendSetupEmail);
+            ->add(Crud::PAGE_INDEX, Action::DETAIL);
     }
 
     public function configureFields(string $pageName): iterable
