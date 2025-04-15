@@ -402,11 +402,18 @@ final class PatientController extends AbstractController
         PaginatorInterface $paginator
     ): Response {
         $searchQuery = $request->query->get('search', '');
-    
+
+        // Set timezone to ensure correct filtering
+        $timezone = new \DateTimeZone('Europe/Paris');
+        $now = new \DateTime('now', $timezone);
+
         // Create the query builder for available appointments
         $queryBuilder = $entityManager->getRepository(Appointment::class)->createQueryBuilder('a')
             ->join('a.doctor', 'd')
-            ->where('a.status = :status');
+            ->where('a.status = :status')
+            ->andWhere('a.date >= :now') // Filter out past appointments
+            ->setParameter('status', 'disponible')
+            ->setParameter('now', $now); // Pass DateTime object directly
             
         // Add search filter if a search query is provided
         if (!empty($searchQuery)) {
@@ -414,8 +421,7 @@ final class PatientController extends AbstractController
                 ->setParameter('search', '%' . strtolower($searchQuery) . '%');
         }
         
-        $queryBuilder->setParameter('status', 'disponible')
-            ->orderBy('a.date', 'ASC');
+        $queryBuilder->orderBy('a.date', 'ASC');
             
         // Paginate the results
         $availableAppointments = $paginator->paginate(
