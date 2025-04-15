@@ -421,4 +421,145 @@ final class DoctorController extends AbstractController
         $this->addFlash('success', 'Le rendez-vous a été annulé avec succès.');
         return $this->redirectToRoute('app_doctor_appointments_upcoming');
     }
+
+    #[Route('/doctor/appointments/add-bulk', name: 'app_doctor_appointments_add_bulk', methods: ['POST'])]
+    #[IsGranted('ROLE_DOCTOR')]
+    public function addBulkAppointments(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+
+        if ((!$doctor && in_array('ROLE_DOCTOR', $user->getRoles())) || ($doctor && !$doctor->isCompleted())) {
+            $this->addFlash('error', 'Vous devez compléter votre profil pour ajouter des rendez-vous.');
+            return $this->redirectToRoute('app_doctor_profile');
+        }
+
+        // Get form data
+        $startDate = $request->request->get('start_date');
+        $endDate = $request->request->get('end_date');
+        $startTime = $request->request->get('start_time');
+        $endTime = $request->request->get('end_time');
+        $duration = (int) $request->request->get('duration');
+        
+        // Fix: Correctly get the weekdays array
+        $weekdays = $request->request->all()['weekdays'] ?? [];
+
+        // Validate input
+        if (empty($startDate) || empty($endDate) || empty($startTime) || empty($endTime) || empty($duration) || empty($weekdays)) {
+            $this->addFlash('error', 'Tous les champs sont obligatoires.');
+            return $this->redirectToRoute('app_doctor_appointments_add');
+        }
+
+        // Create DateTime objects for the range
+        $timezone = new \DateTimeZone('Europe/Paris');
+        $currentDate = new \DateTime($startDate, $timezone);
+        $lastDate = new \DateTime($endDate, $timezone);
+        
+        // Add 1 day to include the end date
+        $lastDate->modify('+1 day');
+
+        // Map day names to day of week numbers
+        $dayMap = [
+            'monday' => 1,
+            'tuesday' => 2,
+            'wednesday' => 3,
+            'thursday' => 4,
+            'friday' => 5,
+            'saturday' => 6,
+            'sunday' => 7
+        ];
+
+        // Convert weekdays to numbers
+        $selectedDays = [];
+        foreach ($weekdays as $day) {
+            if (isset($dayMap[$day])) {
+                $selectedDays[] = $dayMap[$day];
+            }
+        }
+
+        // Parse time values
+        list($startHour, $startMinute) = explode(':', $startTime);
+        list($endHour, $endMinute) = explode(':', $endTime);
+
+        // Create interval for appointment duration
+        $durationInterval = new \DateInterval('PT' . $duration . 'M');
+
+        // Get the current server date and set the same timezone
+        $now = new \DateTime('now', $timezone);
+        
+        // Add one hour to current time for minimum appointment time
+        $oneHourLater = (clone $now)->modify('+1 hour');
+
+        // Track created appointments
+        $createdCount = 0;
+        $skippedCount = 0;
+
+        // Loop through each day in the range
+        while ($currentDate < $lastDate) {
+            // Check if current day is a selected weekday
+            $dayOfWeek = (int) $currentDate->format('N'); // 1 (Monday) to 7 (Sunday)
+            
+            if (in_array($dayOfWeek, $selectedDays)) {
+                // Create appointment times for this day
+                $appointmentStart = clone $currentDate;
+                $appointmentStart->setTime((int) $startHour, (int) $startMinute);
+                
+                $dayEndTime = clone $currentDate;
+                $dayEndTime->setTime((int) $endHour, (int) $endMinute);
+                
+                // Loop through each time slot on this day
+                while ($appointmentStart < $dayEndTime) {
+                    $appointmentEnd = clone $appointmentStart;
+                    $appointmentEnd->add($durationInterval);
+                    
+                    // Check if this appointment end time is after the day's end time
+                    if ($appointmentEnd > $dayEndTime) {
+                        break;
+                    }
+                    
+                    // Skip if appointment is in the past or within next hour
+                    if ($appointmentStart > $oneHourLater) {
+                        // Check if an appointment already exists at this time
+                        $existingAppointment = $entityManager->getRepository(Appointment::class)->findOneBy([
+                            'doctor' => $doctor,
+                            'date' => $appointmentStart
+                        ]);
+                        
+                        if (!$existingAppointment) {
+                            // Create new appointment
+                            $appointment = new Appointment();
+                            $appointment->setDoctor($doctor);
+                            $appointment->setDate(clone $appointmentStart);
+                            $appointment->setStatus('disponible');
+                            
+                            $entityManager->persist($appointment);
+                            $createdCount++;
+                        } else {
+                            $skippedCount++;
+                        }
+                    } else {
+                        $skippedCount++;
+                    }
+                    
+                    // Move to next time slot
+                    $appointmentStart->add($durationInterval);
+                }
+            }
+            
+            // Move to next day
+            $currentDate->modify('+1 day');
+        }
+        
+        // Flush all created appointments
+        $entityManager->flush();
+        
+        if ($createdCount > 0) {
+            $this->addFlash('success', $createdCount . ' rendez-vous ont été ajoutés avec succès. ' . ($skippedCount > 0 ? $skippedCount . ' ont été ignorés (déjà existants ou trop proches).' : ''));
+        } else {
+            $this->addFlash('error', 'Aucun rendez-vous n\'a été créé. Veuillez vérifier vos paramètres.');
+        }
+        
+        return $this->redirectToRoute('app_doctor_appointments_upcoming');
+    }
 }
