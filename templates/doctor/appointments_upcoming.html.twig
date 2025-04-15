@@ -3,19 +3,7 @@
 {% block content %}
 <h2 class="text-xl font-bold text-dark-gray mb-6">Mes rendez-vous à venir</h2>
 
-{% if appointments.items is not empty %}
-  {# Group appointments by day #}
-  {% set appointmentsByDay = {} %}
-  {% for appointment in appointments.items %}
-    {% set dateKey = appointment.date|date('Y-m-d') %}
-    {% if appointmentsByDay[dateKey] is not defined %}
-      {% set appointmentsByDay = appointmentsByDay|merge({(dateKey): []}) %}
-    {% endif %}
-    {% set appointmentsByDay = appointmentsByDay|merge({
-      (dateKey): appointmentsByDay[dateKey]|merge([appointment])
-    }) %}
-  {% endfor %}
-  
+{% if appointmentsByDay is not empty %}
   <div class="flex flex-col gap-6">
     {% for dateKey, dayAppointments in appointmentsByDay %}
       <div class="bg-white shadow-lg rounded-lg p-6 border-2 border-dotted border-gray-400">

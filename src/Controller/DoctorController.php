@@ -318,15 +318,38 @@ final class DoctorController extends AbstractController
             ->setParameter('now', $now->format('Y-m-d H:i:s')) // Format the date for comparison
             ->orderBy('a.date', 'ASC');
 
-        // Paginate the results
-        $appointments = $paginator->paginate(
-            $queryBuilder, // QueryBuilder object
-            $request->query->getInt('page', 1), // Current page number, default is 1
-            3 // Number of results per page
+        // Get all upcoming appointments
+        $allAppointments = $queryBuilder->getQuery()->getResult();
+        
+        // Group appointments by day
+        $appointmentsByDay = [];
+        foreach ($allAppointments as $appointment) {
+            $dateKey = $appointment->getDate()->format('Y-m-d');
+            if (!isset($appointmentsByDay[$dateKey])) {
+                $appointmentsByDay[$dateKey] = [];
+            }
+            $appointmentsByDay[$dateKey][] = $appointment;
+        }
+        
+        // Get the unique dates and paginate them
+        $dateKeys = array_keys($appointmentsByDay);
+        $paginatedDates = $paginator->paginate(
+            $dateKeys,
+            $request->query->getInt('page', 1),
+            1 // 3 days per page
         );
-
+        
+        // Create the filtered appointments by day array
+        $filteredAppointmentsByDay = [];
+        foreach ($paginatedDates as $dateKey) {
+            if (isset($appointmentsByDay[$dateKey])) {
+                $filteredAppointmentsByDay[$dateKey] = $appointmentsByDay[$dateKey];
+            }
+        }
+        
         return $this->render('doctor/appointments_upcoming.html.twig', [
-            'appointments' => $appointments,
+            'appointmentsByDay' => $filteredAppointmentsByDay,
+            'appointments' => $paginatedDates // This is now a proper paginator object
         ]);
     }
 
