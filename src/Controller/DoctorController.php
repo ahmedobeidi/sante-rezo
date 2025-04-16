@@ -309,6 +309,9 @@ final class DoctorController extends AbstractController
         $timezone = new \DateTimeZone('Europe/Paris');
         $now = new \DateTime('now', $timezone);
 
+        // Get date filter if any
+        $dateFilter = $request->query->get('date_filter');
+
         // Fetch only upcoming appointments for the doctor that have been reserved by patients
         $queryBuilder = $entityManager->getRepository(Appointment::class)
             ->createQueryBuilder('a')
@@ -318,6 +321,15 @@ final class DoctorController extends AbstractController
             ->setParameter('doctor', $doctor)
             ->setParameter('now', $now->format('Y-m-d H:i:s')) // Format the date for comparison
             ->orderBy('a.date', 'ASC');
+
+        // Apply date filter if provided
+        if (!empty($dateFilter)) {
+            $filterDate = new \DateTime($dateFilter, $timezone);
+            $nextDay = (clone $filterDate)->modify('+1 day');
+            $queryBuilder->andWhere('a.date >= :filterDate AND a.date < :nextDay')
+                ->setParameter('filterDate', $filterDate->format('Y-m-d'))
+                ->setParameter('nextDay', $nextDay->format('Y-m-d'));
+        }
 
         // Get all upcoming appointments
         $allAppointments = $queryBuilder->getQuery()->getResult();
@@ -337,7 +349,7 @@ final class DoctorController extends AbstractController
         $paginatedDates = $paginator->paginate(
             $dateKeys,
             $request->query->getInt('page', 1),
-            1 // 3 days per page
+            1 // Show 1 day per page
         );
 
         // Create the filtered appointments by day array
@@ -350,7 +362,8 @@ final class DoctorController extends AbstractController
 
         return $this->render('doctor/appointments_upcoming.html.twig', [
             'appointmentsByDay' => $filteredAppointmentsByDay,
-            'appointments' => $paginatedDates // This is now a proper paginator object
+            'appointments' => $paginatedDates, // This is now a proper paginator object
+            'date_filter' => $dateFilter
         ]);
     }
 
@@ -650,7 +663,7 @@ final class DoctorController extends AbstractController
         $paginatedDates = $paginator->paginate(
             $dateKeys,
             $request->query->getInt('page', 1),
-            1 // 3 days per page
+            1 // 1 day per page
         );
 
         // Create the filtered appointments by day array
