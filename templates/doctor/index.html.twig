@@ -97,7 +97,7 @@
         </div>
 
         <!-- Form inputs div -->
-        <div class="w-full lg:w-2/3 bg-off-white p-6 rounded-3xl shadow-lg border-2 border-dotted border-dark-blue">
+        <div class="w-full lg:w-2/3 bg-off-white p-6 rounded-3xl shadow-lg border-2 border-solid border-dark-blue">
           <form action="{{ path('app_doctor_update') }}" method="POST" class="flex flex-col gap-4">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('update-doctor') }}" />
             <div class="flex flex-col md:flex-row gap-4">

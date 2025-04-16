@@ -113,7 +113,20 @@
             </div>
             <div class="w-full">
               <label for="city" class="block text-sm font-medium text-gray-700 mb-1">Ville</label>
-              <input type="text" id="city" name="city" value="{{ patient.city }}" class="p-3 border border-dotted border-gray-500 rounded-md w-full" placeholder="Ville" {% if patient.city %}required{% endif %} />
+              <select id="city" name="city" class="p-3 border border-dotted border-gray-500 rounded-md w-full" {% if patient.city %}required{% endif %}>
+                <option value="">Sélectionnez une ville</option>
+                {% set cities = [
+                  "Paris", "Marseille", "Lyon", "Toulouse", "Nice", "Nantes", "Strasbourg", "Montpellier", 
+                  "Bordeaux", "Lille", "Rennes", "Reims", "Le Havre", "Saint-Étienne", "Toulon", 
+                  "Grenoble", "Dijon", "Angers", "Villeurbanne", "Le Mans", "Aix-en-Provence", 
+                  "Clermont-Ferrand", "Brest", "Tours", "Limoges", "Amiens", "Annecy", "Perpignan", 
+                  "Boulogne-Billancourt", "Metz", "Besançon", "Orléans", "Argenteuil", "Rouen", 
+                  "Mulhouse", "Caen", "Nancy", "Saint-Denis", "Saint-Paul", "Montreuil", "Avignon"
+                ] %}
+                {% for city in cities %}
+                  <option value="{{ city }}" {% if patient.city == city %}selected{% endif %}>{{ city }}</option>
+                {% endfor %}
+              </select>
             </div>
             <div class="w-full">
               <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
