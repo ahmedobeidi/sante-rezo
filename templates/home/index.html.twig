@@ -278,37 +278,21 @@
             document.addEventListener('turbo:load', scrollToContact)
           </script>
 
-          <form id="contact" action="{{ path('app_contact') }}" method="POST" class="space-y-6 font-poppins">
+          {# Replace the existing form in templates/home/index.html.twig with this #}
+          {{ form_start(contactForm, {'attr': {'id': 'contact', 'class': 'space-y-6 font-poppins'}}) }}
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input 
-                      type="text" 
-                      name="firstName" 
-                      placeholder="Prénom" 
-                      value="{{ contactData.firstName|default('') }}" 
-                      class="border border-dotted border-gray-500 rounded p-2 focus:border-off-blue" />
-                  <input 
-                      type="text" 
-                      name="lastName" 
-                      placeholder="Nom" 
-                      value="{{ contactData.lastName|default('') }}" 
-                      class="border border-dotted border-gray-500 rounded p-2 focus:border-off-blue" /> 
+                  {{ form_widget(contactForm.firstName) }}
+                  {{ form_widget(contactForm.lastName) }}
               </div>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input 
-                      type="email" 
-                      name="email" 
-                      placeholder="Email" 
-                      value="{{ contactData.email|default('') }}" 
-                      class="border border-dotted border-gray-500 rounded p-2 focus:border-off-blue" />
+                  {{ form_widget(contactForm.email) }}
               </div>
-              <textarea 
-                  name="message" 
-                  placeholder="Écrivez votre message ici..." 
-                  class="border border-dotted border-gray-500 rounded p-2 w-full focus:border-off-blue">{{ contactData.message|default('') }}</textarea>
+              {{ form_widget(contactForm.message) }}
+              
               <div class="flex flex-col md:flex-row items-center gap-4">
                   <button type="submit" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue">Contactez-nous</button>
               </div>
-          </form>
+          {{ form_end(contactForm) }}
         </div>
         <!-- Image Column -->
         <div class="flex justify-center items-center">

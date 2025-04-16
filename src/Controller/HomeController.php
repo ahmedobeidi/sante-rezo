@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\DTO\ContactFormDTO;
+use App\Form\ContactFormType;
 use App\Repository\DoctorRepository;
 use App\Repository\PatientRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,37 +24,48 @@ final class HomeController extends AbstractController
         $doctorCount = $doctorRepository->count([]);
         $patientCount = $patientRepository->count([]);
 
-        // Initialize contact data
-        $contactData = [
-            'firstName' => '',
-            'lastName' => '',
-            'email' => '',
-            'message' => '',
-        ];
-
+        // Create the contact form DTO
+        $contactFormDTO = new ContactFormDTO();
+        
         // Pre-fill contact data if the user is logged in
         /** @var User $user */
         $user = $this->getUser();
 
         if ($user) {
-            $contactData['email'] = $user->getEmail();
+            $contactFormDTO->email = $user->getEmail();
+            
             // Check roles and fetch additional data
             if (in_array('ROLE_DOCTOR', $user->getRoles())) {
                 $doctor = $doctorRepository->findOneBy(['user' => $user]);
                 if ($doctor) {
-                    $contactData['firstName'] = $doctor->getFirstName();
-                    $contactData['lastName'] = $doctor->getLastName();
+                    $contactFormDTO->firstName = $doctor->getFirstName();
+                    $contactFormDTO->lastName = $doctor->getLastName();
                 }
             } elseif (in_array('ROLE_PATIENT', $user->getRoles())) {
                 $patient = $patientRepository->findOneBy(['user' => $user]);
                 if ($patient) {
-                    $contactData['firstName'] = $patient->getFirstName();
-                    $contactData['lastName'] = $patient->getLastName();
+                    $contactFormDTO->firstName = $patient->getFirstName();
+                    $contactFormDTO->lastName = $patient->getLastName();
                 }
             }
         }
         
+        // Create the form
+        $form = $this->createForm(ContactFormType::class, $contactFormDTO, [
+            'action' => $this->generateUrl('app_contact'),
+            'method' => 'POST',
+        ]);
+        
+        // Create the contact data array for backward compatibility
+        $contactData = [
+            'firstName' => $contactFormDTO->firstName,
+            'lastName' => $contactFormDTO->lastName,
+            'email' => $contactFormDTO->email,
+            'message' => $contactFormDTO->message
+        ];
+        
         return $this->render('home/index.html.twig', [
+            'contactForm' => $form->createView(),
             'contactData' => $contactData,
             'doctorCount' => $doctorCount,
             'patientCount' => $patientCount,
