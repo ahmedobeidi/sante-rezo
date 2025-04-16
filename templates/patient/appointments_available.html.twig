@@ -29,12 +29,12 @@
         name="search" 
         value="{{ searchQuery }}" 
         placeholder="Nom ou prénom..." 
-        class="w-full p-3 border border-gray-300 rounded-md"
+        class="w-full p-3 border border-solid border-gray-400 rounded-md"
       />
     </div>
     <div>
       <label for="specialty" class="block text-sm font-medium text-gray-700 mb-1">Spécialité</label>
-      <select id="specialty" name="specialty" class="w-full p-3 border border-gray-300 rounded-md">
+      <select id="specialty" name="specialty" class="w-full p-3 border border-solid border-gray-400 rounded-md">
         <option value="">Toutes les spécialités</option>
         {% for specialty in specialties %}
           <option value="{{ specialty.id }}" {% if specialtyId is not empty and specialtyId == specialty.id %}selected{% endif %}>
@@ -44,13 +44,24 @@
       </select>
     </div>
     <div>
+      <label for="city" class="block text-sm font-medium text-gray-700 mb-1">Ville</label>
+      <input 
+        type="text" 
+        id="city"
+        name="city" 
+        value="{{ cityFilter }}" 
+        placeholder="Paris, Lyon, Marseille..." 
+        class="w-full p-3 border border-solid border-gray-400 rounded-md"
+      />
+    </div>
+    <div>
       <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Date souhaitée</label>
       <input 
         type="date" 
         id="date"
         name="date" 
         value="{{ dateFilter }}"
-        class="w-full p-3 border border-gray-300 rounded-md cursor-pointer"
+        class="w-full p-3 border border-solid border-gray-400 rounded-md cursor-pointer"
       />
     </div>
   </div>
@@ -62,7 +73,7 @@
 </form>
 
 <!-- Available Appointments - Only show if search or filters were applied -->
-{% set searchApplied = searchQuery is not empty or specialtyId is not empty or dateFilter is not empty %}
+{% set searchApplied = searchQuery is not empty or specialtyId is not empty or cityFilter is not empty or dateFilter is not empty %}
 
 {% if searchApplied %}
   {% if doctors is defined and doctors|length > 0 %}
@@ -79,7 +90,8 @@
             <div class="flex-1">
               <h2 class="text-lg font-bold text-dark-gray">Dr. {{ doctor.firstName }} {{ doctor.lastName }}</h2>
               <p class="text-sm text-off-gray">{{ doctor.specialty ? doctor.specialty.name : 'Spécialité non spécifiée' }}</p>
-              <p class="text-sm text-dark-gray"><i class="fas fa-map-marker-alt text-off-blue mr-1"></i> {{ doctor.address }}</p>
+              <p class="text-sm text-dark-gray"><i class="text-off-blue mr-1"></i> {{ doctor.address }}</p>
+              <p class="text-sm text-dark-gray"><i class="text-off-blue mr-1"></i> {{ doctor.city }}</p>
             </div>
           </div>
           
@@ -218,15 +230,5 @@
       iconSvg.classList.remove('transform', 'rotate-180');
     }
   }
-  
-  // Open the first date for each doctor by default
-  document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.bg-white.shadow-lg').forEach(doctorCard => {
-      const firstButton = doctorCard.querySelector('button[id^="button-collapse"]');
-      if (firstButton) {
-        firstButton.click();
-      }
-    });
-  });
 </script>
 {% endblock %}

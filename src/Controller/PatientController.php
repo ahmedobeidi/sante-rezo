@@ -427,6 +427,7 @@ final class PatientController extends AbstractController
         // Get filter parameters
         $searchQuery = $request->query->get('search', '');
         $specialtyId = $request->query->get('specialty', '');
+        $cityFilter = $request->query->get('city', '');
         $dateFilter = $request->query->get('date', '');
 
         // Set timezone to ensure correct filtering
@@ -447,6 +448,12 @@ final class PatientController extends AbstractController
         if (!empty($searchQuery)) {
             $doctorQueryBuilder->andWhere('LOWER(d.firstName) LIKE :search OR LOWER(d.lastName) LIKE :search')
                 ->setParameter('search', '%' . strtolower($searchQuery) . '%');
+        }
+
+        // Add city filter if provided
+        if (!empty($cityFilter)) {
+            $doctorQueryBuilder->andWhere('LOWER(d.city) LIKE :city')
+                ->setParameter('city', '%' . strtolower($cityFilter) . '%');
         }
 
         // Add specialty filter if provided
@@ -521,6 +528,7 @@ final class PatientController extends AbstractController
             'paginatedDoctors' => $paginatedDoctors, // For pagination controls
             'searchQuery' => $searchQuery,
             'specialtyId' => $specialtyId,
+            'cityFilter' => $cityFilter,
             'dateFilter' => $dateFilter,
             'specialties' => $specialties
         ]);
