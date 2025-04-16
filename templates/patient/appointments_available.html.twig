@@ -96,42 +96,64 @@
             {% endfor %}
             
             <div class="space-y-4">
+              {% set displayCount = 0 %}
               {% for date in uniqueDates %}
-                {% set dateString = date|date('Y-m-d') %}
-                {% set collapseId = 'collapse-' ~ doctor.id ~ '-' ~ dateString|replace({'-': ''}) %}
-                
-                <div class="border-2 border-dotted border-gray-400 rounded-lg hover:border-off-blue transition">
-                  <!-- Collapsible date header -->
-                  <button 
-                    type="button" 
-                    class="w-full p-4 bg-gray-50 flex items-center justify-between font-medium text-dark-gray rounded-lg focus:outline-none"
-                    onclick="toggleCollapse('{{ collapseId }}')"
-                  >
-                    <div class="flex items-center">
-                      <i class="far fa-calendar-alt text-off-blue mr-2"></i>
-                      {{ date|format_datetime(locale='fr',pattern="EEEE dd MMMM YYYY") }}
-                    </div>
-                    <i class="fas fa-chevron-down text-gray-500 transition-transform" id="icon-{{ collapseId }}"></i>
-                  </button>
+                {% if displayCount < 5 %}
+                  {% set dateString = date|date('Y-m-d') %}
+                  {% set collapseId = 'collapse-' ~ doctor.id ~ '-' ~ dateString|replace({'-': ''}) %}
                   
-                  <!-- Collapsible content with time slots -->
-                  <div class="p-4 border-t border-gray-400 hidden" id="{{ collapseId }}">
-                    <div class="flex flex-wrap gap-2">
-                      {% for appointment in doctorAppointments %}
-                        {% if appointment.date|date('Y-m-d') == dateString %}
-                          <a 
-                            href="{{ path('app_patient_book_appointment', { id: appointment.id }) }}" 
-                            class="inline-block bg-gray-100 text-dark-gray hover:bg-off-blue hover:text-white px-3 py-2 rounded text-sm font-medium transition"
-                            onclick="return confirm('Confirmer la réservation pour le {{ appointment.date|date('d/m/Y') }} à {{ appointment.date|date('H:i') }} ?');"
-                          >
-                            {{ appointment.date|date('H:i') }}
-                          </a>
-                        {% endif %}
-                      {% endfor %}
+                  {# Check if this date has any available appointments #}
+                  {% set hasAppointments = false %}
+                  {% for appointment in doctorAppointments %}
+                    {% if appointment.date|date('Y-m-d') == dateString %}
+                      {% set hasAppointments = true %}
+                    {% endif %}
+                  {% endfor %}
+                  
+                  {% if hasAppointments %}
+                    {% set displayCount = displayCount + 1 %}
+                    <div class="border-2 border-dotted border-gray-400 rounded-lg hover:border-off-blue transition">
+                      <!-- Collapsible date header -->
+                      <button 
+                        type="button" 
+                        class="w-full p-4 bg-gray-50 flex items-center justify-between font-medium text-dark-gray rounded-lg focus:outline-none"
+                        onclick="toggleCollapse('{{ collapseId }}')"
+                        id="button-{{ collapseId }}"
+                      >
+                        <div class="flex items-center">
+                          <i class="far fa-calendar-alt text-off-blue mr-2"></i>
+                          {{ date|format_datetime(locale='fr',pattern="EEEE dd MMMM YYYY") }}
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-500 transition-transform" id="icon-{{ collapseId }}"></i>
+                      </button>
+                      
+                      <!-- Collapsible content with time slots -->
+                      <div class="p-4 border-t border-gray-400 hidden" id="{{ collapseId }}">
+                        <div class="flex flex-wrap gap-2">
+                          {% for appointment in doctorAppointments %}
+                            {% if appointment.date|date('Y-m-d') == dateString %}
+                              <a 
+                                href="{{ path('app_patient_book_appointment', { id: appointment.id }) }}" 
+                                class="inline-block bg-gray-100 text-dark-gray hover:bg-off-blue hover:text-white px-3 py-2 rounded text-sm font-medium transition"
+                                onclick="return confirm('Confirmer la réservation pour le {{ appointment.date|date('d/m/Y') }} à {{ appointment.date|date('H:i') }} ?');"
+                              >
+                                {{ appointment.date|date('H:i') }}
+                              </a>
+                            {% endif %}
+                          {% endfor %}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  {% endif %}
+                {% endif %}
               {% endfor %}
+              
+              {% if displayCount == 0 %}
+                <div class="p-4 bg-gray-50 rounded-lg text-center text-gray-500">
+                  <i class="fas fa-calendar-times mr-2"></i>
+                  Aucun créneau disponible pour ce médecin
+                </div>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -180,13 +202,10 @@
   
   // Open the first date for each doctor by default
   document.addEventListener('DOMContentLoaded', function() {
-    const firstDateButtons = document.querySelectorAll('.w-full.p-4.bg-gray-50.flex:first-of-type');
-    firstDateButtons.forEach(button => {
-      // Only trigger click for the very first button under each doctor
-      const doctorCard = button.closest('.bg-white.shadow-lg');
-      const firstButton = doctorCard.querySelector('.w-full.p-4.bg-gray-50.flex');
-      if (button === firstButton) {
-        button.click();
+    document.querySelectorAll('.bg-white.shadow-lg').forEach(doctorCard => {
+      const firstButton = doctorCard.querySelector('button[id^="button-collapse"]');
+      if (firstButton) {
+        firstButton.click();
       }
     });
   });
