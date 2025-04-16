@@ -75,6 +75,11 @@
                   Mes rendez-vous à venir
               </a>
           </li>
+          <li class="{{ app.request.attributes.get('_route') == 'app_doctor_appointments_available' ? 'bg-off-blue' : '' }} p-2 rounded">
+              <a href="{{ path('app_doctor_appointments_available') }}" class="{{ app.request.attributes.get('_route') == 'app_doctor_appointments_available' ? 'text-off-white no-underline' : 'text-dark-blue hover:underline' }}">
+                  Rendez-vous disponibles
+              </a>
+          </li>
           <li class="{{ app.request.attributes.get('_route') == 'app_doctor_appointments_add' ? 'bg-off-blue' : '' }} p-2 rounded">
               <a href="{{ path('app_doctor_appointments_add') }}" class="{{ app.request.attributes.get('_route') == 'app_doctor_appointments_add' ? 'text-off-white no-underline' : 'text-dark-blue hover:underline' }}">
                   Ajouter un rendez-vous

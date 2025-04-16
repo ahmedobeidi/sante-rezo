@@ -213,7 +213,7 @@ final class DoctorController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-    
+
         // Get form data
         $currentPassword = $request->request->get('current_password');
         $newPassword = $request->request->get('new_password');
@@ -224,13 +224,13 @@ final class DoctorController extends AbstractController
             $this->addFlash('error', 'Tous les champs sont obligatoires.');
             return $this->redirectToRoute('app_doctor_profile');
         }
-    
+
         // Validate current password
         if (!$passwordHasher->isPasswordValid($user, $currentPassword)) {
             $this->addFlash('error', 'Le mot de passe actuel est incorrect.');
             return $this->redirectToRoute('app_doctor_profile');
         }
-    
+
         // Check if new passwords match
         if ($newPassword !== $confirmPassword) {
             $this->addFlash('error', 'Les nouveaux mots de passe ne correspondent pas.');
@@ -242,12 +242,12 @@ final class DoctorController extends AbstractController
             $this->addFlash('error', 'Le nouveau mot de passe doit comporter au moins 6 caractères, dont au moins un chiffre, une majuscule et une minuscule.');
             return $this->redirectToRoute('app_doctor_profile');
         }
-    
+
         // Update the user's password
         $user->setPassword($passwordHasher->hashPassword($user, $newPassword));
         $entityManager->persist($user);
         $entityManager->flush();
-    
+
         $this->addFlash('success', 'Votre mot de passe a été mis à jour avec succès.');
         return $this->redirectToRoute('app_doctor_profile');
     }
@@ -311,17 +311,17 @@ final class DoctorController extends AbstractController
 
         // Fetch only upcoming appointments for the doctor that have been reserved by patients
         $queryBuilder = $entityManager->getRepository(Appointment::class)
-        ->createQueryBuilder('a')
-        ->where('a.doctor = :doctor')
-        ->andWhere('a.date >= :now') // Filter out past appointments
-        ->andWhere('a.patient IS NOT NULL') // Only show appointments with patients
-        ->setParameter('doctor', $doctor)
-        ->setParameter('now', $now->format('Y-m-d H:i:s')) // Format the date for comparison
-        ->orderBy('a.date', 'ASC');
+            ->createQueryBuilder('a')
+            ->where('a.doctor = :doctor')
+            ->andWhere('a.date >= :now') // Filter out past appointments
+            ->andWhere('a.patient IS NOT NULL') // Only show appointments with patients
+            ->setParameter('doctor', $doctor)
+            ->setParameter('now', $now->format('Y-m-d H:i:s')) // Format the date for comparison
+            ->orderBy('a.date', 'ASC');
 
         // Get all upcoming appointments
         $allAppointments = $queryBuilder->getQuery()->getResult();
-        
+
         // Group appointments by day
         $appointmentsByDay = [];
         foreach ($allAppointments as $appointment) {
@@ -331,7 +331,7 @@ final class DoctorController extends AbstractController
             }
             $appointmentsByDay[$dateKey][] = $appointment;
         }
-        
+
         // Get the unique dates and paginate them
         $dateKeys = array_keys($appointmentsByDay);
         $paginatedDates = $paginator->paginate(
@@ -339,7 +339,7 @@ final class DoctorController extends AbstractController
             $request->query->getInt('page', 1),
             1 // 3 days per page
         );
-        
+
         // Create the filtered appointments by day array
         $filteredAppointmentsByDay = [];
         foreach ($paginatedDates as $dateKey) {
@@ -347,7 +347,7 @@ final class DoctorController extends AbstractController
                 $filteredAppointmentsByDay[$dateKey] = $appointmentsByDay[$dateKey];
             }
         }
-        
+
         return $this->render('doctor/appointments_upcoming.html.twig', [
             'appointmentsByDay' => $filteredAppointmentsByDay,
             'appointments' => $paginatedDates // This is now a proper paginator object
@@ -368,7 +368,7 @@ final class DoctorController extends AbstractController
                 return $this->redirectToRoute('app_doctor_profile');
             }
 
-             // Get the date from the client
+            // Get the date from the client
             $clientDate = $request->request->get('date');
 
             // Set the timezone for the client date
@@ -465,7 +465,7 @@ final class DoctorController extends AbstractController
         $startTime = $request->request->get('start_time');
         $endTime = $request->request->get('end_time');
         $duration = (int) $request->request->get('duration');
-        
+
         // Fix: Correctly get the weekdays array
         $weekdays = $request->request->all()['weekdays'] ?? [];
 
@@ -479,7 +479,7 @@ final class DoctorController extends AbstractController
         $timezone = new \DateTimeZone('Europe/Paris');
         $currentDate = new \DateTime($startDate, $timezone);
         $lastDate = new \DateTime($endDate, $timezone);
-        
+
         // Add 1 day to include the end date
         $lastDate->modify('+1 day');
 
@@ -511,7 +511,7 @@ final class DoctorController extends AbstractController
 
         // Get the current server date and set the same timezone
         $now = new \DateTime('now', $timezone);
-        
+
         // Add one hour to current time for minimum appointment time
         $oneHourLater = (clone $now)->modify('+1 hour');
 
@@ -523,25 +523,25 @@ final class DoctorController extends AbstractController
         while ($currentDate < $lastDate) {
             // Check if current day is a selected weekday
             $dayOfWeek = (int) $currentDate->format('N'); // 1 (Monday) to 7 (Sunday)
-            
+
             if (in_array($dayOfWeek, $selectedDays)) {
                 // Create appointment times for this day
                 $appointmentStart = clone $currentDate;
                 $appointmentStart->setTime((int) $startHour, (int) $startMinute);
-                
+
                 $dayEndTime = clone $currentDate;
                 $dayEndTime->setTime((int) $endHour, (int) $endMinute);
-                
+
                 // Loop through each time slot on this day
                 while ($appointmentStart < $dayEndTime) {
                     $appointmentEnd = clone $appointmentStart;
                     $appointmentEnd->add($durationInterval);
-                    
+
                     // Check if this appointment end time is after the day's end time
                     if ($appointmentEnd > $dayEndTime) {
                         break;
                     }
-                    
+
                     // Skip if appointment is in the past or within next hour
                     if ($appointmentStart > $oneHourLater) {
                         // Check if an appointment already exists at this time
@@ -549,14 +549,14 @@ final class DoctorController extends AbstractController
                             'doctor' => $doctor,
                             'date' => $appointmentStart
                         ]);
-                        
+
                         if (!$existingAppointment) {
                             // Create new appointment
                             $appointment = new Appointment();
                             $appointment->setDoctor($doctor);
                             $appointment->setDate(clone $appointmentStart);
                             $appointment->setStatus('disponible');
-                            
+
                             $entityManager->persist($appointment);
                             $createdCount++;
                         } else {
@@ -565,25 +565,106 @@ final class DoctorController extends AbstractController
                     } else {
                         $skippedCount++;
                     }
-                    
+
                     // Move to next time slot
                     $appointmentStart->add($durationInterval);
                 }
             }
-            
+
             // Move to next day
             $currentDate->modify('+1 day');
         }
-        
+
         // Flush all created appointments
         $entityManager->flush();
-        
+
         if ($createdCount > 0) {
             $this->addFlash('success', $createdCount . ' rendez-vous ont été ajoutés avec succès. ' . ($skippedCount > 0 ? $skippedCount . ' ont été ignorés (déjà existants ou trop proches).' : ''));
         } else {
             $this->addFlash('error', 'Aucun rendez-vous n\'a été créé. Veuillez vérifier vos paramètres.');
         }
-        
+
         return $this->redirectToRoute('app_doctor_appointments_upcoming');
+    }
+
+    #[Route('/doctor/appointments/available', name: 'app_doctor_appointments_available')]
+    #[IsGranted('ROLE_DOCTOR')]
+    public function availableAppointments(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        PaginatorInterface $paginator
+    ): Response {
+        /** @var User $user */
+        $user = $this->getUser();
+        $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+
+        if ((!$doctor && in_array('ROLE_DOCTOR', $user->getRoles())) || ($doctor && !$doctor->isCompleted())) {
+            $this->addFlash('error', 'Vous devez compléter votre profil pour accéder à cette page.');
+            return $this->redirectToRoute('app_doctor_profile');
+        }
+
+        // Set timezone to ensure correct filtering
+        $timezone = new \DateTimeZone('Europe/Paris');
+        $now = new \DateTime('now', $timezone);
+
+        // Get date filter if any
+        $dateFilter = $request->query->get('date_filter');
+
+        // Fetch available appointments for the doctor
+        $queryBuilder = $entityManager->getRepository(Appointment::class)
+            ->createQueryBuilder('a')
+            ->where('a.doctor = :doctor')
+            ->andWhere('a.date >= :now') // Filter out past appointments
+            ->andWhere('a.status = :status') // Only available appointments
+            ->setParameter('doctor', $doctor)
+            ->setParameter('now', $now->format('Y-m-d H:i:s'))
+            ->setParameter('status', 'disponible');
+
+        // Apply date filter if provided
+        if (!empty($dateFilter)) {
+            $filterDate = new \DateTime($dateFilter, $timezone);
+            $nextDay = (clone $filterDate)->modify('+1 day');
+            $queryBuilder->andWhere('a.date >= :filterDate AND a.date < :nextDay')
+                ->setParameter('filterDate', $filterDate->format('Y-m-d'))
+                ->setParameter('nextDay', $nextDay->format('Y-m-d'));
+        }
+
+        // Order by date
+        $queryBuilder->orderBy('a.date', 'ASC');
+
+        // Group appointments by day
+        $allAppointments = $queryBuilder->getQuery()->getResult();
+
+        // Group appointments by day
+        $appointmentsByDay = [];
+        foreach ($allAppointments as $appointment) {
+            $dateKey = $appointment->getDate()->format('Y-m-d');
+            if (!isset($appointmentsByDay[$dateKey])) {
+                $appointmentsByDay[$dateKey] = [];
+            }
+            $appointmentsByDay[$dateKey][] = $appointment;
+        }
+
+        // Get the unique dates and paginate them
+        $dateKeys = array_keys($appointmentsByDay);
+        $paginatedDates = $paginator->paginate(
+            $dateKeys,
+            $request->query->getInt('page', 1),
+            1 // 3 days per page
+        );
+
+        // Create the filtered appointments by day array
+        $filteredAppointmentsByDay = [];
+        foreach ($paginatedDates as $dateKey) {
+            if (isset($appointmentsByDay[$dateKey])) {
+                $filteredAppointmentsByDay[$dateKey] = $appointmentsByDay[$dateKey];
+            }
+        }
+
+        return $this->render('doctor/appointments_available.html.twig', [
+            'appointmentsByDay' => $filteredAppointmentsByDay,
+            'appointments' => $paginatedDates, // This is now a proper paginator object
+            'date_filter' => $dateFilter
+        ]);
     }
 }
