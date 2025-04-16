@@ -67,9 +67,6 @@
               <p class="text-sm text-off-gray">{{ doctor.specialty ? doctor.specialty.name : 'Spécialité non spécifiée' }}</p>
               <p class="text-sm text-dark-gray"><i class="fas fa-map-marker-alt text-off-blue mr-1"></i> {{ doctor.address }}</p>
             </div>
-            <a href="#" class="text-dark-blue hover:underline text-sm">
-              <i class="fas fa-id-card mr-1"></i> Voir profil
-            </a>
           </div>
           
           <!-- Doctor's Available Dates -->
@@ -98,28 +95,40 @@
               {% endif %}
             {% endfor %}
             
-            <div class="space-y-6">
+            <div class="space-y-4">
               {% for date in uniqueDates %}
                 {% set dateString = date|date('Y-m-d') %}
+                {% set collapseId = 'collapse-' ~ doctor.id ~ '-' ~ dateString|replace({'-': ''}) %}
                 
-                <div class="p-4 rounded-lg bg-gray-50 border border-gray-200">
-                  <div class="font-medium text-dark-gray mb-3 border-b pb-2">
-                    <i class="far fa-calendar-alt text-off-blue mr-2"></i>
-                    {{ date|format_datetime(locale='fr',pattern="EEEE dd MMMM YYYY") }}
-                  </div>
+                <div class="border-2 border-dotted border-gray-400 rounded-lg hover:border-off-blue transition">
+                  <!-- Collapsible date header -->
+                  <button 
+                    type="button" 
+                    class="w-full p-4 bg-gray-50 flex items-center justify-between font-medium text-dark-gray rounded-lg focus:outline-none"
+                    onclick="toggleCollapse('{{ collapseId }}')"
+                  >
+                    <div class="flex items-center">
+                      <i class="far fa-calendar-alt text-off-blue mr-2"></i>
+                      {{ date|format_datetime(locale='fr',pattern="EEEE dd MMMM YYYY") }}
+                    </div>
+                    <i class="fas fa-chevron-down text-gray-500 transition-transform" id="icon-{{ collapseId }}"></i>
+                  </button>
                   
-                  <div class="flex flex-wrap gap-2">
-                    {% for appointment in doctorAppointments %}
-                      {% if appointment.date|date('Y-m-d') == dateString %}
-                        <a 
-                          href="{{ path('app_patient_book_appointment', { id: appointment.id }) }}" 
-                          class="inline-block bg-gray-100 text-dark-gray hover:bg-off-blue hover:text-white px-3 py-2 rounded text-sm font-medium transition"
-                          onclick="return confirm('Confirmer la réservation pour le {{ appointment.date|date('d/m/Y') }} à {{ appointment.date|date('H:i') }} ?');"
-                        >
-                          {{ appointment.date|date('H:i') }}
-                        </a>
-                      {% endif %}
-                    {% endfor %}
+                  <!-- Collapsible content with time slots -->
+                  <div class="p-4 border-t border-gray-400 hidden" id="{{ collapseId }}">
+                    <div class="flex flex-wrap gap-2">
+                      {% for appointment in doctorAppointments %}
+                        {% if appointment.date|date('Y-m-d') == dateString %}
+                          <a 
+                            href="{{ path('app_patient_book_appointment', { id: appointment.id }) }}" 
+                            class="inline-block bg-gray-100 text-dark-gray hover:bg-off-blue hover:text-white px-3 py-2 rounded text-sm font-medium transition"
+                            onclick="return confirm('Confirmer la réservation pour le {{ appointment.date|date('d/m/Y') }} à {{ appointment.date|date('H:i') }} ?');"
+                          >
+                            {{ appointment.date|date('H:i') }}
+                          </a>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
                   </div>
                 </div>
               {% endfor %}
@@ -153,6 +162,33 @@
   // Ensure clicking anywhere on the date input opens the calendar
   document.getElementById('date').addEventListener('click', function () {
     this.showPicker();
+  });
+  
+  // Toggle collapse function for date sections
+  function toggleCollapse(id) {
+    const content = document.getElementById(id);
+    const icon = document.getElementById('icon-' + id);
+    
+    if (content.classList.contains('hidden')) {
+      content.classList.remove('hidden');
+      icon.classList.add('transform', 'rotate-180');
+    } else {
+      content.classList.add('hidden');
+      icon.classList.remove('transform', 'rotate-180');
+    }
+  }
+  
+  // Open the first date for each doctor by default
+  document.addEventListener('DOMContentLoaded', function() {
+    const firstDateButtons = document.querySelectorAll('.w-full.p-4.bg-gray-50.flex:first-of-type');
+    firstDateButtons.forEach(button => {
+      // Only trigger click for the very first button under each doctor
+      const doctorCard = button.closest('.bg-white.shadow-lg');
+      const firstButton = doctorCard.querySelector('.w-full.p-4.bg-gray-50.flex');
+      if (button === firstButton) {
+        button.click();
+      }
+    });
   });
 </script>
 {% endblock %}
