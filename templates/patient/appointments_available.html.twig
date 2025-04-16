@@ -112,7 +112,7 @@
                   
                   {% if hasAppointments %}
                     {% set displayCount = displayCount + 1 %}
-                    <div class="border-2 border-dotted border-gray-400 rounded-lg hover:border-off-blue transition">
+                    <div class="border-2 border-dotted border-gray-400 rounded-lg hover:border-solid hover:border-off-blue transition">
                       <!-- Collapsible date header -->
                       <button 
                         type="button" 
@@ -124,7 +124,11 @@
                           <i class="far fa-calendar-alt text-off-blue mr-2"></i>
                           {{ date|format_datetime(locale='fr',pattern="EEEE dd MMMM YYYY") }}
                         </div>
-                        <i class="fas fa-chevron-down text-gray-500 transition-transform" id="icon-{{ collapseId }}"></i>
+                        <div class="bg-gray-200 p-2 rounded-full" id="icon-{{ collapseId }}">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-off-blue transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
                       </button>
                       
                       <!-- Collapsible content with time slots -->
@@ -134,7 +138,7 @@
                             {% if appointment.date|date('Y-m-d') == dateString %}
                               <a 
                                 href="{{ path('app_patient_book_appointment', { id: appointment.id }) }}" 
-                                class="inline-block bg-gray-100 text-dark-gray hover:bg-off-blue hover:text-white px-3 py-2 rounded text-sm font-medium transition"
+                                class="inline-block bg-gray-300 text-dark-gray hover:bg-off-blue hover:text-white px-3 py-2 rounded text-sm font-medium transition"
                                 onclick="return confirm('Confirmer la réservation pour le {{ appointment.date|date('d/m/Y') }} à {{ appointment.date|date('H:i') }} ?');"
                               >
                                 {{ appointment.date|date('H:i') }}
@@ -189,14 +193,15 @@
   // Toggle collapse function for date sections
   function toggleCollapse(id) {
     const content = document.getElementById(id);
-    const icon = document.getElementById('icon-' + id);
+    const iconContainer = document.getElementById('icon-' + id);
+    const iconSvg = iconContainer.querySelector('svg');
     
     if (content.classList.contains('hidden')) {
       content.classList.remove('hidden');
-      icon.classList.add('transform', 'rotate-180');
+      iconSvg.classList.add('transform', 'rotate-180');
     } else {
       content.classList.add('hidden');
-      icon.classList.remove('transform', 'rotate-180');
+      iconSvg.classList.remove('transform', 'rotate-180');
     }
   }
   
