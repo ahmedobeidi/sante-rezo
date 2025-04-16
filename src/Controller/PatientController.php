@@ -322,6 +322,28 @@ final class PatientController extends AbstractController
             return $this->redirectToRoute('app_patient_appointments');
         }
 
+        // Check if patient already has 2 or more future appointments with this doctor
+        $now = new \DateTime('now', new \DateTimeZone('Europe/Paris'));
+        $doctorId = $appointment->getDoctor()->getId();
+        
+        $existingAppointments = $entityManager->getRepository(Appointment::class)
+            ->createQueryBuilder('a')
+            ->where('a.patient = :patient')
+            ->andWhere('a.doctor = :doctor')
+            ->andWhere('a.date >= :now')
+            ->andWhere('a.status = :status')
+            ->setParameter('patient', $patient)
+            ->setParameter('doctor', $doctorId)
+            ->setParameter('now', $now)
+            ->setParameter('status', 'réservé')
+            ->getQuery()
+            ->getResult();
+        
+        if (count($existingAppointments) >= 2) {
+            $this->addFlash('error', 'Vous avez déjà deux rendez-vous programmés avec ce médecin. Vous ne pouvez pas en réserver plus pour le moment.');
+            return $this->redirectToRoute('app_patient_appointments_available');
+        }
+
         $appointment->setPatient($patient);
         $appointment->setStatus('réservé');
 
