@@ -23,49 +23,18 @@
                     <span class="font-bold">{{ appointment.date|date('H:i') }}</span>
                   </div>
                   
-                  <div>
+                  <div class="flex flex-row gap-3">
                     <p class="text-sm text-off-gray"><strong>Statut:</strong> 
-                      <span class="
-                        {% if appointment.status == 'disponible' %}text-green-600
-                        {% elseif appointment.status == 'confirmé' %}text-blue-600
-                        {% elseif appointment.status == 'annulé' %}text-red-600
-                        {% else %}text-gray-600{% endif %}
-                      ">
+                      <span class="text-green-600">
                         {{ appointment.status }}
                       </span>
                     </p>
+                    {% if appointment.patient is not null %}
+                      <p class="text-sm text-dark-gray"><strong>Patient:</strong> {{ appointment.patient.firstName }} {{ appointment.patient.lastName }}</p>
+                    {% endif %}
                   </div>
-                </div>
-                
-                <div>
-                  {% if appointment.patient is null %}
-                    <form action="{{ path('app_doctor_cancel_appointment', { id: appointment.id }) }}" method="POST" 
-                          onsubmit="return confirm('Êtes-vous sûr de vouloir annuler ce rendez-vous ?');"
-                          class="inline-block">
-                      <input type="hidden" name="_csrf_token" value="{{ csrf_token('cancel-appointment-' ~ appointment.id) }}">
-                      <button type="submit" class="bg-red-500 text-white py-1 px-3 rounded text-sm hover:bg-red-600">
-                        <i class="fas fa-times-circle mr-1"></i> Annuler
-                      </button>
-                    </form>
-                  {% endif %}
                 </div>
               </div>
-              
-              {% if appointment.patient is not null %}
-                <div class="mt-3 pl-12">
-                  <div class="flex items-center gap-4 bg-gray-50 p-3 rounded-lg">
-                    <img 
-                      src="{{ appointment.patient.profileImage ? asset('uploads/profiles/' ~ appointment.patient.profileImage) : asset('img/default2.png') }}" 
-                      alt="Patient Profile Image" 
-                      class="w-12 h-12 rounded-full object-cover"
-                    />
-                    <div>
-                      <p class="text-sm text-dark-gray"><strong>Patient:</strong> {{ appointment.patient.firstName }} {{ appointment.patient.lastName }}</p>
-                      <p class="text-sm text-dark-gray"><strong>Ville:</strong> {{ appointment.patient.city }}</p>
-                    </div>
-                  </div>
-                </div>
-              {% endif %}
             </div>
           {% endfor %}
         </div>
