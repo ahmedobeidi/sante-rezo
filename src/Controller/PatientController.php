@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Appointment;
 use App\Entity\Patient;
+use App\Entity\Specialty;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -206,7 +207,7 @@ final class PatientController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-    
+
         // Get form data
         $currentPassword = $request->request->get('current_password');
         $newPassword = $request->request->get('new_password');
@@ -217,30 +218,30 @@ final class PatientController extends AbstractController
             $this->addFlash('error', 'Tous les champs sont obligatoires.');
             return $this->redirectToRoute('app_patient_profile');
         }
-    
+
         // Validate current password
         if (!$passwordHasher->isPasswordValid($user, $currentPassword)) {
             $this->addFlash('error', 'Le mot de passe actuel est incorrect.');
             return $this->redirectToRoute('app_patient_profile');
         }
-    
+
         // Check if new passwords match
         if ($newPassword !== $confirmPassword) {
             $this->addFlash('error', 'Les nouveaux mots de passe ne correspondent pas.');
             return $this->redirectToRoute('app_patient_profile');
         }
 
-         // Validate new password with regex
+        // Validate new password with regex
         if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/', $newPassword)) {
             $this->addFlash('error', 'Le nouveau mot de passe doit comporter au moins 6 caractères, dont au moins un chiffre, une majuscule et une minuscule.');
             return $this->redirectToRoute('app_patient_profile');
         }
-    
+
         // Update the user's password
         $user->setPassword($passwordHasher->hashPassword($user, $newPassword));
         $entityManager->persist($user);
         $entityManager->flush();
-    
+
         $this->addFlash('success', 'Votre mot de passe a été mis à jour avec succès.');
         return $this->redirectToRoute('app_patient_profile');
     }
@@ -356,7 +357,7 @@ final class PatientController extends AbstractController
     #[Route('/patient/appointments/upcoming', name: 'app_patient_appointments_upcoming')]
     #[IsGranted('ROLE_PATIENT')]
     public function upcomingAppointments(
-        Request $request, 
+        Request $request,
         EntityManagerInterface $entityManager,
         PaginatorInterface $paginator
     ): Response {
@@ -397,42 +398,109 @@ final class PatientController extends AbstractController
     #[Route('/patient/appointments/available', name: 'app_patient_appointments_available')]
     #[IsGranted('ROLE_PATIENT')]
     public function availableAppointments(
-        Request $request, 
+        Request $request,
         EntityManagerInterface $entityManager,
         PaginatorInterface $paginator
     ): Response {
+        // Get filter parameters
         $searchQuery = $request->query->get('search', '');
+        $specialtyId = $request->query->get('specialty', '');
+        $dateFilter = $request->query->get('date', '');
 
         // Set timezone to ensure correct filtering
         $timezone = new \DateTimeZone('Europe/Paris');
         $now = new \DateTime('now', $timezone);
 
-        // Create the query builder for available appointments
-        $queryBuilder = $entityManager->getRepository(Appointment::class)->createQueryBuilder('a')
-            ->join('a.doctor', 'd')
+        // First, get the base query for doctors with available appointments
+        $doctorQueryBuilder = $entityManager->createQueryBuilder()
+            ->select('DISTINCT d')
+            ->from('App\Entity\Doctor', 'd')
+            ->join('d.appointments', 'a')
             ->where('a.status = :status')
-            ->andWhere('a.date >= :now') // Filter out past appointments
+            ->andWhere('a.date >= :now')
             ->setParameter('status', 'disponible')
-            ->setParameter('now', $now); // Pass DateTime object directly
-            
-        // Add search filter if a search query is provided
+            ->setParameter('now', $now);
+
+        // Add name search filter if provided
         if (!empty($searchQuery)) {
-            $queryBuilder->andWhere('LOWER(d.firstName) LIKE :search OR LOWER(d.lastName) LIKE :search')
+            $doctorQueryBuilder->andWhere('LOWER(d.firstName) LIKE :search OR LOWER(d.lastName) LIKE :search')
                 ->setParameter('search', '%' . strtolower($searchQuery) . '%');
         }
-        
-        $queryBuilder->orderBy('a.date', 'ASC');
-            
-        // Paginate the results
-        $availableAppointments = $paginator->paginate(
-            $queryBuilder,
+
+        // Add specialty filter if provided
+        if (!empty($specialtyId)) {
+            $doctorQueryBuilder->andWhere('d.specialty = :specialty')
+                ->setParameter('specialty', $specialtyId);
+        }
+
+        // Add date filter if provided
+        if (!empty($dateFilter)) {
+            $filterDate = new \DateTime($dateFilter, $timezone);
+            $nextDay = (clone $filterDate)->modify('+1 day');
+            $doctorQueryBuilder->andWhere('a.date >= :filterDate AND a.date < :nextDay')
+                ->setParameter('filterDate', $filterDate->format('Y-m-d'))
+                ->setParameter('nextDay', $nextDay->format('Y-m-d'));
+        }
+
+        // Order doctors
+        $doctorQueryBuilder->orderBy('d.lastName', 'ASC')
+            ->addOrderBy('d.firstName', 'ASC');
+
+        // Get all specialties for the filter dropdown
+        $specialties = $entityManager->getRepository(Specialty::class)
+            ->findBy([], ['name' => 'ASC']);
+
+        // Paginate doctors (not appointments)
+        $paginatedDoctors = $paginator->paginate(
+            $doctorQueryBuilder,
             $request->query->getInt('page', 1),
-            3 // Results per page
+            3 // 3 doctors per page
         );
+
+        // Get the doctor IDs from the current page
+        $doctorIds = [];
+        foreach ($paginatedDoctors as $doctor) {
+            $doctorIds[] = $doctor->getId();
+        }
+
+        // Now load all appointments for these doctors
+        $appointmentsQuery = $entityManager->getRepository(Appointment::class)->createQueryBuilder('a')
+            ->join('a.doctor', 'd')
+            ->where('a.status = :status')
+            ->andWhere('a.date >= :now')
+            ->andWhere('d.id IN (:doctorIds)')
+            ->setParameter('status', 'disponible')
+            ->setParameter('now', $now)
+            ->setParameter('doctorIds', $doctorIds)
+            ->orderBy('d.lastName', 'ASC')
+            ->addOrderBy('d.firstName', 'ASC')
+            ->addOrderBy('a.date', 'ASC');
+
+        // Apply date filter to appointments if provided
+        if (!empty($dateFilter)) {
+            $filterDate = new \DateTime($dateFilter, $timezone);
+            $nextDay = (clone $filterDate)->modify('+1 day');
+            $appointmentsQuery->andWhere('a.date >= :filterDate AND a.date < :nextDay')
+                ->setParameter('filterDate', $filterDate->format('Y-m-d'))
+                ->setParameter('nextDay', $nextDay->format('Y-m-d'));
+        }
+
+        $availableAppointments = $appointmentsQuery->getQuery()->getResult();
+
+        // Get sorted doctors for the template
+        $doctors = [];
+        foreach ($paginatedDoctors as $doctor) {
+            $doctors[] = $doctor;
+        }
 
         return $this->render('patient/appointments_available.html.twig', [
             'availableAppointments' => $availableAppointments,
+            'doctors' => $doctors, // Passing the doctor entities directly
+            'paginatedDoctors' => $paginatedDoctors, // For pagination controls
             'searchQuery' => $searchQuery,
+            'specialtyId' => $specialtyId,
+            'dateFilter' => $dateFilter,
+            'specialties' => $specialties
         ]);
     }
 }

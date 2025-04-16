@@ -3,55 +3,156 @@
 {% block content %}
 <h2 class="text-xl font-bold text-dark-gray mb-6">Prendre un rendez-vous</h2>
 
-<!-- Search Input -->
-<form method="GET" action="{{ path('app_patient_appointments_available') }}" class="flex flex-col gap-3 mb-6">
-  <input 
-    type="text" 
-    name="search" 
-    value="{{ searchQuery }}" 
-    placeholder="Rechercher un médecin par son nom..." 
-    class="w-full p-3 border-2 border-solid border-gray-400 rounded-md"
-  />
-  <button type="submit" class="w-fit bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue mt-2 md:mt-0">
-    Rechercher
-  </button>
+<!-- Search Form -->
+<form method="GET" action="{{ path('app_patient_appointments_available') }}" class="bg-white shadow-lg rounded-lg p-6 border-2 border-dotted border-gray-400 mb-6">
+  <h3 class="text-lg font-semibold text-dark-gray mb-4">Rechercher un médecin</h3>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div>
+      <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Nom du médecin</label>
+      <input 
+        type="text" 
+        id="search"
+        name="search" 
+        value="{{ searchQuery }}" 
+        placeholder="Nom ou prénom..." 
+        class="w-full p-3 border border-gray-300 rounded-md"
+      />
+    </div>
+    <div>
+      <label for="specialty" class="block text-sm font-medium text-gray-700 mb-1">Spécialité</label>
+      <select id="specialty" name="specialty" class="w-full p-3 border border-gray-300 rounded-md">
+        <option value="">Toutes les spécialités</option>
+        {% for specialty in specialties %}
+          <option value="{{ specialty.id }}" {% if specialtyId is not empty and specialtyId == specialty.id %}selected{% endif %}>
+            {{ specialty.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Date souhaitée</label>
+      <input 
+        type="date" 
+        id="date"
+        name="date" 
+        value="{{ dateFilter }}"
+        class="w-full p-3 border border-gray-300 rounded-md cursor-pointer"
+      />
+    </div>
+  </div>
+  <div class="flex justify-end mt-4">
+    <button type="submit" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue">
+      Rechercher
+    </button>
+  </div>
 </form>
 
-<!-- Available Appointments -->
-{% if availableAppointments is not empty %}
-  <div class="flex flex-col gap-6">
-    {% for appointment in availableAppointments %}
-      <div class="bg-white shadow-lg rounded-lg p-6 border-2 border-dotted border-gray-400">
-        <div class="flex items-center gap-4 mb-4">
-          <img 
-            src="{{ appointment.doctor.profileImage ? asset('uploads/profiles/' ~ appointment.doctor.profileImage) : asset('img/default2.png') }}" 
-            alt="Doctor Profile Image" 
-            class="w-16 h-16 rounded-full object-cover"
-          />
-          <div>
-            <h2 class="text-lg font-bold text-dark-gray">{{ appointment.doctor.firstName }} {{ appointment.doctor.lastName }}</h2>
-            <p class="text-sm text-off-gray">{{ appointment.doctor.specialty ? appointment.doctor.specialty.name : 'Spécialité non spécifiée' }}</p>
+<!-- Available Appointments - Only show if search or filters were applied -->
+{% set searchApplied = searchQuery is not empty or specialtyId is not empty or dateFilter is not empty %}
+
+{% if searchApplied %}
+  {% if doctors is defined and doctors|length > 0 %}
+    <div class="flex flex-col gap-6">
+      {% for doctor in doctors %}
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden border-2 border-dotted border-gray-400">
+          <!-- Doctor Info - Shown only once per doctor -->
+          <div class="flex items-center gap-4 p-6 border-b border-gray-200 bg-gray-50">
+            <img 
+              src="{{ doctor.profileImage ? asset('uploads/profiles/' ~ doctor.profileImage) : asset('img/default2.png') }}" 
+              alt="Photo du Médecin" 
+              class="w-16 h-16 rounded-full object-cover border-2 border-off-blue"
+            />
+            <div class="flex-1">
+              <h2 class="text-lg font-bold text-dark-gray">Dr. {{ doctor.firstName }} {{ doctor.lastName }}</h2>
+              <p class="text-sm text-off-gray">{{ doctor.specialty ? doctor.specialty.name : 'Spécialité non spécifiée' }}</p>
+              <p class="text-sm text-dark-gray"><i class="fas fa-map-marker-alt text-off-blue mr-1"></i> {{ doctor.address }}</p>
+            </div>
+            <a href="#" class="text-dark-blue hover:underline text-sm">
+              <i class="fas fa-id-card mr-1"></i> Voir profil
+            </a>
+          </div>
+          
+          <!-- Doctor's Available Dates -->
+          <div class="p-6">
+            <h3 class="text-md font-semibold text-dark-gray mb-3">Créneaux disponibles:</h3>
+            
+            {# First collect all appointments for this doctor and sort them #}
+            {% set doctorAppointments = [] %}
+            {% for appointment in availableAppointments %}
+              {% if appointment.doctor.id == doctor.id %}
+                {% set doctorAppointments = doctorAppointments|merge([appointment]) %}
+              {% endif %}
+            {% endfor %}
+            
+            {# Sort appointments by date for consistency #}
+            {% set doctorAppointments = doctorAppointments|sort((a, b) => a.date <=> b.date) %}
+            
+            {# Now collect unique dates to use as our groups #}
+            {% set uniqueDates = [] %}
+            {% set dateStrings = [] %}
+            {% for appointment in doctorAppointments %}
+              {% set dateString = appointment.date|date('Y-m-d') %}
+              {% if dateString not in dateStrings %}
+                {% set dateStrings = dateStrings|merge([dateString]) %}
+                {% set uniqueDates = uniqueDates|merge([appointment.date]) %}
+              {% endif %}
+            {% endfor %}
+            
+            <div class="space-y-6">
+              {% for date in uniqueDates %}
+                {% set dateString = date|date('Y-m-d') %}
+                
+                <div class="p-4 rounded-lg bg-gray-50 border border-gray-200">
+                  <div class="font-medium text-dark-gray mb-3 border-b pb-2">
+                    <i class="far fa-calendar-alt text-off-blue mr-2"></i>
+                    {{ date|format_datetime(locale='fr',pattern="EEEE dd MMMM YYYY") }}
+                  </div>
+                  
+                  <div class="flex flex-wrap gap-2">
+                    {% for appointment in doctorAppointments %}
+                      {% if appointment.date|date('Y-m-d') == dateString %}
+                        <a 
+                          href="{{ path('app_patient_book_appointment', { id: appointment.id }) }}" 
+                          class="inline-block bg-gray-100 text-dark-gray hover:bg-off-blue hover:text-white px-3 py-2 rounded text-sm font-medium transition"
+                          onclick="return confirm('Confirmer la réservation pour le {{ appointment.date|date('d/m/Y') }} à {{ appointment.date|date('H:i') }} ?');"
+                        >
+                          {{ appointment.date|date('H:i') }}
+                        </a>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
           </div>
         </div>
-        <p class="text-sm text-dark-gray mb-2"><strong>Adresse:</strong> {{ appointment.doctor.address }}</p>
-        <p class="text-sm text-dark-gray mb-4"><strong>Date et Heure:</strong> {{ appointment.date|date('d/m/Y H:i') }}</p>
-        <div class="flex justify-end">
-          <a 
-            href="{{ path('app_patient_book_appointment', { id: appointment.id }) }}" 
-            class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue"
-          >
-            Prendre Rendez-vous
-          </a>
-        </div>
-      </div>
-    {% endfor %}
-  </div>
+      {% endfor %}
+    </div>
 
-  <!-- Pagination Controls -->
-  <div class="mt-6">
-    {{ knp_pagination_render(availableAppointments, 'pagination/custom_pagination.html.twig') }}
-  </div>
+    <!-- Pagination Controls -->
+    <div class="mt-6">
+      {{ knp_pagination_render(paginatedDoctors, 'pagination/custom_pagination.html.twig') }}
+    </div>
+  {% else %}
+    <div class="bg-white shadow-lg rounded-lg p-6 border-2 border-dotted border-gray-400 text-center">
+      <i class="fas fa-calendar-times text-4xl text-gray-400 mb-3"></i>
+      <p class="text-off-gray text-lg">Aucun rendez-vous disponible pour les critères sélectionnés.</p>
+      <p class="text-sm text-gray-500 mt-2">Essayez de modifier vos critères de recherche.</p>
+    </div>
+  {% endif %}
 {% else %}
-  <p class="text-off-gray">Aucun rendez-vous disponible pour le moment.</p>
+  <!-- Default message when no search has been performed -->
+  <div class="bg-white shadow-lg rounded-lg p-6 border-2 border-dotted border-gray-400 text-center">
+    <i class="fas fa-search text-4xl text-gray-400 mb-3"></i>
+    <p class="text-off-gray text-lg">Veuillez utiliser le formulaire de recherche ci-dessus</p>
+    <p class="text-sm text-gray-500 mt-2">Vous pouvez rechercher par nom de médecin, spécialité ou date</p>
+  </div>
 {% endif %}
+
+<script>
+  // Ensure clicking anywhere on the date input opens the calendar
+  document.getElementById('date').addEventListener('click', function () {
+    this.showPicker();
+  });
+</script>
 {% endblock %}
