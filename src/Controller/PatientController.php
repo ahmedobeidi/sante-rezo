@@ -6,6 +6,7 @@ use App\Entity\Appointment;
 use App\Entity\Patient;
 use App\Entity\Specialty;
 use App\Entity\User;
+use App\Form\PatientAppointmentSearchType;
 use App\Form\PatientCancelAppointmentType;
 use App\Form\PatientDeleteAccountType;
 use App\Form\PatientDeleteImageType;
@@ -555,7 +556,15 @@ final class PatientController extends AbstractController
         EntityManagerInterface $entityManager,
         PaginatorInterface $paginator
     ): Response {
-        // Get filter parameters
+        // Create the search form
+        $form = $this->createForm(PatientAppointmentSearchType::class, null, [
+            'action' => $this->generateUrl('app_patient_appointments_available'),
+            'method' => 'GET',
+        ]);
+
+        $form->handleRequest($request);
+
+        // Get filter parameters from the form
         $searchQuery = $request->query->get('search', '');
         $specialtyId = $request->query->get('specialty', '');
         $cityFilter = $request->query->get('city', '');
@@ -654,6 +663,7 @@ final class PatientController extends AbstractController
         }
 
         return $this->render('patient/appointments_available.html.twig', [
+            'searchForm' => $form->createView(),
             'availableAppointments' => $availableAppointments,
             'doctors' => $doctors, // Passing the doctor entities directly
             'paginatedDoctors' => $paginatedDoctors, // For pagination controls
@@ -661,7 +671,7 @@ final class PatientController extends AbstractController
             'specialtyId' => $specialtyId,
             'cityFilter' => $cityFilter,
             'dateFilter' => $dateFilter,
-            'specialties' => $specialties
+            'specialties' => $specialties,
         ]);
     }
 }

@@ -18,59 +18,37 @@
 </div> #}
 
 <!-- Search Form -->
-<form method="GET" action="{{ path('app_patient_appointments_available') }}" class="bg-white shadow-lg rounded-lg p-6 border-2 border-dotted border-gray-400 mb-6">
+<div class="bg-white shadow-lg rounded-lg p-6 border-2 border-dotted border-gray-400 mb-6">
   <h3 class="text-lg font-semibold text-dark-gray mb-4">Rechercher un médecin</h3>
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div>
-      <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Nom du médecin</label>
-      <input 
-        type="text" 
-        id="search"
-        name="search" 
-        value="{{ searchQuery }}" 
-        placeholder="Nom ou prénom..." 
-        class="w-full p-3 border border-solid border-gray-400 rounded-md"
-      />
+  
+  {{ form_start(searchForm) }}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        {{ form_label(searchForm.search) }}
+        {{ form_widget(searchForm.search) }}
+        {{ form_errors(searchForm.search) }}
+      </div>
+      <div>
+        {{ form_label(searchForm.specialty) }}
+        {{ form_widget(searchForm.specialty) }}
+        {{ form_errors(searchForm.specialty) }}
+      </div>
+      <div>
+        {{ form_label(searchForm.city) }}
+        {{ form_widget(searchForm.city) }}
+        {{ form_errors(searchForm.city) }}
+      </div>
+      <div>
+        {{ form_label(searchForm.date) }}
+        {{ form_widget(searchForm.date) }}
+        {{ form_errors(searchForm.date) }}
+      </div>
     </div>
-    <div>
-      <label for="specialty" class="block text-sm font-medium text-gray-700 mb-1">Spécialité</label>
-      <select id="specialty" name="specialty" class="w-full p-3 border border-solid border-gray-400 rounded-md">
-        <option value="">Toutes les spécialités</option>
-        {% for specialty in specialties %}
-          <option value="{{ specialty.id }}" {% if specialtyId is not empty and specialtyId == specialty.id %}selected{% endif %}>
-            {{ specialty.name }}
-          </option>
-        {% endfor %}
-      </select>
+    <div class="flex justify-end mt-4">
+      {{ form_widget(searchForm.submit) }}
     </div>
-    <div>
-      <label for="city" class="block text-sm font-medium text-gray-700 mb-1">Ville</label>
-      <input 
-        type="text" 
-        id="city"
-        name="city" 
-        value="{{ cityFilter }}" 
-        placeholder="Paris, Lyon, Marseille..." 
-        class="w-full p-3 border border-solid border-gray-400 rounded-md"
-      />
-    </div>
-    <div>
-      <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Date souhaitée</label>
-      <input 
-        type="date" 
-        id="date"
-        name="date" 
-        value="{{ dateFilter }}"
-        class="w-full p-3 border border-solid border-gray-400 rounded-md cursor-pointer"
-      />
-    </div>
-  </div>
-  <div class="flex justify-end mt-4">
-    <button type="submit" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue">
-      Rechercher
-    </button>
-  </div>
-</form>
+  {{ form_end(searchForm) }}
+</div>
 
 <!-- Available Appointments - Only show if search or filters were applied -->
 {% set searchApplied = searchQuery is not empty or specialtyId is not empty or cityFilter is not empty or dateFilter is not empty %}
@@ -212,8 +190,13 @@
 
 <script>
   // Ensure clicking anywhere on the date input opens the calendar
-  document.getElementById('date').addEventListener('click', function () {
-    this.showPicker();
+  document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.getElementById('date');
+    if (dateInput) {
+      dateInput.addEventListener('click', function () {
+        this.showPicker();
+      });
+    }
   });
   
   // Toggle collapse function for date sections
