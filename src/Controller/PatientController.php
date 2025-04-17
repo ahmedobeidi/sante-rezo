@@ -6,6 +6,7 @@ use App\Entity\Appointment;
 use App\Entity\Patient;
 use App\Entity\Specialty;
 use App\Entity\User;
+use App\Form\PatientDeleteAccountType;
 use App\Form\PatientDeleteImageType;
 use App\Form\PatientPasswordResetType;
 use App\Form\PatientProfileImageType;
@@ -70,12 +71,19 @@ final class PatientController extends AbstractController
             'method' => 'POST',
         ]);
 
+        // Create the delete account form
+        $deleteAccountForm = $this->createForm(PatientDeleteAccountType::class, null, [
+            'action' => $this->generateUrl('app_patient_delete_account'),
+            'method' => 'POST',
+        ]);
+
         return $this->render('patient/index.html.twig', [
             'patient' => $patient,
             'profileImageForm' => $profileImageForm->createView(),
             'deleteImageForm' => $deleteImageForm->createView(),
             'patientUpdateForm' => $patientUpdateForm->createView(),
             'passwordResetForm' => $passwordResetForm->createView(),
+            'deleteAccountForm' => $deleteAccountForm->createView(),
         ]);
     }
 
@@ -325,21 +333,34 @@ final class PatientController extends AbstractController
 
     #[Route('/patient/delete-account', name: 'app_patient_delete_account', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
-    public function deleteAccount(EntityManagerInterface $entityManager): Response
+    public function deleteAccount(
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response
     {
         /** @var User $user */
         $user = $this->getUser();
+        
+        // Create and handle the form
+        $form = $this->createForm(PatientDeleteAccountType::class);
+        $form->handleRequest($request);
+        
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Mark the account as deleted
+            $user->setIsDeleted(true);
+            $user->setDeletedDate(new \DateTimeImmutable());
 
-        // Mark the account as deleted
-        $user->setIsDeleted(true);
-        $user->setDeletedDate(new \DateTimeImmutable());
+            $entityManager->persist($user);
+            $entityManager->flush();
 
-        $entityManager->persist($user);
-        $entityManager->flush();
-
-        // Log the user out
-        $this->addFlash('success', 'Votre compte a été supprimé avec succès.');
-        return $this->redirectToRoute('app_logout');
+            // Log the user out
+            $this->addFlash('success', 'Votre compte a été supprimé avec succès.');
+            return $this->redirectToRoute('app_logout');
+        }
+        
+        // If form validation fails, redirect back to profile
+        $this->addFlash('error', 'Une erreur est survenue lors de la suppression du compte.');
+        return $this->redirectToRoute('app_patient_profile');
     }
 
     #[Route('/patient/appointments', name: 'app_patient_appointments')]
