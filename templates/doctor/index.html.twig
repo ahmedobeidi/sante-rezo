@@ -136,48 +136,28 @@
             Modifier le mot de passe
           </button>
 
-          <form 
-            id="edit-password-form" 
-            action="{{ path('app_doctor_handle_reset_password_form') }}" 
-            method="POST" 
-            class="flex-col gap-4 mt-4 hidden p-6 rounded-3xl shadow-lg border-2 border-dotted border-dark-blue"
-          >
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token('update-password') }}" />
-
+          {{ form_start(passwordResetForm, {
+              'attr': {
+                'id': 'edit-password-form',
+                'class': 'flex-col gap-4 mt-4 hidden p-6 rounded-3xl shadow-lg border-2 border-dotted border-dark-blue'
+              }
+          }) }}
             <div class="w-full">
-              <label for="current_password" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe actuel</label>
-              <input 
-                type="password" 
-                id="current_password" 
-                name="current_password" 
-                class="p-3 border border-dotted border-gray-500 rounded-md w-full" 
-                placeholder="Mot de passe actuel" 
-                required 
-              />
+              {{ form_label(passwordResetForm.currentPassword) }}
+              {{ form_widget(passwordResetForm.currentPassword) }}
+              {{ form_errors(passwordResetForm.currentPassword) }}
             </div>
 
             <div class="w-full">
-              <label for="new_password" class="block text-sm font-medium text-gray-700 mb-1">Nouveau mot de passe</label>
-              <input 
-                type="password" 
-                id="new_password" 
-                name="new_password" 
-                class="p-3 border border-dotted border-gray-500 rounded-md w-full" 
-                placeholder="Nouveau mot de passe" 
-                required 
-              />
+              {{ form_label(passwordResetForm.newPassword.first) }}
+              {{ form_widget(passwordResetForm.newPassword.first) }}
+              {{ form_errors(passwordResetForm.newPassword.first) }}
             </div>
 
             <div class="w-full">
-              <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1">Confirmer le mot de passe</label>
-              <input 
-                type="password" 
-                id="confirm_password" 
-                name="confirm_password" 
-                class="p-3 border border-dotted border-gray-500 rounded-md w-full" 
-                placeholder="Confirmer le mot de passe" 
-                required 
-              />
+              {{ form_label(passwordResetForm.newPassword.second) }}
+              {{ form_widget(passwordResetForm.newPassword.second) }}
+              {{ form_errors(passwordResetForm.newPassword.second) }}
             </div>
 
             <button 
@@ -186,7 +166,7 @@
             >
               Enregistrer
             </button>
-          </form>
+          {{ form_end(passwordResetForm) }}
         </div>
       </div>
 

@@ -7,6 +7,7 @@ use App\Entity\Doctor;
 use App\Entity\Specialty;
 use App\Entity\User;
 use App\Form\DoctorDeleteImageType;
+use App\Form\DoctorPasswordResetType;
 use App\Form\DoctorProfileImageType;
 use App\Form\DoctorUpdateType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -70,12 +71,19 @@ final class DoctorController extends AbstractController
             'method' => 'POST',
         ]);
 
+        // Create the password reset form
+        $passwordResetForm = $this->createForm(DoctorPasswordResetType::class, null, [
+            'action' => $this->generateUrl('app_doctor_handle_reset_password_form'),
+            'method' => 'POST',
+        ]);
+
         return $this->render('doctor/index.html.twig', [
             'doctor' => $doctor,
             'specialties' => $specialties,
             'profileImageForm' => $profileImageForm->createView(),
             'deleteImageForm' => $deleteImageForm->createView(),
             'doctorUpdateForm' => $doctorUpdateForm->createView(),
+            'passwordResetForm' => $passwordResetForm->createView(),
         ]);
     }
 
@@ -271,41 +279,47 @@ final class DoctorController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        // Get form data
-        $currentPassword = $request->request->get('current_password');
-        $newPassword = $request->request->get('new_password');
-        $confirmPassword = $request->request->get('confirm_password');
+        // Create the form
+        $form = $this->createForm(DoctorPasswordResetType::class);
+        $form->handleRequest($request);
 
-        // Check if any field is empty
-        if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
-            $this->addFlash('error', 'Tous les champs sont obligatoires.');
-            return $this->redirectToRoute('app_doctor_profile');
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Get form data
+            $currentPassword = $form->get('currentPassword')->getData();
+            $newPassword = $form->get('newPassword')->getData();
+
+            // Validate current password
+            if (!$passwordHasher->isPasswordValid($user, $currentPassword)) {
+                $this->addFlash('error', 'Le mot de passe actuel est incorrect.');
+                return $this->redirectToRoute('app_doctor_profile');
+            }
+
+            // Update the user's password
+            $user->setPassword($passwordHasher->hashPassword($user, $newPassword));
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Votre mot de passe a été mis à jour avec succès.');
+        } else if ($form->isSubmitted()) {
+            // Form has validation errors
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
+
+            // Add specific field errors
+            if ($form->get('currentPassword')->getErrors()->count() > 0) {
+                foreach ($form->get('currentPassword')->getErrors() as $error) {
+                    $this->addFlash('error', 'Mot de passe actuel: ' . $error->getMessage());
+                }
+            }
+
+            if ($form->get('newPassword')->getErrors()->count() > 0) {
+                foreach ($form->get('newPassword')->getErrors() as $error) {
+                    $this->addFlash('error', 'Nouveau mot de passe: ' . $error->getMessage());
+                }
+            }
         }
 
-        // Validate current password
-        if (!$passwordHasher->isPasswordValid($user, $currentPassword)) {
-            $this->addFlash('error', 'Le mot de passe actuel est incorrect.');
-            return $this->redirectToRoute('app_doctor_profile');
-        }
-
-        // Check if new passwords match
-        if ($newPassword !== $confirmPassword) {
-            $this->addFlash('error', 'Les nouveaux mots de passe ne correspondent pas.');
-            return $this->redirectToRoute('app_doctor_profile');
-        }
-
-        // Validate new password with regex
-        if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/', $newPassword)) {
-            $this->addFlash('error', 'Le nouveau mot de passe doit comporter au moins 6 caractères, dont au moins un chiffre, une majuscule et une minuscule.');
-            return $this->redirectToRoute('app_doctor_profile');
-        }
-
-        // Update the user's password
-        $user->setPassword($passwordHasher->hashPassword($user, $newPassword));
-        $entityManager->persist($user);
-        $entityManager->flush();
-
-        $this->addFlash('success', 'Votre mot de passe a été mis à jour avec succès.');
         return $this->redirectToRoute('app_doctor_profile');
     }
 
