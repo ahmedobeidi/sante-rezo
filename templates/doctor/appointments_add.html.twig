@@ -1,3 +1,4 @@
+{# filepath: c:\Users\Dev404\Documents\Developer\Ahmed\Projects\Symfony\SantéRézo\templates\doctor\appointments_add.html.twig #}
 {% extends 'doctor/appointments.html.twig' %}
 
 {% block content %}
@@ -23,110 +24,82 @@
 
 <div class="bg-white shadow-lg rounded-lg p-6 border-2 border-dotted border-gray-400">
   <h3 class="text-lg font-semibold text-dark-gray mb-4">Ajout en série</h3>
-  <form action="{{ path('app_doctor_appointments_add_bulk') }}" method="POST" class="flex flex-col gap-4">
+  {{ form_start(bulkForm, {'attr': {'class': 'flex flex-col gap-4'}}) }}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Date de début</label>
-        <input 
-          type="date" 
-          id="start_date" 
-          name="start_date" 
-          required 
-          class="p-3 border border-gray-300 rounded-md w-full cursor-pointer">
+        {{ form_label(bulkForm.start_date) }}
+        {{ form_widget(bulkForm.start_date) }}
+        {{ form_errors(bulkForm.start_date) }}
       </div>
       <div>
-        <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">Date de fin</label>
-        <input 
-          type="date" 
-          id="end_date" 
-          name="end_date" 
-          required 
-          class="p-3 border border-gray-300 rounded-md w-full cursor-pointer">
+        {{ form_label(bulkForm.end_date) }}
+        {{ form_widget(bulkForm.end_date) }}
+        {{ form_errors(bulkForm.end_date) }}
       </div>
     </div>
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <label for="start_time" class="block text-sm font-medium text-gray-700 mb-1">Heure de début</label>
-        <input 
-          type="time" 
-          id="start_time" 
-          name="start_time" 
-          required 
-          class="p-3 border border-gray-300 rounded-md w-full cursor-pointer">
+        {{ form_label(bulkForm.start_time) }}
+        {{ form_widget(bulkForm.start_time) }}
+        {{ form_errors(bulkForm.start_time) }}
       </div>
       <div>
-        <label for="end_time" class="block text-sm font-medium text-gray-700 mb-1">Heure de fin</label>
-        <input 
-          type="time" 
-          id="end_time" 
-          name="end_time" 
-          required 
-          class="p-3 border border-gray-300 rounded-md w-full cursor-pointer">
+        {{ form_label(bulkForm.end_time) }}
+        {{ form_widget(bulkForm.end_time) }}
+        {{ form_errors(bulkForm.end_time) }}
       </div>
     </div>
     
     <div>
-      <label for="duration" class="block text-sm font-medium text-gray-700 mb-1">Durée de rendez-vous (minutes)</label>
-      <select id="duration" name="duration" required class="p-3 border border-gray-300 rounded-md w-full">
-        <option value="15">15 minutes</option>
-        <option value="30" selected>30 minutes</option>
-        <option value="45">45 minutes</option>
-        <option value="60">60 minutes</option>
-      </select>
+      {{ form_label(bulkForm.duration) }}
+      {{ form_widget(bulkForm.duration) }}
+      {{ form_errors(bulkForm.duration) }}
     </div>
     
     <div class="mt-2">
-      <label class="block text-sm font-medium text-gray-700 mb-2">Jours de la semaine</label>
-      <div class="flex flex-wrap gap-4">
-        {% set days = [
-          {value: 'monday', label: 'Lundi'},
-          {value: 'tuesday', label: 'Mardi'},
-          {value: 'wednesday', label: 'Mercredi'},
-          {value: 'thursday', label: 'Jeudi'},
-          {value: 'friday', label: 'Vendredi'},
-          {value: 'saturday', label: 'Samedi'},
-          {value: 'sunday', label: 'Dimanche'}
-        ] %}
-        
-        {% for day in days %}
-          <div class="flex items-center">
-            <input 
-              type="checkbox" 
-              id="{{ day.value }}" 
-              name="weekdays[]" 
-              value="{{ day.value }}"
-              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              {% if loop.index <= 5 %}checked{% endif %}
-            >
-            <label for="{{ day.value }}" class="ml-2 text-sm text-gray-700">{{ day.label }}</label>
-          </div>
-        {% endfor %}
-      </div>
+      {{ form_label(bulkForm.weekdays, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
+        <div class="flex flex-wrap gap-4">
+          {% for child in bulkForm.weekdays %}
+            <div class="flex items-center">
+              {{ form_widget(child, {
+                'attr': {'class': 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'}
+              }) }}
+              {{ form_label(child, null, {'label_attr': {'class': 'ml-2 text-sm text-gray-700'}}) }}
+            </div>
+          {% endfor %}
+        </div>
+      {{ form_errors(bulkForm.weekdays) }}
     </div>
     
     <div class="flex justify-end">
-      <button type="submit" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue mt-2">
-        Générer les rendez-vous
-      </button>
+      {{ form_widget(bulkForm.submit) }}
     </div>
-  </form>
+  {{ form_end(bulkForm) }}
 </div>
 
 <script>
   // Ensure clicking anywhere on the input opens the calendar
-  document.getElementById('date').addEventListener('click', function () {
-    this.showPicker();
-  });
+  // The document.getElementById check should be done in JavaScript, not in Twig
+  const dateInput = document.getElementById('date');
+  if (dateInput) {
+    dateInput.addEventListener('click', function () {
+      this.showPicker();
+    });
+  }
+  
   document.getElementById('start_date').addEventListener('click', function () {
     this.showPicker();
   });
+  
   document.getElementById('end_date').addEventListener('click', function () {
     this.showPicker();
   });
+  
   document.getElementById('start_time').addEventListener('click', function () {
     this.showPicker();
   });
+  
   document.getElementById('end_time').addEventListener('click', function () {
     this.showPicker();
   });
