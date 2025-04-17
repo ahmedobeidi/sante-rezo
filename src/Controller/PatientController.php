@@ -8,6 +8,7 @@ use App\Entity\Specialty;
 use App\Entity\User;
 use App\Form\PatientDeleteImageType;
 use App\Form\PatientProfileImageType;
+use App\Form\PatientUpdateType;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -49,10 +50,16 @@ final class PatientController extends AbstractController
             'action' => $this->generateUrl('app_patient_upload_image'),
             'method' => 'POST',
         ]);
-        
+
         // Create the delete image form
         $deleteImageForm = $this->createForm(PatientDeleteImageType::class, null, [
             'action' => $this->generateUrl('app_patient_delete_image'),
+            'method' => 'POST',
+        ]);
+
+        // Create the patient update form
+        $patientUpdateForm = $this->createForm(PatientUpdateType::class, $patient, [
+            'action' => $this->generateUrl('app_patient_update'),
             'method' => 'POST',
         ]);
 
@@ -60,6 +67,7 @@ final class PatientController extends AbstractController
             'patient' => $patient,
             'profileImageForm' => $profileImageForm->createView(),
             'deleteImageForm' => $deleteImageForm->createView(),
+            'patientUpdateForm' => $patientUpdateForm->createView(),
         ]);
     }
 
@@ -75,70 +83,86 @@ final class PatientController extends AbstractController
             throw $this->createNotFoundException('Profil patient introuvable.');
         }
 
-        // Get form data
-        $firstName = $request->request->get('firstName');
-        $lastName = $request->request->get('lastName');
-        $city = $request->request->get('city');
-        $address = $request->request->get('address');
+        $originalData = [
+            'firstName' => $patient->getFirstName(),
+            'lastName' => $patient->getLastName(),
+            'city' => $patient->getCity(),
+            'address' => $patient->getAddress(),
+        ];
 
-        // Check if trying to empty existing data
-        if (($patient->getFirstName() && empty($firstName)) ||
-            ($patient->getLastName() && empty($lastName)) ||
-            ($patient->getCity() && empty($city)) ||
-            ($patient->getAddress() && empty($address))
-        ) {
-            $this->addFlash('error', 'Les champs peuvent être modifiés mais ne peuvent pas être vidés une fois remplis');
-            return $this->redirectToRoute('app_patient_profile');
-        }
+        // Create and handle form submission
+        $form = $this->createForm(PatientUpdateType::class, $patient);
 
-        // Check if any data has changed
-        $hasChanges = false;
+        try {
+            $form->handleRequest($request);
 
-        if (!empty($firstName) && $firstName !== $patient->getFirstName()) {
-            $patient->setFirstName($firstName);
-            $hasChanges = true;
-        }
-        if (!empty($lastName) && $lastName !== $patient->getLastName()) {
-            $patient->setLastName($lastName);
-            $hasChanges = true;
-        }
-        if (!empty($city) && $city !== $patient->getCity()) {
-            $patient->setCity($city);
-            $hasChanges = true;
-        }
-        if (!empty($address) && $address !== $patient->getAddress()) {
-            $patient->setAddress($address);
-            $hasChanges = true;
-        }
+            if ($form->isSubmitted() && $form->isValid()) {
+                // Check if trying to empty existing data
+                if (($originalData['firstName'] && empty($patient->getFirstName())) ||
+                    ($originalData['lastName'] && empty($patient->getLastName())) ||
+                    ($originalData['city'] && empty($patient->getCity())) ||
+                    ($originalData['address'] && empty($patient->getAddress()))
+                ) {
+                    $this->addFlash('error', 'Les champs peuvent être modifiés mais ne peuvent pas être vidés une fois remplis');
+                    return $this->redirectToRoute('app_patient_profile');
+                }
 
-        // Only proceed if there are changes
-        if ($hasChanges) {
-            // Check if all fields are filled to grant ROLE_PATIENT
-            if (
-                $patient->getFirstName() &&
-                $patient->getLastName() &&
-                $patient->getCity() &&
-                $patient->getAddress()
-            ) {
-                if (!in_array('ROLE_PATIENT', $user->getRoles())) {
-                    $roles = $user->getRoles();
-                    $roles[] = 'ROLE_PATIENT';
-                    $user->setRoles(array_unique($roles));
-                    $entityManager->persist($user);
+                // Check if any data has changed
+                $hasChanges =
+                    $originalData['firstName'] !== $patient->getFirstName() ||
+                    $originalData['lastName'] !== $patient->getLastName() ||
+                    $originalData['city'] !== $patient->getCity() ||
+                    $originalData['address'] !== $patient->getAddress();
 
-                    // Refresh the user's token with new roles
-                    $token = new UsernamePasswordToken(
-                        $user,
-                        'main',
-                        $user->getRoles()
-                    );
-                    $tokenStorage->setToken($token);
+                // Only proceed if there are changes
+                if ($hasChanges) {
+                    // Check if all fields are filled to grant ROLE_PATIENT
+                    if (
+                        $patient->getFirstName() &&
+                        $patient->getLastName() &&
+                        $patient->getCity() &&
+                        $patient->getAddress()
+                    ) {
+                        if (!in_array('ROLE_PATIENT', $user->getRoles())) {
+                            $roles = $user->getRoles();
+                            $roles[] = 'ROLE_PATIENT';
+                            $user->setRoles(array_unique($roles));
+                            $entityManager->persist($user);
+
+                            // Refresh the user's token with new roles
+                            $token = new UsernamePasswordToken(
+                                $user,
+                                'main',
+                                $user->getRoles()
+                            );
+                            $tokenStorage->setToken($token);
+                        }
+                    }
+
+                    $entityManager->persist($patient);
+                    $entityManager->flush();
+                    $this->addFlash('success', 'Profil mis à jour avec succès');
+                } else {
+                    $this->addFlash('info', 'Aucune modification détectée.');
+                }
+            } else if ($form->isSubmitted()) {
+                // Form has validation errors
+                foreach ($form->getErrors(true) as $error) {
+                    $this->addFlash('error', $error->getMessage());
+                }
+
+                // Check for specific field errors
+                foreach (['lastName', 'firstName', 'city', 'address'] as $field) {
+                    if ($form->get($field)->getErrors()->count() > 0) {
+                        foreach ($form->get($field)->getErrors() as $error) {
+                            $this->addFlash('error', 'Erreur dans le champ ' . $field . ': ' . $error->getMessage());
+                        }
+                    }
                 }
             }
-
-            $entityManager->persist($patient);
-            $entityManager->flush();
-            $this->addFlash('success', 'Profil mis à jour avec succès');
+        } catch (\Exception $e) {
+            // Catch any exception and provide a user-friendly message
+            $this->addFlash('error', 'Une erreur est survenue lors de la mise à jour du profil: ' . $e->getMessage());
         }
 
         return $this->redirectToRoute('app_patient_profile');
@@ -147,7 +171,7 @@ final class PatientController extends AbstractController
     #[Route('/patient/upload-image', name: 'app_patient_upload_image', methods: ['POST'])]
     public function uploadImage(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
-         /** @var User $user */
+        /** @var User $user */
         $user = $this->getUser();
         $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
 
@@ -204,8 +228,7 @@ final class PatientController extends AbstractController
     public function deleteImage(
         Request $request,
         EntityManagerInterface $entityManager
-    ): Response
-    {
+    ): Response {
         /** @var User $user */
         $user = $this->getUser();
         $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
@@ -214,11 +237,11 @@ final class PatientController extends AbstractController
             $this->addFlash('error', 'Aucune photo de profil à supprimer');
             return $this->redirectToRoute('app_patient_profile');
         }
-        
+
         // Create and handle form submission
         $form = $this->createForm(PatientDeleteImageType::class);
         $form->handleRequest($request);
-        
+
         if ($form->isSubmitted() && $form->isValid()) {
             // Delete the file
             $oldFile = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles/' . $patient->getProfileImage();
@@ -234,7 +257,7 @@ final class PatientController extends AbstractController
         } else {
             $this->addFlash('error', 'Une erreur est survenue lors de la suppression de la photo');
         }
-        
+
         return $this->redirectToRoute('app_patient_profile');
     }
 
@@ -365,7 +388,7 @@ final class PatientController extends AbstractController
         // Check if patient already has 2 or more future appointments with this doctor
         $now = new \DateTime('now', new \DateTimeZone('Europe/Paris'));
         $doctorId = $appointment->getDoctor()->getId();
-        
+
         $existingAppointments = $entityManager->getRepository(Appointment::class)
             ->createQueryBuilder('a')
             ->where('a.patient = :patient')
@@ -378,7 +401,7 @@ final class PatientController extends AbstractController
             ->setParameter('status', 'réservé')
             ->getQuery()
             ->getResult();
-        
+
         if (count($existingAppointments) >= 2) {
             $this->addFlash('error', 'Vous avez déjà deux rendez-vous programmés avec ce médecin. Vous ne pouvez pas en réserver plus pour le moment.');
             return $this->redirectToRoute('app_patient_appointments_available');

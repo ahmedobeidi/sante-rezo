@@ -92,41 +92,31 @@
 
         <!-- Form inputs div -->
         <div class="w-full lg:w-2/3 bg-off-white p-6 rounded-3xl shadow-lg border border-solid border-dark-blue">
-          <form action="{{ path('app_patient_update') }}" method="POST" class="flex flex-col gap-4">
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token('update-patient') }}" />
+          {{ form_start(patientUpdateForm, {'attr': {'class': 'flex flex-col gap-4'}}) }}
             <div class="flex flex-col md:flex-row gap-4">
               <div class="w-full">
-                <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-                <input type="text" id="lastName" name="lastName" value="{{ patient.lastName }}" class="p-3 border border-dotted border-gray-500 rounded-md w-full" placeholder="Nom" {% if patient.lastName %}required{% endif %} />
+                {{ form_label(patientUpdateForm.lastName) }}
+                {{ form_widget(patientUpdateForm.lastName) }}
+                {{ form_errors(patientUpdateForm.lastName) }}
               </div>
               <div class="w-full">
-                <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
-                <input type="text" id="firstName" name="firstName" value="{{ patient.firstName }}" class="p-3 border border-dotted border-gray-500 rounded-md w-full" placeholder="Prénom" {% if patient.firstName %}required{% endif %}/>
+                {{ form_label(patientUpdateForm.firstName) }}
+                {{ form_widget(patientUpdateForm.firstName) }}
+                {{ form_errors(patientUpdateForm.firstName) }}
               </div>
             </div>
             <div class="w-full">
-              <label for="city" class="block text-sm font-medium text-gray-700 mb-1">Ville</label>
-              <select id="city" name="city" class="p-3 border border-dotted border-gray-500 rounded-md w-full" {% if patient.city %}required{% endif %}>
-                <option value="">Sélectionnez une ville</option>
-                {% set cities = [
-                  "Paris", "Marseille", "Lyon", "Toulouse", "Nice", "Nantes", "Strasbourg", "Montpellier", 
-                  "Bordeaux", "Lille", "Rennes", "Reims", "Le Havre", "Saint-Étienne", "Toulon", 
-                  "Grenoble", "Dijon", "Angers", "Villeurbanne", "Le Mans", "Aix-en-Provence", 
-                  "Clermont-Ferrand", "Brest", "Tours", "Limoges", "Amiens", "Annecy", "Perpignan", 
-                  "Boulogne-Billancourt", "Metz", "Besançon", "Orléans", "Argenteuil", "Rouen", 
-                  "Mulhouse", "Caen", "Nancy", "Saint-Denis", "Saint-Paul", "Montreuil", "Avignon"
-                ] %}
-                {% for city in cities %}
-                  <option value="{{ city }}" {% if patient.city == city %}selected{% endif %}>{{ city }}</option>
-                {% endfor %}
-              </select>
+              {{ form_label(patientUpdateForm.city) }}
+              {{ form_widget(patientUpdateForm.city) }}
+              {{ form_errors(patientUpdateForm.city) }}
             </div>
             <div class="w-full">
-              <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-              <input type="text" id="address" name="address" value="{{ patient.address }}" class="p-3 border border-dotted border-gray-500 rounded-md w-full" placeholder="Adresse" {% if patient.address %}required{% endif %}/>
+              {{ form_label(patientUpdateForm.address) }}
+              {{ form_widget(patientUpdateForm.address) }}
+              {{ form_errors(patientUpdateForm.address) }}
             </div>
             <button type="submit" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px] w-full sm:w-auto sm:self-end">Enregistrer</button>
-          </form>
+          {{ form_end(patientUpdateForm) }}
         </div>
       </div>
     </div>
