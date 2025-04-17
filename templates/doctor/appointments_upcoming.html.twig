@@ -5,28 +5,21 @@
 
 <!-- Filter/Search Section -->
 <div class="bg-white shadow-lg rounded-lg p-6 border-2 border-dotted border-gray-400 mb-6">
-  <form method="GET" action="{{ path('app_doctor_appointments_upcoming') }}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  {{ form_start(filterForm, {'attr': {'class': 'grid grid-cols-1 md:grid-cols-2 gap-4'}}) }}
     <div>
-      <label for="date_filter" class="block text-sm font-medium text-gray-700 mb-1">Filtrer par date</label>
-      <input 
-        type="date" 
-        id="date_filter"
-        name="date_filter" 
-        value="{{ date_filter|default('') }}" 
-        class="w-full p-3 border border-solid border-gray-400 rounded-md cursor-pointer"
-      />
+      {{ form_label(filterForm.date_filter) }}
+      {{ form_widget(filterForm.date_filter) }}
+      {{ form_errors(filterForm.date_filter) }}
     </div>
     <div class="flex items-end">
-      <button type="submit" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue w-full md:w-auto">
-        <i class="fas fa-search mr-2"></i> Filtrer
-      </button>
+      {{ form_widget(filterForm.submit) }}
       {% if date_filter is defined and date_filter is not empty %}
         <a href="{{ path('app_doctor_appointments_upcoming') }}" class="ml-2 bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">
           <i class="fas fa-times mr-2"></i> Réinitialiser
         </a>
       {% endif %}
     </div>
-  </form>
+  {{ form_end(filterForm) }}
 </div>
 
 {% if appointmentsByDay is not empty %}

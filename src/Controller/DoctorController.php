@@ -6,6 +6,7 @@ use App\Entity\Appointment;
 use App\Entity\Doctor;
 use App\Entity\Specialty;
 use App\Entity\User;
+use App\Form\DoctorAppointmentFilterType;
 use App\Form\DoctorDeleteAccountType;
 use App\Form\DoctorDeleteImageType;
 use App\Form\DoctorPasswordResetType;
@@ -336,8 +337,7 @@ final class DoctorController extends AbstractController
     public function deleteAccount(
         Request $request,
         EntityManagerInterface $entityManager
-    ): Response
-    {
+    ): Response {
         /** @var User $user */
         $user = $this->getUser();
 
@@ -397,12 +397,21 @@ final class DoctorController extends AbstractController
             return $this->redirectToRoute('app_doctor_profile');
         }
 
+        // Get date filter if any
+        $dateFilter = $request->query->get('date_filter');
+
+        // Create and handle the filter form
+        $filterForm = $this->createForm(DoctorAppointmentFilterType::class, null, [
+            'date_filter' => $dateFilter,
+            'method' => 'GET',
+            'action' => $this->generateUrl('app_doctor_appointments_upcoming'),
+        ]);
+
+        $filterForm->handleRequest($request);
+
         // Set timezone to ensure correct filtering
         $timezone = new \DateTimeZone('Europe/Paris');
         $now = new \DateTime('now', $timezone);
-
-        // Get date filter if any
-        $dateFilter = $request->query->get('date_filter');
 
         // Fetch only upcoming appointments for the doctor that have been reserved by patients
         $queryBuilder = $entityManager->getRepository(Appointment::class)
@@ -455,7 +464,8 @@ final class DoctorController extends AbstractController
         return $this->render('doctor/appointments_upcoming.html.twig', [
             'appointmentsByDay' => $filteredAppointmentsByDay,
             'appointments' => $paginatedDates, // This is now a proper paginator object
-            'date_filter' => $dateFilter
+            'date_filter' => $dateFilter,
+            'filterForm' => $filterForm->createView(),
         ]);
     }
 
