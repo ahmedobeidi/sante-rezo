@@ -82,11 +82,9 @@
             {{ form_end(profileImageForm) }}
 
             {% if doctor.profileImage %}
-              <form action="{{ path('app_doctor_delete_image') }}" method="POST" class="flex flex-col items-center">
-                  <button type="submit" class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 text-[16px]">
-                      Supprimer la photo
-                  </button>
-              </form>
+              {{ form_start(deleteImageForm, {'attr': {'class': 'flex flex-col items-center'}}) }}
+                {{ form_widget(deleteImageForm.submit) }}
+              {{ form_end(deleteImageForm) }}
             {% endif %}
           </div>
         </div>
