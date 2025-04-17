@@ -23,14 +23,11 @@
         <p class="text-sm text-dark-gray mb-4"><strong>Date et Heure:</strong> {{ appointment.date|date('d/m/Y H:i') }}</p>
 
         <!-- Annuler Button -->
-        <form action="{{ path('app_patient_cancel_appointment', { id: appointment.id }) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler ce rendez-vous ?');">
-          <input type="hidden" name="_csrf_token" value="{{ csrf_token('cancel-appointment-' ~ appointment.id) }}">
-          <div class="flex justify-end">
-            <button type="submit" class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
-              Annuler
-            </button>
-          </div>
-        </form>
+        <div class="flex justify-end">
+          {{ form_start(cancelForms[appointment.id]) }}
+            {{ form_widget(cancelForms[appointment.id].submit) }}
+          {{ form_end(cancelForms[appointment.id]) }}
+        </div>
       </div>
     {% endfor %}
   </div>

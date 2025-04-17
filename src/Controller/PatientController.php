@@ -6,6 +6,7 @@ use App\Entity\Appointment;
 use App\Entity\Patient;
 use App\Entity\Specialty;
 use App\Entity\User;
+use App\Form\PatientCancelAppointmentType;
 use App\Form\PatientDeleteAccountType;
 use App\Form\PatientDeleteImageType;
 use App\Form\PatientPasswordResetType;
@@ -336,15 +337,14 @@ final class PatientController extends AbstractController
     public function deleteAccount(
         Request $request,
         EntityManagerInterface $entityManager
-    ): Response
-    {
+    ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        
+
         // Create and handle the form
         $form = $this->createForm(PatientDeleteAccountType::class);
         $form->handleRequest($request);
-        
+
         if ($form->isSubmitted() && $form->isValid()) {
             // Mark the account as deleted
             $user->setIsDeleted(true);
@@ -357,7 +357,7 @@ final class PatientController extends AbstractController
             $this->addFlash('success', 'Votre compte a été supprimé avec succès.');
             return $this->redirectToRoute('app_logout');
         }
-        
+
         // If form validation fails, redirect back to profile
         $this->addFlash('error', 'Une erreur est survenue lors de la suppression du compte.');
         return $this->redirectToRoute('app_patient_profile');
@@ -382,7 +382,9 @@ final class PatientController extends AbstractController
 
         // Handle search query
         $searchQuery = $request->query->get('search', '');
+
         $availableAppointments = [];
+
         if (!empty($searchQuery)) {
             $availableAppointments = $entityManager->getRepository(Appointment::class)->createQueryBuilder('a')
                 ->join('a.doctor', 'd')
@@ -454,8 +456,11 @@ final class PatientController extends AbstractController
 
     #[Route('/patient/appointments/cancel/{id}', name: 'app_patient_cancel_appointment', methods: ['POST'])]
     #[IsGranted('ROLE_PATIENT')]
-    public function cancelAppointment(Appointment $appointment, EntityManagerInterface $entityManager): Response
-    {
+    public function cancelAppointment(
+        Request $request,
+        Appointment $appointment,
+        EntityManagerInterface $entityManager
+    ): Response {
         /** @var User $user */
         $user = $this->getUser();
         $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
@@ -465,13 +470,25 @@ final class PatientController extends AbstractController
             return $this->redirectToRoute('app_patient_appointments');
         }
 
-        // Cancel the appointment
-        $appointment->setPatient(null);
-        $appointment->setStatus('disponible');
-        $entityManager->flush();
+        // Create the form with dynamic CSRF token ID
+        $form = $this->createForm(PatientCancelAppointmentType::class, null, [
+            'csrf_token_id' => 'cancel-appointment-' . $appointment->getId()
+        ]);
 
-        $this->addFlash('success', 'Le rendez-vous a été annulé avec succès.');
-        return $this->redirectToRoute('app_patient_appointments');
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Cancel the appointment
+            $appointment->setPatient(null);
+            $appointment->setStatus('disponible');
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Le rendez-vous a été annulé avec succès.');
+        } else {
+            $this->addFlash('error', 'Une erreur est survenue lors de l\'annulation du rendez-vous.');
+        }
+
+        return $this->redirectToRoute('app_patient_appointments_upcoming');
     }
 
     #[Route('/patient/appointments/upcoming', name: 'app_patient_appointments_upcoming')]
@@ -490,6 +507,7 @@ final class PatientController extends AbstractController
             $this->addFlash('error', 'Vous devez compléter votre profil pour accéder à cette page.');
             return $this->redirectToRoute('app_patient_profile');
         }
+
         // Set timezone to ensure correct filtering
         $timezone = new \DateTimeZone('Europe/Paris');
         $now = new \DateTime('now', $timezone);
@@ -510,8 +528,23 @@ final class PatientController extends AbstractController
             3 // Number of results per page
         );
 
+        // Create cancel forms for each appointment
+        $cancelForms = [];
+        foreach ($bookedAppointments as $appointment) {
+            $cancelForms[$appointment->getId()] = $this->createForm(
+                PatientCancelAppointmentType::class,
+                null,
+                [
+                    'action' => $this->generateUrl('app_patient_cancel_appointment', ['id' => $appointment->getId()]),
+                    'method' => 'POST',
+                    'csrf_token_id' => 'cancel-appointment-' . $appointment->getId()
+                ]
+            )->createView();
+        }
+
         return $this->render('patient/appointments_upcoming.html.twig', [
             'bookedAppointments' => $bookedAppointments,
+            'cancelForms' => $cancelForms,
         ]);
     }
 
