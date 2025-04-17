@@ -6,6 +6,7 @@ use App\Entity\Appointment;
 use App\Entity\Patient;
 use App\Entity\Specialty;
 use App\Entity\User;
+use App\Form\PatientDeleteImageType;
 use App\Form\PatientProfileImageType;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -48,10 +49,17 @@ final class PatientController extends AbstractController
             'action' => $this->generateUrl('app_patient_upload_image'),
             'method' => 'POST',
         ]);
+        
+        // Create the delete image form
+        $deleteImageForm = $this->createForm(PatientDeleteImageType::class, null, [
+            'action' => $this->generateUrl('app_patient_delete_image'),
+            'method' => 'POST',
+        ]);
 
         return $this->render('patient/index.html.twig', [
             'patient' => $patient,
             'profileImageForm' => $profileImageForm->createView(),
+            'deleteImageForm' => $deleteImageForm->createView(),
         ]);
     }
 
@@ -193,7 +201,10 @@ final class PatientController extends AbstractController
     }
 
     #[Route('/patient/delete-image', name: 'app_patient_delete_image', methods: ['POST'])]
-    public function deleteImage(EntityManagerInterface $entityManager): Response
+    public function deleteImage(
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -203,18 +214,27 @@ final class PatientController extends AbstractController
             $this->addFlash('error', 'Aucune photo de profil à supprimer');
             return $this->redirectToRoute('app_patient_profile');
         }
+        
+        // Create and handle form submission
+        $form = $this->createForm(PatientDeleteImageType::class);
+        $form->handleRequest($request);
+        
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Delete the file
+            $oldFile = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles/' . $patient->getProfileImage();
+            if (file_exists($oldFile)) {
+                unlink($oldFile);
+            }
 
-        // Delete the file
-        $oldFile = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles/' . $patient->getProfileImage();
-        if (file_exists($oldFile)) {
-            unlink($oldFile);
+            // Remove reference from database
+            $patient->setProfileImage(null);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Photo de profil supprimée avec succès');
+        } else {
+            $this->addFlash('error', 'Une erreur est survenue lors de la suppression de la photo');
         }
-
-        // Remove reference from database
-        $patient->setProfileImage(null);
-        $entityManager->flush();
-
-        $this->addFlash('success', 'Photo de profil supprimée avec succès');
+        
         return $this->redirectToRoute('app_patient_profile');
     }
 
