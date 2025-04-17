@@ -6,6 +6,7 @@ use App\Entity\Appointment;
 use App\Entity\Patient;
 use App\Entity\Specialty;
 use App\Entity\User;
+use App\Form\PatientProfileImageType;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -42,8 +43,15 @@ final class PatientController extends AbstractController
             $entityManager->flush();
         }
 
+        // Create the profile image upload form
+        $profileImageForm = $this->createForm(PatientProfileImageType::class, null, [
+            'action' => $this->generateUrl('app_patient_upload_image'),
+            'method' => 'POST',
+        ]);
+
         return $this->render('patient/index.html.twig', [
             'patient' => $patient,
+            'profileImageForm' => $profileImageForm->createView(),
         ]);
     }
 
@@ -131,7 +139,7 @@ final class PatientController extends AbstractController
     #[Route('/patient/upload-image', name: 'app_patient_upload_image', methods: ['POST'])]
     public function uploadImage(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
-        /** @var User $user */
+         /** @var User $user */
         $user = $this->getUser();
         $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
 
@@ -139,33 +147,45 @@ final class PatientController extends AbstractController
             throw $this->createNotFoundException('Patient not found');
         }
 
-        $profileImage = $request->files->get('profileImage');
+        // Create the form
+        $form = $this->createForm(PatientProfileImageType::class);
+        $form->handleRequest($request);
 
-        if ($profileImage) {
-            $originalFilename = pathinfo($profileImage->getClientOriginalName(), PATHINFO_FILENAME);
-            $safeFilename = $slugger->slug($originalFilename);
-            $newFilename = $safeFilename . '-' . uniqid() . '.' . $profileImage->guessExtension();
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var UploadedFile $profileImage */
+            $profileImage = $form->get('profileImage')->getData();
 
-            try {
-                $profileImage->move(
-                    $this->getParameter('kernel.project_dir') . '/public/uploads/profiles',
-                    $newFilename
-                );
+            if ($profileImage) {
+                $originalFilename = pathinfo($profileImage->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $profileImage->guessExtension();
 
-                // Delete old image if exists
-                if ($patient->getProfileImage()) {
-                    $oldFile = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles/' . $patient->getProfileImage();
-                    if (file_exists($oldFile)) {
-                        unlink($oldFile);
+                try {
+                    $profileImage->move(
+                        $this->getParameter('kernel.project_dir') . '/public/uploads/profiles',
+                        $newFilename
+                    );
+
+                    // Delete old image if exists
+                    if ($patient->getProfileImage()) {
+                        $oldFile = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles/' . $patient->getProfileImage();
+                        if (file_exists($oldFile)) {
+                            unlink($oldFile);
+                        }
                     }
+
+                    $patient->setProfileImage($newFilename);
+                    $entityManager->flush();
+
+                    $this->addFlash('success', 'Photo de profil mise à jour avec succès');
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Une erreur est survenue lors du téléchargement de l\'image: ' . $e->getMessage());
                 }
-
-                $patient->setProfileImage($newFilename);
-                $entityManager->flush();
-
-                $this->addFlash('success', 'Photo de profil mise à jour avec succès');
-            } catch (FileException $e) {
-                $this->addFlash('error', 'Une erreur est survenue lors du téléchargement de l\'image');
+            }
+        } elseif ($form->isSubmitted()) {
+            // Form has validation errors - add them as flash messages
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('error', $error->getMessage());
             }
         }
 
