@@ -74,17 +74,12 @@
                  alt="profile image" 
                  class="w-48 h-48 rounded-full object-cover" />
         
-            <form action="{{ path('app_doctor_upload_image') }}" method="POST" enctype="multipart/form-data" class="w-full flex flex-col items-center gap-2">
-                <input type="file" 
-                      name="profileImage" 
-                      id="profileImage" 
-                      accept="image/*" 
-                      class="hidden" 
-                      onchange="this.form.submit()" />
-                <label for="profileImage" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px] cursor-pointer">
+            {{ form_start(profileImageForm, {'attr': {'class': 'w-full flex flex-col items-center gap-2'}}) }}
+                {{ form_widget(profileImageForm.profileImage) }}
+                <label for="{{ profileImageForm.profileImage.vars.id }}" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px] cursor-pointer">
                     Changer la photo
                 </label>
-            </form>
+            {{ form_end(profileImageForm) }}
 
             {% if doctor.profileImage %}
               <form action="{{ path('app_doctor_delete_image') }}" method="POST" class="flex flex-col items-center">

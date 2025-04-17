@@ -6,6 +6,7 @@ use App\Entity\Appointment;
 use App\Entity\Doctor;
 use App\Entity\Specialty;
 use App\Entity\User;
+use App\Form\DoctorProfileImageType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -49,9 +50,16 @@ final class DoctorController extends AbstractController
         // Get all specialties for the dropdown
         $specialties = $entityManager->getRepository(Specialty::class)->findAll();
 
+        // Create the profile image upload form
+        $profileImageForm = $this->createForm(DoctorProfileImageType::class, null, [
+            'action' => $this->generateUrl('app_doctor_upload_image'),
+            'method' => 'POST',
+        ]);
+
         return $this->render('doctor/index.html.twig', [
             'doctor' => $doctor,
             'specialties' => $specialties,
+            'profileImageForm' => $profileImageForm->createView(),
         ]);
     }
 
@@ -145,33 +153,45 @@ final class DoctorController extends AbstractController
             throw $this->createNotFoundException('Profil médecin non trouvé');
         }
 
-        $profileImage = $request->files->get('profileImage');
+        // Create the form
+        $form = $this->createForm(DoctorProfileImageType::class);
+        $form->handleRequest($request);
 
-        if ($profileImage) {
-            $originalFilename = pathinfo($profileImage->getClientOriginalName(), PATHINFO_FILENAME);
-            $safeFilename = $slugger->slug($originalFilename);
-            $newFilename = $safeFilename . '-' . uniqid() . '.' . $profileImage->guessExtension();
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var UploadedFile $profileImage */
+            $profileImage = $form->get('profileImage')->getData();
 
-            try {
-                $profileImage->move(
-                    $this->getParameter('kernel.project_dir') . '/public/uploads/profiles',
-                    $newFilename
-                );
+            if ($profileImage) {
+                $originalFilename = pathinfo($profileImage->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $profileImage->guessExtension();
 
-                // Delete old image if exists
-                if ($doctor->getProfileImage()) {
-                    $oldFile = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles/' . $doctor->getProfileImage();
-                    if (file_exists($oldFile)) {
-                        unlink($oldFile);
+                try {
+                    $profileImage->move(
+                        $this->getParameter('kernel.project_dir') . '/public/uploads/profiles',
+                        $newFilename
+                    );
+
+                    // Delete old image if exists
+                    if ($doctor->getProfileImage()) {
+                        $oldFile = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles/' . $doctor->getProfileImage();
+                        if (file_exists($oldFile)) {
+                            unlink($oldFile);
+                        }
                     }
+
+                    $doctor->setProfileImage($newFilename);
+                    $entityManager->flush();
+
+                    $this->addFlash('success', 'Photo de profil mise à jour avec succès');
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Une erreur est survenue lors du téléchargement de l\'image: ' . $e->getMessage());
                 }
-
-                $doctor->setProfileImage($newFilename);
-                $entityManager->flush();
-
-                $this->addFlash('success', 'Photo de profil mise à jour avec succès');
-            } catch (FileException $e) {
-                $this->addFlash('error', 'Une erreur est survenue lors du téléchargement de l\'image');
+            }
+        } elseif ($form->isSubmitted()) {
+            // Form has validation errors - add them as flash messages
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('error', $error->getMessage());
             }
         }
 
