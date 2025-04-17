@@ -280,18 +280,30 @@
 
           {# Replace the existing form in templates/home/index.html.twig with this #}
           {{ form_start(contactForm, {'attr': {'id': 'contact', 'class': 'space-y-6 font-poppins'}}) }}
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {{ form_widget(contactForm.firstName) }}
-                  {{ form_widget(contactForm.lastName) }}
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {{ form_widget(contactForm.email) }}
-              </div>
-              {{ form_widget(contactForm.message) }}
-              
-              <div class="flex flex-col md:flex-row items-center gap-4">
-                  <button type="submit" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue">Contactez-nous</button>
-              </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    {{ form_label(contactForm.firstName) }}
+                    {{ form_widget(contactForm.firstName) }}
+                </div>
+                <div>
+                    {{ form_label(contactForm.lastName) }}
+                    {{ form_widget(contactForm.lastName) }}
+                </div>
+            </div>
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    {{ form_label(contactForm.email) }}
+                    {{ form_widget(contactForm.email) }}
+                </div>
+            </div>
+            <div>
+                {{ form_label(contactForm.message) }}
+                {{ form_widget(contactForm.message) }}
+            </div>
+            
+            <div class="flex flex-col md:flex-row items-center gap-4 mt-4">
+                <button type="submit" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue">Contactez-nous</button>
+            </div>
           {{ form_end(contactForm) }}
         </div>
         <!-- Image Column -->

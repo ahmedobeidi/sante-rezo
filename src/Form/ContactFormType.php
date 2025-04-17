@@ -20,7 +20,10 @@ class ContactFormType extends AbstractType
                     'placeholder' => 'Prénom',
                     'class' => 'border border-dotted border-gray-500 rounded p-2 focus:border-off-blue'
                 ],
-                'label' => false,
+                'label' => 'Prénom',
+                'label_attr' => [
+                    'class' => 'block text-sm font-medium text-dark-gray mb-1'
+                ],
                 'required' => true
             ])
             ->add('lastName', TextType::class, [
@@ -28,7 +31,10 @@ class ContactFormType extends AbstractType
                     'placeholder' => 'Nom',
                     'class' => 'border border-dotted border-gray-500 rounded p-2 focus:border-off-blue'
                 ],
-                'label' => false,
+                'label' => 'Nom',
+                'label_attr' => [
+                    'class' => 'block text-sm font-medium text-dark-gray mb-1'
+                ],
                 'required' => true
             ])
             ->add('email', EmailType::class, [
@@ -36,15 +42,22 @@ class ContactFormType extends AbstractType
                     'placeholder' => 'Email',
                     'class' => 'border border-dotted border-gray-500 rounded p-2 focus:border-off-blue'
                 ],
-                'label' => false,
+                'label' => 'Adresse email',
+                'label_attr' => [
+                    'class' => 'block text-sm font-medium text-dark-gray mb-1'
+                ],
                 'required' => true
             ])
             ->add('message', TextareaType::class, [
                 'attr' => [
                     'placeholder' => 'Écrivez votre message ici...',
-                    'class' => 'border border-dotted border-gray-500 rounded p-2 w-full focus:border-off-blue'
+                    'class' => 'border border-dotted border-gray-500 rounded p-2 w-full focus:border-off-blue',
+                    'rows' => 4
                 ],
-                'label' => false,
+                'label' => 'Message',
+                'label_attr' => [
+                    'class' => 'block text-sm font-medium text-dark-gray mb-1'
+                ],
                 'required' => true
             ]);
     }
