@@ -7,6 +7,8 @@ use App\Entity\Doctor;
 use App\Entity\Specialty;
 use App\Entity\User;
 use App\Form\DoctorAppointmentFilterType;
+use App\Form\DoctorAvailableAppointmentFilterType;
+use App\Form\DoctorCancelAppointmentType;
 use App\Form\DoctorDeleteAccountType;
 use App\Form\DoctorDeleteImageType;
 use App\Form\DoctorPasswordResetType;
@@ -531,34 +533,43 @@ final class DoctorController extends AbstractController
 
     #[Route('/doctor/appointments/cancel/{id}', name: 'app_doctor_cancel_appointment', methods: ['POST'])]
     #[IsGranted('ROLE_DOCTOR')]
-    public function cancelAppointment(Appointment $appointment, EntityManagerInterface $entityManager): Response
+    public function cancelAppointment(
+        Request $request,
+        Appointment $appointment, 
+        EntityManagerInterface $entityManager
+    ): Response
     {
         /** @var User $user */
         $user = $this->getUser();
         $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
 
-        if (!$doctor) {
-            throw $this->createNotFoundException('Profil médecin introuvable.');
-        }
-
-        // Check if the appointment belongs to the doctor
+        // Security check - ensure the appointment belongs to this doctor
         if ($appointment->getDoctor() !== $doctor) {
-            $this->addFlash('error', 'Vous ne pouvez pas annuler ce rendez-vous.');
-            return $this->redirectToRoute('app_doctor_appointments_upcoming');
+            throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à annuler ce rendez-vous.');
         }
 
-        // Check if the appointment is still available
-        if ($appointment->getPatient() !== null) {
-            $this->addFlash('error', 'Ce rendez-vous ne peut pas être annulé car il a déjà été réservé par un patient.');
-            return $this->redirectToRoute('app_doctor_appointments_upcoming');
+        // Create and handle the form
+        $form = $this->createForm(DoctorCancelAppointmentType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Check if the appointment has a patient
+            if ($appointment->getPatient()) {
+                $this->addFlash('error', 'Impossible d\'annuler un rendez-vous déjà réservé par un patient.');
+                return $this->redirectToRoute('app_doctor_appointments_available');
+            }
+
+            // Delete the available appointment
+            $entityManager->remove($appointment);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Le rendez-vous a été annulé avec succès.');
+        } else {
+            $this->addFlash('error', 'Une erreur est survenue lors de l\'annulation du rendez-vous.');
         }
 
-        // Cancel the appointment
-        $entityManager->remove($appointment);
-        $entityManager->flush();
-
-        $this->addFlash('success', 'Le rendez-vous a été annulé avec succès.');
-        return $this->redirectToRoute('app_doctor_appointments_upcoming');
+        // Redirect back to available appointments page
+        return $this->redirectToRoute('app_doctor_appointments_available');
     }
 
     #[Route('/doctor/appointments/add-bulk', name: 'app_doctor_appointments_add_bulk', methods: ['POST'])]
@@ -718,22 +729,33 @@ final class DoctorController extends AbstractController
             return $this->redirectToRoute('app_doctor_profile');
         }
 
+        // Get date filter if any
+        $dateFilter = $request->query->get('date_filter');
+
+        // Create and handle the filter form
+        $filterForm = $this->createForm(DoctorAvailableAppointmentFilterType::class, null, [
+            'date_filter' => $dateFilter,
+            'method' => 'GET',
+            'action' => $this->generateUrl('app_doctor_appointments_available'),
+        ]);
+
+        $filterForm->handleRequest($request);
+
         // Set timezone to ensure correct filtering
         $timezone = new \DateTimeZone('Europe/Paris');
         $now = new \DateTime('now', $timezone);
 
-        // Get date filter if any
-        $dateFilter = $request->query->get('date_filter');
-
-        // Fetch available appointments for the doctor
+        // Fetch only available appointments for the doctor
         $queryBuilder = $entityManager->getRepository(Appointment::class)
             ->createQueryBuilder('a')
             ->where('a.doctor = :doctor')
             ->andWhere('a.date >= :now') // Filter out past appointments
-            ->andWhere('a.status = :status') // Only available appointments
+            ->andWhere('a.status = :status') // Only show available appointments
+            ->andWhere('a.patient IS NULL') // Only show appointments without patients
             ->setParameter('doctor', $doctor)
             ->setParameter('now', $now->format('Y-m-d H:i:s'))
-            ->setParameter('status', 'disponible');
+            ->setParameter('status', 'disponible')
+            ->orderBy('a.date', 'ASC');
 
         // Apply date filter if provided
         if (!empty($dateFilter)) {
@@ -744,10 +766,7 @@ final class DoctorController extends AbstractController
                 ->setParameter('nextDay', $nextDay->format('Y-m-d'));
         }
 
-        // Order by date
-        $queryBuilder->orderBy('a.date', 'ASC');
-
-        // Group appointments by day
+        // Get all available appointments
         $allAppointments = $queryBuilder->getQuery()->getResult();
 
         // Group appointments by day
@@ -765,7 +784,7 @@ final class DoctorController extends AbstractController
         $paginatedDates = $paginator->paginate(
             $dateKeys,
             $request->query->getInt('page', 1),
-            1 // 1 day per page
+            1 // Show 1 day per page
         );
 
         // Create the filtered appointments by day array
@@ -776,10 +795,27 @@ final class DoctorController extends AbstractController
             }
         }
 
+        // Create cancel forms for each appointment
+        $cancelForms = [];
+        foreach ($filteredAppointmentsByDay as $dateKey => $appointments) {
+            foreach ($appointments as $appointment) {
+                $cancelForms[$appointment->getId()] = $this->createForm(
+                    DoctorCancelAppointmentType::class,
+                    null,
+                    [
+                        'action' => $this->generateUrl('app_doctor_cancel_appointment', ['id' => $appointment->getId()]),
+                        'method' => 'POST',
+                    ]
+                )->createView();
+            }
+        }
+
         return $this->render('doctor/appointments_available.html.twig', [
             'appointmentsByDay' => $filteredAppointmentsByDay,
-            'appointments' => $paginatedDates, // This is now a proper paginator object
-            'date_filter' => $dateFilter
+            'appointments' => $paginatedDates,
+            'date_filter' => $dateFilter,
+            'filterForm' => $filterForm->createView(),
+            'cancelForms' => $cancelForms,
         ]);
     }
 }
