@@ -8,6 +8,7 @@ use App\Entity\Specialty;
 use App\Entity\User;
 use App\Form\DoctorDeleteImageType;
 use App\Form\DoctorProfileImageType;
+use App\Form\DoctorUpdateType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -63,11 +64,18 @@ final class DoctorController extends AbstractController
             'method' => 'POST',
         ]);
 
+        // Create the update form
+        $doctorUpdateForm = $this->createForm(DoctorUpdateType::class, $doctor, [
+            'action' => $this->generateUrl('app_doctor_update'),
+            'method' => 'POST',
+        ]);
+
         return $this->render('doctor/index.html.twig', [
             'doctor' => $doctor,
             'specialties' => $specialties,
             'profileImageForm' => $profileImageForm->createView(),
             'deleteImageForm' => $deleteImageForm->createView(),
+            'doctorUpdateForm' => $doctorUpdateForm->createView(),
         ]);
     }
 
@@ -83,70 +91,80 @@ final class DoctorController extends AbstractController
             throw $this->createNotFoundException('Profil médecin non trouvé');
         }
 
-        // Get form data
-        $firstName = $request->request->get('firstName');
-        $lastName = $request->request->get('lastName');
-        $city = $request->request->get('city');
-        $address = $request->request->get('address');
-        $specialtyId = $request->request->get('specialty');
+        $originalData = [
+            'firstName' => $doctor->getFirstName(),
+            'lastName' => $doctor->getLastName(),
+            'city' => $doctor->getCity(),
+            'address' => $doctor->getAddress(),
+            'specialty' => $doctor->getSpecialty(),
+        ];
 
-        // Check if trying to empty existing data
-        if (($doctor->getFirstName() && empty($firstName)) ||
-            ($doctor->getLastName() && empty($lastName)) ||
-            ($doctor->getCity() && empty($city)) ||
-            ($doctor->getAddress() && empty($address))
-        ) {
-            $this->addFlash('error', 'Les champs peuvent être modifiés mais ne peuvent pas être vidés une fois remplis');
-            return $this->redirectToRoute('app_doctor_profile');
-        }
+        // Create and handle form submission
+        $form = $this->createForm(DoctorUpdateType::class, $doctor);
 
-        // Check if any data has changed
-        $hasChanges = false;
+        try {
+            $form->handleRequest($request);
 
-        if (!empty($firstName) && $firstName !== $doctor->getFirstName()) {
-            $doctor->setFirstName($firstName);
-            $hasChanges = true;
-        }
-        if (!empty($lastName) && $lastName !== $doctor->getLastName()) {
-            $doctor->setLastName($lastName);
-            $hasChanges = true;
-        }
-        if (!empty($city) && $city !== $doctor->getCity()) {
-            $doctor->setCity($city);
-            $hasChanges = true;
-        }
-        if (!empty($address) && $address !== $doctor->getAddress()) {
-            $doctor->setAddress($address);
-            $hasChanges = true;
-        }
+            if ($form->isSubmitted() && $form->isValid()) {
+                // Check if trying to empty existing data
+                if (($originalData['firstName'] && empty($doctor->getFirstName())) ||
+                    ($originalData['lastName'] && empty($doctor->getLastName())) ||
+                    ($originalData['city'] && empty($doctor->getCity())) ||
+                    ($originalData['address'] && empty($doctor->getAddress())) ||
+                    ($originalData['specialty'] && empty($doctor->getSpecialty()))
+                ) {
+                    $this->addFlash('error', 'Les champs peuvent être modifiés mais ne peuvent pas être vidés une fois remplis');
+                    return $this->redirectToRoute('app_doctor_profile');
+                }
 
-        // Handle specialty
-        if (!empty($specialtyId)) {
-            $specialty = $entityManager->getRepository(Specialty::class)->find($specialtyId);
-            if ($specialty && $doctor->getSpecialty() !== $specialty) {
-                $doctor->setSpecialty($specialty);
-                $hasChanges = true;
+                // Check if any data has changed
+                $hasChanges =
+                    $originalData['firstName'] !== $doctor->getFirstName() ||
+                    $originalData['lastName'] !== $doctor->getLastName() ||
+                    $originalData['city'] !== $doctor->getCity() ||
+                    $originalData['address'] !== $doctor->getAddress() ||
+                    $originalData['specialty'] !== $doctor->getSpecialty();
+
+                // Only proceed if there are changes
+                if ($hasChanges) {
+                    // Check if profile is complete to set isCompleted flag
+                    if (
+                        $doctor->getFirstName() &&
+                        $doctor->getLastName() &&
+                        $doctor->getCity() &&
+                        $doctor->getAddress() &&
+                        $doctor->getSpecialty()
+                    ) {
+                        $doctor->setIsCompleted(true);
+                    } else {
+                        $doctor->setIsCompleted(false);
+                    }
+
+                    $entityManager->persist($doctor);
+                    $entityManager->flush();
+                    $this->addFlash('success', 'Profil mis à jour avec succès');
+                } else {
+                    $this->addFlash('info', 'Aucune modification détectée.');
+                }
+            } else if ($form->isSubmitted()) {
+                // Form has validation errors
+                foreach ($form->getErrors(true) as $error) {
+                    $this->addFlash('error', $error->getMessage());
+                }
+
+                // Check for specific field errors
+                foreach (['lastName', 'firstName', 'city', 'address', 'specialty'] as $field) {
+                    if ($form->get($field)->getErrors()->count() > 0) {
+                        foreach ($form->get($field)->getErrors() as $error) {
+                            $this->addFlash('error', 'Erreur dans le champ ' . $field . ': ' . $error->getMessage());
+                        }
+                    }
+                }
             }
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Une erreur est survenue lors de la mise à jour du profil: ' . $e->getMessage());
         }
 
-        // Only proceed if there are changes
-        if ($hasChanges) {
-            if (
-                $doctor->getFirstName() &&
-                $doctor->getLastName() &&
-                $doctor->getCity() &&
-                $doctor->getAddress() &&
-                $doctor->getSpecialty()
-            ) {
-                $doctor->setIsCompleted(true);
-            } else {
-                $doctor->setIsCompleted(false);
-            }
-        }
-
-        $entityManager->persist($doctor);
-        $entityManager->flush();
-        $this->addFlash('success', 'Profil mis à jour avec succès');
         return $this->redirectToRoute('app_doctor_profile');
     }
 
@@ -210,8 +228,7 @@ final class DoctorController extends AbstractController
     public function deleteImage(
         Request $request,
         EntityManagerInterface $entityManager
-    ): Response
-    {
+    ): Response {
         /** @var User $user */
         $user = $this->getUser();
         $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
