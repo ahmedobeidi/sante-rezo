@@ -16,7 +16,7 @@
     <!-- Favicon -->
     <link rel="icon" href="{{ asset('img/favicon.png') }}" />
 
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap" rel="stylesheet" />
@@ -24,7 +24,8 @@
 
     <link rel="stylesheet" href="{{ asset('styles/app.css') }}" />
     <link rel="stylesheet" href="{{ asset('styles/custom.css') }}" />
-
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    
     {% block stylesheets %}
 
     {% endblock %}
@@ -35,7 +36,8 @@
       {% endblock %}
     {% endblock %}
 
-    {% block js %}{% endblock %}
+    {% block js %}
+    {% endblock %}
     <script defer>
       const initializeMobileMenu = () => {
         const menuToggle = document.getElementById('menu-toggle')
@@ -89,7 +91,7 @@
       </div>
     </header>
     <!-- End Header -->
-{# data-turbo-permanent #}
+    {# data-turbo-permanent #}
     <!-- Mobile Navigation: Full screen overlay -->
     <div id="mobile-nav" class="fixed inset-0 bg-off-white hidden z-40">
       {% block navbarMobile %}
@@ -111,5 +113,27 @@
       </div>
     </footer>
     <!-- End Copyright -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+      $(document).ready(function() {
+        $('.select-height-limited').select2({
+          dropdownAutoWidth: true,
+          width: '100%',
+          minimumResultsForSearch: 5,
+          maximumSelectionSize: 15
+        });
+
+        // Réinitialiser Select2 après navigation Turbo
+        document.addEventListener('turbo:load', function() {
+          $('.select-height-limited').select2({
+            dropdownAutoWidth: true,
+            width: '100%',
+            minimumResultsForSearch: 5,
+            maximumSelectionSize: 15
+          });
+        });
+      });
+    </script>
   </body>
 </html>

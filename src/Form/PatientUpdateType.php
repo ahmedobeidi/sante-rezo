@@ -55,7 +55,7 @@ class PatientUpdateType extends AbstractType
             ->add('city', ChoiceType::class, [
                 'choices' => array_flip(array_merge(['Sélectionnez une ville' => ''], $citiesChoices)),
                 'attr' => [
-                    'class' => 'p-3 border border-dotted border-gray-500 rounded-md w-full'
+                    'class' => 'select-height-limited'
                 ],
                 'label' => 'Ville',
                 'label_attr' => [
