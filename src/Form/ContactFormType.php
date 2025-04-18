@@ -18,7 +18,7 @@ class ContactFormType extends AbstractType
             ->add('firstName', TextType::class, [
                 'attr' => [
                     'placeholder' => 'Prénom',
-                    'class' => 'border border-dotted border-gray-500 rounded p-2 focus:border-off-blue'
+                    'class' => 'w-full border border-dotted border-gray-500 rounded p-2 focus:border-off-blue'
                 ],
                 'label' => 'Prénom',
                 'label_attr' => [
@@ -29,7 +29,7 @@ class ContactFormType extends AbstractType
             ->add('lastName', TextType::class, [
                 'attr' => [
                     'placeholder' => 'Nom',
-                    'class' => 'border border-dotted border-gray-500 rounded p-2 focus:border-off-blue'
+                    'class' => 'w-full border border-dotted border-gray-500 rounded p-2 focus:border-off-blue'
                 ],
                 'label' => 'Nom',
                 'label_attr' => [
@@ -40,7 +40,7 @@ class ContactFormType extends AbstractType
             ->add('email', EmailType::class, [
                 'attr' => [
                     'placeholder' => 'Email',
-                    'class' => 'border border-dotted border-gray-500 rounded p-2 focus:border-off-blue'
+                    'class' => 'w-full border border-dotted border-gray-500 rounded p-2 focus:border-off-blue'
                 ],
                 'label' => 'Adresse email',
                 'label_attr' => [
