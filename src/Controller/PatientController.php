@@ -347,10 +347,34 @@ final class PatientController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Find patient associated with user
+            $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
+
+            if ($patient) {
+                // Find all upcoming appointments for this patient
+                $now = new \DateTime('now', new \DateTimeZone('Europe/Paris'));
+                $upcomingAppointments = $entityManager->getRepository(Appointment::class)
+                    ->createQueryBuilder('a')
+                    ->where('a.patient = :patient')
+                    ->andWhere('a.date >= :now')
+                    ->andWhere('a.status = :status')
+                    ->setParameter('patient', $patient)
+                    ->setParameter('now', $now)
+                    ->setParameter('status', 'réservé')
+                    ->getQuery()
+                    ->getResult();
+
+                // Reset all upcoming appointments to available
+                foreach ($upcomingAppointments as $appointment) {
+                    $appointment->setPatient(null);
+                    $appointment->setStatus('disponible');
+                    $entityManager->persist($appointment);
+                }
+            }
+
             // Mark the account as deleted
             $user->setIsDeleted(true);
             $user->setDeletedDate(new \DateTimeImmutable());
-
             $entityManager->persist($user);
             $entityManager->flush();
 
