@@ -5,10 +5,10 @@ namespace App\Form;
 use App\Entity\Specialty;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\SearchType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -16,6 +16,32 @@ class PatientAppointmentSearchType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        // Define fixed list of major cities in France
+        $cities = [
+            'Paris' => 'Paris',
+            'Marseille' => 'Marseille',
+            'Lyon' => 'Lyon',
+            'Toulouse' => 'Toulouse',
+            'Nice' => 'Nice',
+            'Nantes' => 'Nantes',
+            'Strasbourg' => 'Strasbourg',
+            'Montpellier' => 'Montpellier',
+            'Bordeaux' => 'Bordeaux',
+            'Lille' => 'Lille',
+            'Rennes' => 'Rennes',
+            'Reims' => 'Reims',
+            'Le Havre' => 'Le Havre',
+            'Saint-Étienne' => 'Saint-Étienne',
+            'Toulon' => 'Toulon',
+            'Angers' => 'Angers',
+            'Grenoble' => 'Grenoble',
+            'Dijon' => 'Dijon',
+            'Nîmes' => 'Nîmes',
+            'Aix-en-Provence' => 'Aix-en-Provence',
+            'Casablanca' => 'Casablanca',
+            'Agadir' => 'Agadir',
+        ];
+
         $builder
             ->add('search', SearchType::class, [
                 'label' => 'Nom du médecin',
@@ -41,15 +67,16 @@ class PatientAppointmentSearchType extends AbstractType
                 'placeholder' => 'Toutes les spécialités',
                 'required' => false,
             ])
-            ->add('city', TextType::class, [
+            ->add('city', ChoiceType::class, [
                 'label' => 'Ville',
                 'label_attr' => [
                     'class' => 'block text-sm font-medium text-gray-700 mb-1'
                 ],
                 'attr' => [
-                    'class' => 'w-full p-3 border border-solid border-gray-400 rounded-md',
-                    'placeholder' => 'Paris, Lyon, Marseille...'
+                    'class' => 'w-full p-3 border border-solid border-gray-400 rounded-md'
                 ],
+                'placeholder' => 'Toutes les villes',
+                'choices' => $cities,
                 'required' => false,
             ])
             ->add('date', DateType::class, [
