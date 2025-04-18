@@ -11,6 +11,7 @@ use App\Form\DoctorAppointmentFilterType;
 use App\Form\DoctorAvailableAppointmentFilterType;
 use App\Form\DoctorCancelAppointmentType;
 use App\Form\DoctorDeleteAccountType;
+use App\Form\DoctorDeleteDayAppointmentsType;
 use App\Form\DoctorDeleteImageType;
 use App\Form\DoctorPasswordResetType;
 use App\Form\DoctorProfileImageType;
@@ -824,12 +825,105 @@ final class DoctorController extends AbstractController
             }
         }
 
+        $deleteDayForms = [];
+        foreach ($filteredAppointmentsByDay as $dateKey => $appointments) {
+            $deleteDayForms[$dateKey] = $this->createForm(
+                DoctorDeleteDayAppointmentsType::class,
+                null,
+                [
+                    'action' => $this->generateUrl('app_doctor_delete_day_appointments'),
+                    'method' => 'POST',
+                    'date' => $dateKey,
+                ]
+            )->createView();
+        }
+
         return $this->render('doctor/appointments_available.html.twig', [
             'appointmentsByDay' => $filteredAppointmentsByDay,
             'appointments' => $paginatedDates,
             'date_filter' => $dateFilter,
             'filterForm' => $filterForm->createView(),
             'cancelForms' => $cancelForms,
+            'deleteDayForms' => $deleteDayForms, // Add this line
         ]);
+    }
+
+    #[Route('/doctor/appointments/delete-day', name: 'app_doctor_delete_day_appointments', methods: ['POST'])]
+    #[IsGranted('ROLE_DOCTOR')]
+    public function deleteDayAppointments(
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response {
+        /** @var User $user */
+        $user = $this->getUser();
+        $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+
+        // Security check - ensure the user is a doctor with a completed profile
+        if ((!$doctor && in_array('ROLE_DOCTOR', $user->getRoles())) || ($doctor && !$doctor->isCompleted())) {
+            $this->addFlash('error', 'Vous devez compléter votre profil pour effectuer cette action.');
+            return $this->redirectToRoute('app_doctor_profile');
+        }
+
+        // Create and handle the form
+        $form = $this->createForm(DoctorDeleteDayAppointmentsType::class, null, [
+            'date' => null, // This will be populated by the form submission
+        ]);
+        
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $date = $form->get('date')->getData();
+            
+            if (empty($date)) {
+                $this->addFlash('error', 'Aucune date spécifiée.');
+                return $this->redirectToRoute('app_doctor_appointments_available');
+            }
+            
+            try {
+                // Parse the date
+                $timezone = new \DateTimeZone('Europe/Paris');
+                $dateObj = new \DateTime($date, $timezone);
+                $nextDay = (clone $dateObj)->modify('+1 day');
+                
+                // Find all available appointments for this day that belong to this doctor
+                $appointmentsToDelete = $entityManager->getRepository(Appointment::class)
+                    ->createQueryBuilder('a')
+                    ->where('a.doctor = :doctor')
+                    ->andWhere('a.date >= :dayStart')
+                    ->andWhere('a.date < :dayEnd')
+                    ->andWhere('a.patient IS NULL') // Only delete appointments without patients
+                    ->andWhere('a.status = :status')
+                    ->setParameter('doctor', $doctor)
+                    ->setParameter('dayStart', $dateObj->format('Y-m-d'))
+                    ->setParameter('dayEnd', $nextDay->format('Y-m-d'))
+                    ->setParameter('status', 'disponible')
+                    ->getQuery()
+                    ->getResult();
+                
+                $count = count($appointmentsToDelete);
+                
+                if ($count === 0) {
+                    $this->addFlash('info', 'Aucun rendez-vous disponible à supprimer pour cette date.');
+                    return $this->redirectToRoute('app_doctor_appointments_available');
+                }
+                
+                // Delete all found appointments
+                foreach ($appointmentsToDelete as $appointment) {
+                    $entityManager->remove($appointment);
+                }
+                
+                $entityManager->flush();
+                
+                $this->addFlash('success', 'Toutes les disponibilités pour cette journée ont été supprimées avec succès.');
+                
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Une erreur est survenue: ' . $e->getMessage());
+            }
+            
+            return $this->redirectToRoute('app_doctor_appointments_available');
+        }
+        
+        $this->addFlash('error', 'Requête invalide.');
+        return $this->redirectToRoute('app_doctor_appointments_available');
     }
 }

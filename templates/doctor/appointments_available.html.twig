@@ -27,10 +27,19 @@
     {% for dateKey, dayAppointments in appointmentsByDay %}
       <div class="bg-white shadow-lg rounded-lg p-6 border-2 border-dotted border-gray-400">
         <div class="mb-4">
-          <h2 class="text-xl font-bold text-dark-gray">
-            {{ dayAppointments[0].date|format_datetime(locale='fr',pattern="EEEE dd MMMM YYYY") }}
-          </h2>
+          <div class="flex flex-row justify-between">
+            <h2 class="text-xl font-bold text-dark-gray">
+              {{ dayAppointments[0].date|format_datetime(locale='fr',pattern="EEEE dd MMMM YYYY") }}
+            </h2>
+            <div>
+              {{ form_start(deleteDayForms[dateKey]) }}
+                {{ form_widget(deleteDayForms[dateKey].delete) }}
+              {{ form_end(deleteDayForms[dateKey]) }}
+            </div>
+          </div>
           <div class="h-1 w-20 bg-off-blue mt-2 mb-4"></div>
+          <div class="flex justify-end w-fit">
+        </div>
         </div>
         
         <div class="space-y-6">
