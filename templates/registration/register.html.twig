@@ -45,25 +45,34 @@
         <h3 class="font-poppins text-2xl border-5 font-medium">S'inscrire</h3>
         {{ form_start(registrationForm, { attr: { class: 'flex flex-col gap-5', role: 'form', id: 'register-form', 'accept-char': 'UTF-8', autocomplete: 'off', method: 'POST' } }) }}
 
-        {% if form_errors(registrationForm.email) or form_errors(registrationForm.plainPassword.first) or form_errors(registrationForm.plainPassword.first) %}
+        {% if form_errors(registrationForm.email) or form_errors(registrationForm.plainPassword.first) or form_errors(registrationForm.plainPassword.second) or form_errors(registrationForm.agreeTerms)%}
           <div class="bg-red-100 text-red-700 p-2 rounded">
             {{ form_errors(registrationForm.email) }}
             {{ form_errors(registrationForm.plainPassword.first) }}
             {{ form_errors(registrationForm.plainPassword.second) }}
+            {{ form_errors(registrationForm.agreeTerms) }}
           </div>
         {% endif %}
 
-        <div class="flex flex-col gap-1">{{ form_label(registrationForm.email) }}
-          {{ form_widget(registrationForm.email) }}</div>
+        <div class="flex flex-col gap-1">
+          {{ form_label(registrationForm.email) }}
+          {{ form_widget(registrationForm.email) }}
+        </div>
 
-        <div class="flex flex-col gap-1">{{ form_label(registrationForm.plainPassword.first) }}
-          {{ form_widget(registrationForm.plainPassword.first) }}</div>
+        <div class="flex flex-col gap-1">
+          {{ form_label(registrationForm.plainPassword.first) }}
+          {{ form_widget(registrationForm.plainPassword.first) }}
+        </div>
 
-        <div class="flex flex-col gap-1">{{ form_label(registrationForm.plainPassword.second) }}
-          {{ form_widget(registrationForm.plainPassword.second) }}</div>
+        <div class="flex flex-col gap-1">
+          {{ form_label(registrationForm.plainPassword.second) }}
+          {{ form_widget(registrationForm.plainPassword.second) }}
+        </div>
 
-        <div class="flex flex-row gap-1">{{ form_widget(registrationForm.agreeTerms) }}
-          {{ form_label(registrationForm.agreeTerms) }}</div>
+        <div class="flex flex-row gap-1">
+          {{ form_widget(registrationForm.agreeTerms) }}
+          {{ form_label(registrationForm.agreeTerms) }}
+        </div>
 
         <button type="submit" class="text-center bg-off-blue text-off-white py-3 hover:bg-dark-gray">S'inscrire</button>
 

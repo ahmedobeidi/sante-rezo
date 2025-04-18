@@ -31,7 +31,7 @@ class RegistrationFormType extends AbstractType
                 'constraints' => [
                     new Regex([
                         'pattern' => '/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
-                        'message' => 'Veuillez entrer une adresse e-mail valide',
+                        'message' => 'Veuillez entrer une adresse e-mail valide.',
                     ])
                 ],
             ])
@@ -52,28 +52,28 @@ class RegistrationFormType extends AbstractType
                         'placeholder' => 'Confirmer le mot de passe'
                     ],
                 ],
-                'invalid_message' => 'Les mots de passe doivent correspondre',
+                'invalid_message' => 'Les mots de passe doivent correspondre.',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Veuillez entrer un mot de passe',
+                        'message' => 'Veuillez entrer un mot de passe.',
                     ]),
                     new Regex([
                         'pattern' => '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/',
-                        'message' => 'Votre mot de passe doit comporter au moins 6 caractères, dont au moins un chiffre, une majuscule et une minuscule',
+                        'message' => 'Votre mot de passe doit comporter au moins 6 caractères, dont au moins un chiffre, une majuscule et une minuscule.',
                     ]),
                 ],
             ])->add('agreeTerms', CheckboxType::class, [
                 'mapped' => false,
                 'constraints' => [
                     new IsTrue([
-                        'message' => 'Vous devez accepter les conditions',
+                        'message' => 'Vous devez accepter les conditions.',
                     ]),
                 ],
                 'attr' => [
                     'id' => 'accept-terms',
                     'required' => true,
                 ],
-                'label' => "J'ai lu et j'accepte <a href='#!' target='_blank' class='text-off-blue'>les conditions d'utilisation </a>",
+                'label' => "J'ai lu et j'accepte <a href='/conditions-utilisation' target='_blank' class='text-off-blue'>les conditions d'utilisation </a>",
                 'label_html' => true,
 
             ]);
