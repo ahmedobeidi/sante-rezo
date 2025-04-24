@@ -53,17 +53,17 @@ class PatientUpdateType extends AbstractType
                 'empty_data' => '', // Provides an empty string instead of null
             ])
             ->add('city', ChoiceType::class, [
-                'choices' => array_flip(array_merge(['Sélectionnez une ville' => ''], $citiesChoices)),
+                'choices' => array_combine($cities, $cities), // Convert array to format ['Paris' => 'Paris', 'Lyon' => 'Lyon', etc.]
                 'attr' => [
-                    'class' => 'select-height-limited'
+                    'class' => 'p-3 border border-dotted border-gray-500 rounded-md w-full'
                 ],
                 'label' => 'Ville',
                 'label_attr' => [
                     'class' => 'block text-sm font-medium text-gray-700 mb-1'
                 ],
-                'required' => false, // Changed to false to prevent HTML5 validation
-                'placeholder' => false,
-                'empty_data' => '', // Provides an empty string instead of null
+                'placeholder' => 'Sélectionnez une ville',
+                'required' => false,
+                'empty_data' => '',
             ])
             ->add('address', TextType::class, [
                 'attr' => [
