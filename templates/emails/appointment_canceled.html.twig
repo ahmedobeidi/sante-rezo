@@ -1,0 +1,19 @@
+{% extends 'emails/base.html.twig' %}
+
+{% block body %}
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 5px;">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <img src="{{ absolute_url(asset('img/logo.png')) }}" alt="SantéRézo Logo" style="max-width: 150px;">
+    </div>
+    
+    <h2 style="color: #333; text-align: center;">Annulation de votre rendez-vous</h2>
+    
+    <p>Bonjour {{ patient.firstName }},</p>
+    
+    <p>Nous vous informons que votre rendez-vous avec Dr. {{ doctor.firstName }} {{ doctor.lastName }} prévu le {{ appointmentDate }} a été annulé.</p>
+    
+    <p>Pour toute question ou pour reprendre un nouveau rendez-vous, veuillez vous connecter à votre espace patient sur SantéRézo.</p>
+    
+    <p>Cordialement,<br>L'équipe SantéRézo</p>
+</div>
+{% endblock %}

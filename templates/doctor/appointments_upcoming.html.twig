@@ -51,6 +51,10 @@
                     {% if appointment.patient is not null %}
                       <p class="text-sm text-dark-gray"><strong>Patient:</strong> {{ appointment.patient.firstName }} {{ appointment.patient.lastName }}</p>
                     {% endif %}
+
+                    {{ form_start(cancelForms[appointment.id]) }}
+                        {{ form_widget(cancelForms[appointment.id].cancel) }}
+                    {{ form_end(cancelForms[appointment.id]) }}
                   </div>
                 </div>
               </div>

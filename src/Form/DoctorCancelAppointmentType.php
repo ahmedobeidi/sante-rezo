@@ -16,7 +16,7 @@ class DoctorCancelAppointmentType extends AbstractType
                 'label' => 'Annuler',
                 'attr' => [
                     'class' => 'bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded text-sm',
-                    'onclick' => "return confirm('Êtes-vous sûr de vouloir annuler ce rendez-vous ?');"
+                    'onclick' => "return confirm('Êtes-vous sûr de vouloir annuler ce rendez-vous ? Une notification sera envoyée au patient concerné.');"
                 ],
             ]);
     }

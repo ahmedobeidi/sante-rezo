@@ -27,6 +27,8 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Knp\Component\Pager\PaginatorInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 
 final class DoctorController extends AbstractController
 {
@@ -465,11 +467,26 @@ final class DoctorController extends AbstractController
             }
         }
 
+        $cancelForms = [];
+        foreach ($filteredAppointmentsByDay as $dateKey => $appointments) {
+            foreach ($appointments as $appointment) {
+                $cancelForms[$appointment->getId()] = $this->createForm(
+                    DoctorCancelAppointmentType::class,
+                    null,
+                    [
+                        'action' => $this->generateUrl('app_doctor_cancel_appointment', ['id' => $appointment->getId()]),
+                        'method' => 'POST',
+                    ]
+                )->createView();
+            }
+        }
+
         return $this->render('doctor/appointments_upcoming.html.twig', [
             'appointmentsByDay' => $filteredAppointmentsByDay,
-            'appointments' => $paginatedDates, // This is now a proper paginator object
+            'appointments' => $paginatedDates,
             'date_filter' => $dateFilter,
             'filterForm' => $filterForm->createView(),
+            'cancelForms' => $cancelForms,
         ]);
     }
 
@@ -546,7 +563,8 @@ final class DoctorController extends AbstractController
     public function cancelAppointment(
         Request $request,
         Appointment $appointment,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        MailerInterface $mailer
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
@@ -562,23 +580,42 @@ final class DoctorController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Store patient information before removing the appointment
+            $patient = $appointment->getPatient();
+            $appointmentDate = $appointment->getDate()->format('d/m/Y à H:i');
+
             // Check if the appointment has a patient
-            if ($appointment->getPatient()) {
-                $this->addFlash('error', 'Impossible d\'annuler un rendez-vous déjà réservé par un patient.');
-                return $this->redirectToRoute('app_doctor_appointments_available');
+            if ($patient) {
+                // Send notification email to the patient
+                $patientEmail = $patient->getUser()->getEmail();
+                $doctorName = $doctor->getFirstName() . ' ' . $doctor->getLastName();
+
+                $email = (new Email())
+                    ->from('no-reply@santerezo.fr')
+                    ->to($patientEmail)
+                    ->subject('Annulation de votre rendez-vous')
+                    ->html($this->renderView('emails/appointment_canceled.html.twig', [
+                        'patient' => $patient,
+                        'doctor' => $doctor,
+                        'appointment' => $appointment,
+                        'appointmentDate' => $appointmentDate
+                    ]));
+
+                try {
+                    $mailer->send($email);
+                    $this->addFlash('success', 'Le patient a été notifié de l\'annulation par email.');
+                } catch (\Exception $e) {
+                    $this->addFlash('error', 'Impossible d\'envoyer l\'email de notification au patient.');
+                }
             }
 
-            // Delete the available appointment
+            // Delete the appointment completely
             $entityManager->remove($appointment);
             $entityManager->flush();
-
-            $this->addFlash('success', 'Le rendez-vous a été annulé avec succès.');
-        } else {
-            $this->addFlash('error', 'Une erreur est survenue lors de l\'annulation du rendez-vous.');
         }
 
-        // Redirect back to available appointments page
-        return $this->redirectToRoute('app_doctor_appointments_available');
+        // Redirect back to the upcoming appointments page
+        return $this->redirectToRoute('app_doctor_appointments_upcoming');
     }
 
     #[Route('/doctor/appointments/add-bulk', name: 'app_doctor_appointments_add_bulk', methods: ['POST'])]
@@ -868,23 +905,23 @@ final class DoctorController extends AbstractController
         $form = $this->createForm(DoctorDeleteDayAppointmentsType::class, null, [
             'date' => null, // This will be populated by the form submission
         ]);
-        
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $date = $form->get('date')->getData();
-            
+
             if (empty($date)) {
                 $this->addFlash('error', 'Aucune date spécifiée.');
                 return $this->redirectToRoute('app_doctor_appointments_available');
             }
-            
+
             try {
                 // Parse the date
                 $timezone = new \DateTimeZone('Europe/Paris');
                 $dateObj = new \DateTime($date, $timezone);
                 $nextDay = (clone $dateObj)->modify('+1 day');
-                
+
                 // Find all available appointments for this day that belong to this doctor
                 $appointmentsToDelete = $entityManager->getRepository(Appointment::class)
                     ->createQueryBuilder('a')
@@ -899,30 +936,29 @@ final class DoctorController extends AbstractController
                     ->setParameter('status', 'disponible')
                     ->getQuery()
                     ->getResult();
-                
+
                 $count = count($appointmentsToDelete);
-                
+
                 if ($count === 0) {
                     $this->addFlash('info', 'Aucun rendez-vous disponible à supprimer pour cette date.');
                     return $this->redirectToRoute('app_doctor_appointments_available');
                 }
-                
+
                 // Delete all found appointments
                 foreach ($appointmentsToDelete as $appointment) {
                     $entityManager->remove($appointment);
                 }
-                
+
                 $entityManager->flush();
-                
+
                 $this->addFlash('success', 'Toutes les disponibilités pour cette journée ont été supprimées avec succès.');
-                
             } catch (\Exception $e) {
                 $this->addFlash('error', 'Une erreur est survenue: ' . $e->getMessage());
             }
-            
+
             return $this->redirectToRoute('app_doctor_appointments_available');
         }
-        
+
         $this->addFlash('error', 'Requête invalide.');
         return $this->redirectToRoute('app_doctor_appointments_available');
     }
