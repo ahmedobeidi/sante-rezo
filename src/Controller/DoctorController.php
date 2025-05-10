@@ -603,9 +603,9 @@ final class DoctorController extends AbstractController
 
                 try {
                     $mailer->send($email);
-                    $this->addFlash('success', 'Le patient a été notifié de l\'annulation par email.');
+                    $this->addFlash('success', 'Le rendez-vous a été annulé avec succès et le patient a été notifié par email.');
                 } catch (\Exception $e) {
-                    $this->addFlash('error', 'Impossible d\'envoyer l\'email de notification au patient.');
+                    $this->addFlash('error', 'Le rendez-vous a été annulé mais l\'email de notification n\'a pas pu être envoyé.');
                 }
             }
 
