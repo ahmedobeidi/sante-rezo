@@ -1,5 +1,4 @@
 <?php
-// filepath: c:\Users\Dev404\Documents\Developer\Ahmed\Projects\Symfony\SantéRézo\src\Form\DoctorCancelAppointmentType.php
 
 namespace App\Form;
 
