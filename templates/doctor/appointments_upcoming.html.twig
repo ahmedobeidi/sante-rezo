@@ -25,43 +25,42 @@
 {% if appointmentsByDay is not empty %}
   <div class="flex flex-col gap-6">
     {% for dateKey, dayAppointments in appointmentsByDay %}
-      <div class="bg-white shadow-lg rounded-lg p-6 border-2 border-dotted border-gray-400">
-        <div class="mb-4">
-          <h2 class="text-xl font-bold text-dark-gray">
-            {{ dayAppointments[0].date|format_datetime(locale='fr',pattern="EEEE dd MMMM YYYY") }}
-          </h2>
-          <div class="h-1 w-20 bg-off-blue mt-2 mb-4"></div>
-        </div>
-        
-        <div class="space-y-6">
-          {% for appointment in dayAppointments %}
-            <div class="{% if not loop.last %}pb-4 border-b border-gray-200{% endif %}">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                  <div class="bg-off-blue text-white p-2 rounded-lg">
-                    <span class="font-bold">{{ appointment.date|date('H:i') }}</span>
-                  </div>
-                  
-                  <div class="flex flex-row gap-3">
-                    <p class="text-sm text-off-gray"><strong>Statut:</strong> 
-                      <span class="text-green-600">
-                        {{ appointment.status }}
-                      </span>
-                    </p>
-                    {% if appointment.patient is not null %}
-                      <p class="text-sm text-dark-gray"><strong>Patient:</strong> {{ appointment.patient.firstName }} {{ appointment.patient.lastName }}</p>
-                    {% endif %}
-
-                    {{ form_start(cancelForms[appointment.id]) }}
-                        {{ form_widget(cancelForms[appointment.id].cancel) }}
-                    {{ form_end(cancelForms[appointment.id]) }}
-                  </div>
-                </div>
+      {% for appointment in dayAppointments %}
+        <div class="bg-white shadow-lg rounded-lg p-6 border-2 border-dotted border-gray-400">
+          <div class="flex items-center gap-4 mb-4">
+            {% if appointment.patient %}
+              <img 
+                src="{{ appointment.patient.profileImage ? asset('uploads/profiles/' ~ appointment.patient.profileImage) : asset('img/default2.png') }}" 
+                alt="Patient Profile Image" 
+                class="w-16 h-16 rounded-full object-cover"
+              />
+              <div>
+                <h2 class="text-lg font-bold text-dark-gray">{{ appointment.patient.firstName }} {{ appointment.patient.lastName }}</h2>
               </div>
-            </div>
-          {% endfor %}
+            {% else %}
+              <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+                <i class="fas fa-user-alt text-gray-400 text-2xl"></i>
+              </div>
+              <div>
+                <h2 class="text-lg font-bold text-dark-gray">Pas de patient</h2>
+              </div>
+            {% endif %}
+          </div>
+          
+          <p class="text-sm text-dark-gray mb-2"><strong>Date:</strong> {{ appointment.date|date('d/m/Y') }}</p>
+          <p class="text-sm text-dark-gray mb-2"><strong>Heure:</strong> {{ appointment.date|date('H:i') }}</p>
+          <p class="text-sm text-dark-gray mb-4"><strong>Statut:</strong> 
+            <span class="text-green-600">{{ appointment.status }}</span>
+          </p>
+
+          <!-- Cancel Button -->
+          <div class="flex justify-end">
+            {{ form_start(cancelForms[appointment.id]) }}
+              {{ form_widget(cancelForms[appointment.id].cancel) }}
+            {{ form_end(cancelForms[appointment.id]) }}
+          </div>
         </div>
-      </div>
+      {% endfor %}
     {% endfor %}
   </div>
 
