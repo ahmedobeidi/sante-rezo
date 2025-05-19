@@ -19,7 +19,7 @@ class DoctorAppointmentBulkType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $today = new \DateTime();
-        
+
         $builder
             ->add('start_date', DateType::class, [
                 'label' => 'Date de début',
@@ -36,10 +36,13 @@ class DoctorAppointmentBulkType extends AbstractType
                     new NotBlank([
                         'message' => 'Veuillez sélectionner une date de début'
                     ]),
-                    new GreaterThanOrEqual([
-                        'value' => $today,
-                        'message' => 'La date de début doit être aujourd\'hui ou dans le futur'
-                    ])
+                    new Callback(function ($date, ExecutionContextInterface $context) {
+                        $today = new \DateTime('today');
+                        if ($date < $today) {
+                            $context->buildViolation('La date de début doit être aujourd\'hui ou dans le futur')
+                                ->addViolation();
+                        }
+                    })
                 ],
             ])
             ->add('end_date', DateType::class, [
@@ -57,7 +60,7 @@ class DoctorAppointmentBulkType extends AbstractType
                     new NotBlank([
                         'message' => 'Veuillez sélectionner une date de fin'
                     ]),
-                    new Callback(function($endDate, ExecutionContextInterface $context) {
+                    new Callback(function ($endDate, ExecutionContextInterface $context) {
                         $form = $context->getRoot();
                         $startDate = $form->get('start_date')->getData();
                         if ($startDate && $endDate && $endDate < $startDate) {
@@ -99,7 +102,7 @@ class DoctorAppointmentBulkType extends AbstractType
                     new NotBlank([
                         'message' => 'Veuillez sélectionner une heure de fin'
                     ]),
-                    new Callback(function($endTime, ExecutionContextInterface $context) {
+                    new Callback(function ($endTime, ExecutionContextInterface $context) {
                         $form = $context->getRoot();
                         $startTime = $form->get('start_time')->getData();
                         if ($startTime && $endTime && $endTime <= $startTime) {
@@ -147,7 +150,7 @@ class DoctorAppointmentBulkType extends AbstractType
                 ],
                 'expanded' => true,
                 'multiple' => true,
-                'choice_attr' => function() {
+                'choice_attr' => function () {
                     return [
                         'class' => 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'
                     ];
