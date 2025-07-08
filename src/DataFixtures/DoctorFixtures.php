@@ -2,13 +2,14 @@
 
 namespace App\DataFixtures;
 
-use App\Entity\Patient;
+use App\Entity\Doctor;
 use App\Entity\User;
+use App\Entity\Specialty;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class PatientFixtures extends Fixture
+class DoctorFixtures extends Fixture
 {
     private UserPasswordHasherInterface $passwordHasher;
 
@@ -39,7 +40,7 @@ class PatientFixtures extends Fixture
             'Marchand', 'Duval', 'Denis', 'Dumont', 'Marie', 'Lemaire', 'Noel', 'Meyer', 'Dufour', 'Meunier'
         ];
 
-        // French cities (same as in your forms)
+        // French cities
         $cities = [
             "Paris", "Marseille", "Lyon", "Toulouse", "Nice", "Nantes", "Strasbourg", "Montpellier", 
             "Bordeaux", "Lille", "Rennes", "Reims", "Le Havre", "Saint-Étienne", "Toulon", 
@@ -58,13 +59,16 @@ class PatientFixtures extends Fixture
             'des Lilas', 'de la Fontaine', 'du Moulin', 'des Platanes', 'Saint-Antoine', 'Sainte-Catherine'
         ];
 
-        for ($i = 1; $i <= 100; $i++) {
+        // Get all specialties for random assignment
+        $specialties = $manager->getRepository(Specialty::class)->findAll();
+        
+        for ($i = 1; $i <= 50; $i++) {
             // Create User entity first
             $user = new User();
-            $user->setEmail('patient' . $i . '@santerezo.com');
-            $user->setRoles(['ROLE_USER', 'ROLE_PATIENT']);
+            $user->setEmail('doctor' . $i . '@santerezo.com');
+            $user->setRoles(['ROLE_USER', 'ROLE_DOCTOR']);
             
-            // Hash a default password
+            // Hash the password "Ahmed1&"
             $hashedPassword = $this->passwordHasher->hashPassword($user, 'Ahmed1&');
             $user->setPassword($hashedPassword);
             $user->setIsVerified(true);
@@ -72,34 +76,43 @@ class PatientFixtures extends Fixture
 
             $manager->persist($user);
 
-            // Create Patient entity
-            $patient = new Patient();
-            $patient->setUser($user);
+            // Create Doctor entity
+            $doctor = new Doctor();
+            $doctor->setUser($user);
             
             // Random French name
             $firstName = $firstNames[array_rand($firstNames)];
             $lastName = $lastNames[array_rand($lastNames)];
-            $patient->setFirstName($firstName);
-            $patient->setLastName($lastName);
+            $doctor->setFirstName($firstName);
+            $doctor->setLastName($lastName);
 
             // Random city
             $city = $cities[array_rand($cities)];
-            $patient->setCity($city);
+            $doctor->setCity($city);
 
             // Generate random address
             $streetNumber = rand(1, 999);
             $streetType = $streetTypes[array_rand($streetTypes)];
             $streetName = $streetNames[array_rand($streetNames)];
             $address = $streetNumber . ' ' . $streetType . ' ' . $streetName;
-            $patient->setAddress($address);
+            $doctor->setAddress($address);
 
-            // Set default profile image to default2.png for all patients
-            $patient->setProfileImage(null);
+            // Assign random specialty
+            if (!empty($specialties)) {
+                $specialty = $specialties[array_rand($specialties)];
+                $doctor->setSpecialty($specialty);
+            }
 
-            $manager->persist($patient);
+            // Set as completed (since all required fields are filled)
+            $doctor->setIsCompleted(true);
+
+            // Set default profile image to null
+            $doctor->setProfileImage(null);
+
+            $manager->persist($doctor);
 
             // Add reference for potential use in other fixtures
-            $this->addReference('patient_' . $i, $patient);
+            $this->addReference('doctor_' . $i, $doctor);
         }
 
         $manager->flush();
