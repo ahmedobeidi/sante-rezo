@@ -62,7 +62,7 @@ class AdminController extends AbstractDashboardController
         yield MenuItem::linkToCrud('Spécialités', 'fa fa-tags', Specialty::class);
 
         // Navigation section
-        yield MenuItem::section('Navigation');
-        yield MenuItem::linkToRoute('Retour au site', 'fa fa-arrow-left', 'app_home');
+        // yield MenuItem::section('Navigation');
+        // yield MenuItem::linkToRoute('Retour au site', 'fa fa-arrow-left', 'app_home');
     }
 }
