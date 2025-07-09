@@ -534,6 +534,17 @@ final class DoctorController extends AbstractController
                 return $this->redirectToRoute('app_doctor_appointments_add');
             }
 
+            // Check if an appointment already exists at this exact time for this doctor
+            $existingAppointment = $entityManager->getRepository(Appointment::class)->findOneBy([
+                'doctor' => $doctor,
+                'date' => $date
+            ]);
+
+            if ($existingAppointment) {
+                $this->addFlash('error', 'Un rendez-vous existe déjà à cette date et heure.');
+                return $this->redirectToRoute('app_doctor_appointments_add');
+            }
+
             $appointment = new Appointment();
             $appointment->setDoctor($doctor);
             $appointment->setDate($date);
