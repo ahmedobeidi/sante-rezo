@@ -115,9 +115,15 @@
               {{ form_errors(doctorUpdateForm.address) }}
             </div>
             <div class="w-full">
-              {{ form_label(doctorUpdateForm.specialty) }}
-              {{ form_widget(doctorUpdateForm.specialty) }}
-              {{ form_errors(doctorUpdateForm.specialty) }}
+              <label class="block text-sm font-medium text-gray-700 mb-1">Spécialité</label>
+              <div class="border border-dotted rounded-md w-full bg-gray-100">
+                {{ doctor.specialty ? doctor.specialty.name : 'Aucune spécialité définie' }}
+              </div>
+              <p class="text-sm text-gray-500 mt-1 italic">
+                <i class="fas fa-info-circle mr-1"></i>
+                Pour modifier votre spécialité, veuillez nous contacter à 
+                <a href="mailto:contact@santerezo.fr" class="text-off-blue hover:underline">specialty@santerezo.fr</a>
+              </p>
             </div>
             <button type="submit" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px] w-full sm:w-auto sm:self-end">Enregistrer</button>
           {{ form_end(doctorUpdateForm) }}

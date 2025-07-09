@@ -18,14 +18,49 @@ class DoctorUpdateType extends AbstractType
     {
         // Get French cities for dropdown
         $cities = [
-            "Paris", "Marseille", "Lyon", "Toulouse", "Nice", "Nantes", "Strasbourg", "Montpellier", 
-            "Bordeaux", "Lille", "Rennes", "Reims", "Le Havre", "Saint-Étienne", "Toulon", 
-            "Grenoble", "Dijon", "Angers", "Villeurbanne", "Le Mans", "Aix-en-Provence", 
-            "Clermont-Ferrand", "Brest", "Tours", "Limoges", "Amiens", "Annecy", "Perpignan", 
-            "Boulogne-Billancourt", "Metz", "Besançon", "Orléans", "Argenteuil", "Rouen", 
-            "Mulhouse", "Caen", "Nancy", "Saint-Denis", "Saint-Paul", "Montreuil", "Avignon"
+            "Paris",
+            "Marseille",
+            "Lyon",
+            "Toulouse",
+            "Nice",
+            "Nantes",
+            "Strasbourg",
+            "Montpellier",
+            "Bordeaux",
+            "Lille",
+            "Rennes",
+            "Reims",
+            "Le Havre",
+            "Saint-Étienne",
+            "Toulon",
+            "Grenoble",
+            "Dijon",
+            "Angers",
+            "Villeurbanne",
+            "Le Mans",
+            "Aix-en-Provence",
+            "Clermont-Ferrand",
+            "Brest",
+            "Tours",
+            "Limoges",
+            "Amiens",
+            "Annecy",
+            "Perpignan",
+            "Boulogne-Billancourt",
+            "Metz",
+            "Besançon",
+            "Orléans",
+            "Argenteuil",
+            "Rouen",
+            "Mulhouse",
+            "Caen",
+            "Nancy",
+            "Saint-Denis",
+            "Saint-Paul",
+            "Montreuil",
+            "Avignon"
         ];
-        
+
         $builder
             ->add('lastName', TextType::class, [
                 'attr' => [
@@ -75,21 +110,8 @@ class DoctorUpdateType extends AbstractType
                 ],
                 'required' => false,
                 'empty_data' => '',
-            ])
-            ->add('specialty', EntityType::class, [
-                'class' => Specialty::class,
-                'choice_label' => 'name',
-                'attr' => [
-                    'class' => 'p-3 border border-dotted border-gray-500 rounded-md w-full'
-                ],
-                'label' => 'Spécialité',
-                'label_attr' => [
-                    'class' => 'block text-sm font-medium text-gray-700 mb-1'
-                ],
-                'placeholder' => 'Sélectionnez une spécialité',
-                'required' => false,
             ]);
-        
+
         // Add data transformers to ensure empty strings are properly handled
         $emptyStringToNullTransformer = new CallbackTransformer(
             function ($value) {
@@ -101,7 +123,7 @@ class DoctorUpdateType extends AbstractType
                 return $value === '' ? '' : $value;
             }
         );
-        
+
         $builder->get('lastName')->addModelTransformer($emptyStringToNullTransformer);
         $builder->get('firstName')->addModelTransformer($emptyStringToNullTransformer);
         $builder->get('city')->addModelTransformer($emptyStringToNullTransformer);

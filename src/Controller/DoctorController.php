@@ -119,7 +119,6 @@ final class DoctorController extends AbstractController
             'lastName' => $doctor->getLastName(),
             'city' => $doctor->getCity(),
             'address' => $doctor->getAddress(),
-            'specialty' => $doctor->getSpecialty(),
         ];
 
         // Create and handle form submission
@@ -133,8 +132,7 @@ final class DoctorController extends AbstractController
                 if (($originalData['firstName'] && empty($doctor->getFirstName())) ||
                     ($originalData['lastName'] && empty($doctor->getLastName())) ||
                     ($originalData['city'] && empty($doctor->getCity())) ||
-                    ($originalData['address'] && empty($doctor->getAddress())) ||
-                    ($originalData['specialty'] && empty($doctor->getSpecialty()))
+                    ($originalData['address'] && empty($doctor->getAddress()))
                 ) {
                     $this->addFlash('error', 'Les champs peuvent être modifiés mais ne peuvent pas être vidés une fois remplis');
                     return $this->redirectToRoute('app_doctor_profile');
@@ -145,8 +143,7 @@ final class DoctorController extends AbstractController
                     $originalData['firstName'] !== $doctor->getFirstName() ||
                     $originalData['lastName'] !== $doctor->getLastName() ||
                     $originalData['city'] !== $doctor->getCity() ||
-                    $originalData['address'] !== $doctor->getAddress() ||
-                    $originalData['specialty'] !== $doctor->getSpecialty();
+                    $originalData['address'] !== $doctor->getAddress();
 
                 // Only proceed if there are changes
                 if ($hasChanges) {
