@@ -79,28 +79,51 @@
 
 <script>
   // Ensure clicking anywhere on the input opens the calendar
-  // The document.getElementById check should be done in JavaScript, not in Twig
-  const dateInput = document.getElementById('date');
-  if (dateInput) {
-    dateInput.addEventListener('click', function () {
-      this.showPicker();
+  document.addEventListener('DOMContentLoaded', function() {
+    // Remove any existing listeners first
+    document.removeEventListener('click', handleInputClick);
+    document.removeEventListener('focus', handleInputFocus);
+    
+    // Add event delegation for clicks
+    document.addEventListener('click', handleInputClick);
+    document.addEventListener('focus', handleInputFocus, true);
+    
+    // Also set cursor style for all date/time inputs
+    const allInputs = document.querySelectorAll('input[type="date"], input[type="time"]');
+    allInputs.forEach(input => {
+      input.style.cursor = 'pointer';
     });
+  });
+  
+  function handleInputClick(e) {
+    const target = e.target;
+    if (target.type === 'date' || target.type === 'time') {
+      target.focus();
+      setTimeout(() => {
+        if (target.showPicker) {
+          try {
+            target.showPicker();
+          } catch (error) {
+            // Silently fail
+          }
+        }
+      }, 50);
+    }
   }
   
-  document.getElementById('start_date').addEventListener('click', function () {
-    this.showPicker();
-  });
-  
-  document.getElementById('end_date').addEventListener('click', function () {
-    this.showPicker();
-  });
-  
-  document.getElementById('start_time').addEventListener('click', function () {
-    this.showPicker();
-  });
-  
-  document.getElementById('end_time').addEventListener('click', function () {
-    this.showPicker();
-  });
+  function handleInputFocus(e) {
+    const target = e.target;
+    if (target.type === 'date' || target.type === 'time') {
+      setTimeout(() => {
+        if (target.showPicker) {
+          try {
+            target.showPicker();
+          } catch (error) {
+            // Silently fail
+          }
+        }
+      }, 50);
+    }
+  }
 </script>
 {% endblock %}
