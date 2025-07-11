@@ -49,8 +49,9 @@
 {% block main %}
   <section class="mt-[90px] w-full font-poppins">
     <div class="flex justify-center py-4 text-xl font-semibold text-dark-gray">Mon Compte</div>
+
     {# Flash messages #}
-    {% for message in app.flashes('success') %}
+    {# {% for message in app.flashes('success') %}
       <div class="container mx-auto px-4 mb-4">
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
           <p>{{ message }}</p>
@@ -64,7 +65,25 @@
           <p>{{ message }}</p>
         </div>
       </div>
-    {% endfor %}
+    {% endfor %} #}
+
+    {% set successMessage = app.flashes('success')|first %}
+    {% if successMessage %}
+      <div class="container mx-auto px-4 mb-4">
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+          <p>{{ successMessage }}</p>
+        </div>
+      </div>
+    {% endif %}
+
+    {% set errorMessage = app.flashes('error')|first %}
+    {% if errorMessage %}
+      <div class="container mx-auto px-4 mb-4">
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <p>{{ errorMessage }}</p>
+        </div>
+      </div>
+    {% endif %}
 
     <div class="container mx-auto px-4 py-8">
       <div class="flex flex-col lg:flex-row gap-6">
