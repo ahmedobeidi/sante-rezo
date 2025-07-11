@@ -115,6 +115,11 @@
               {{ form_widget(patientUpdateForm.address) }}
               {{ form_errors(patientUpdateForm.address) }}
             </div>
+            <div class="w-full">
+              {{ form_label(patientUpdateForm.phoneNumber) }}
+              {{ form_widget(patientUpdateForm.phoneNumber) }}
+              {{ form_errors(patientUpdateForm.phoneNumber) }}
+            </div>
             <button type="submit" class="bg-dark-blue text-white py-2 px-4 rounded hover:bg-off-blue text-[16px] w-full sm:w-auto sm:self-end">Enregistrer</button>
           {{ form_end(patientUpdateForm) }}
         </div>

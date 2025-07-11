@@ -106,6 +106,7 @@ final class PatientController extends AbstractController
             'lastName' => $patient->getLastName(),
             'city' => $patient->getCity(),
             'address' => $patient->getAddress(),
+            'phoneNumber' => $patient->getPhoneNumber(),
         ];
 
         // Create and handle form submission
@@ -119,7 +120,8 @@ final class PatientController extends AbstractController
                 if (($originalData['firstName'] && empty($patient->getFirstName())) ||
                     ($originalData['lastName'] && empty($patient->getLastName())) ||
                     ($originalData['city'] && empty($patient->getCity())) ||
-                    ($originalData['address'] && empty($patient->getAddress()))
+                    ($originalData['address'] && empty($patient->getAddress())) ||
+                    ($originalData['phoneNumber'] && empty($patient->getPhoneNumber()))
                 ) {
                     $this->addFlash('error', 'Les champs peuvent être modifiés mais ne peuvent pas être vidés une fois remplis');
                     return $this->redirectToRoute('app_patient_profile');
@@ -130,7 +132,8 @@ final class PatientController extends AbstractController
                     $originalData['firstName'] !== $patient->getFirstName() ||
                     $originalData['lastName'] !== $patient->getLastName() ||
                     $originalData['city'] !== $patient->getCity() ||
-                    $originalData['address'] !== $patient->getAddress();
+                    $originalData['address'] !== $patient->getAddress() ||
+                    $originalData['phoneNumber'] !== $patient->getPhoneNumber();
 
                 // Only proceed if there are changes
                 if ($hasChanges) {
@@ -170,7 +173,7 @@ final class PatientController extends AbstractController
                 }
 
                 // Check for specific field errors
-                foreach (['lastName', 'firstName', 'city', 'address'] as $field) {
+                foreach (['lastName', 'firstName', 'city', 'address', 'phoneNumber'] as $field) {
                     if ($form->get($field)->getErrors()->count() > 0) {
                         foreach ($form->get($field)->getErrors() as $error) {
                             $this->addFlash('error', 'Erreur dans le champ ' . $field . ': ' . $error->getMessage());

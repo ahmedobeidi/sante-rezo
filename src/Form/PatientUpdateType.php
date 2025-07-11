@@ -10,6 +10,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Regex;
 
 class PatientUpdateType extends AbstractType
 {
@@ -76,6 +77,24 @@ class PatientUpdateType extends AbstractType
                 ],
                 'required' => false, // Changed to false to prevent HTML5 validation
                 'empty_data' => '', // Provides an empty string instead of null
+            ])
+            ->add('phoneNumber', TextType::class, [
+                'attr' => [
+                    'class' => 'p-3 border border-dotted border-gray-500 rounded-md w-full',
+                    'placeholder' => '06 12 34 56 78 ou +33 6 12 34 56 78'
+                ],
+                'label' => 'Numéro de téléphone',
+                'label_attr' => [
+                    'class' => 'block text-sm font-medium text-gray-700 mb-1'
+                ],
+                'required' => false,
+                'empty_data' => '',
+                'constraints' => [
+                    new Regex([
+                        'pattern' => '/^(?:0[67]\d{8}|0[67](?:\s\d{2}){4}|\+33[67]\d{8}|\+33\s[67](?:\s\d{2}){4}|0033[67]\d{8}|0033\s[67](?:\s\d{2}){4}|00\s33\s[67](?:\s\d{2}){4})$/',
+                        'message' => 'Veuillez entrer un numéro de téléphone mobile français valide (ex: 06 12 34 56 78 ou +33 6 12 34 56 78)'
+                    ])
+                ],
             ]);
         
         // Add data transformers to ensure empty strings are properly handled
@@ -94,6 +113,7 @@ class PatientUpdateType extends AbstractType
         $builder->get('firstName')->addModelTransformer($emptyStringToNullTransformer);
         $builder->get('city')->addModelTransformer($emptyStringToNullTransformer);
         $builder->get('address')->addModelTransformer($emptyStringToNullTransformer);
+        $builder->get('phoneNumber')->addModelTransformer($emptyStringToNullTransformer);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
