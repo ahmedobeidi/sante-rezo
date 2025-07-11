@@ -81,7 +81,11 @@ class PatientUpdateType extends AbstractType
             ->add('phoneNumber', TextType::class, [
                 'attr' => [
                     'class' => 'p-3 border border-dotted border-gray-500 rounded-md w-full',
-                    'placeholder' => '06 12 34 56 78 ou +33 6 12 34 56 78'
+                    'placeholder' => '06 12 34 56 78',
+                    'pattern' => '[0-9+\s]*',
+                    'inputmode' => 'tel',
+                    'onkeypress' => 'return (event.charCode >= 48 && event.charCode <= 57) || event.charCode === 32 || event.charCode === 43',
+                    'oninput' => 'this.value = this.value.replace(/[^0-9+\s]/g, "")'
                 ],
                 'label' => 'Numéro de téléphone',
                 'label_attr' => [
