@@ -23,7 +23,7 @@ class DoctorDeleteDayAppointmentsType extends AbstractType
                 'data' => $options['date'],
             ])
             ->add('delete', SubmitType::class, [
-                'label' => 'Supprimer toutes les disponibilités du jour',
+                'label' => 'Supprimer les créneaux du jour',
                 'attr' => [
                     'class' => 'bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded text-sm w-full',
                     'onclick' => "return confirm('Êtes-vous sûr de vouloir supprimer toutes les disponibilités pour cette journée ? Seuls les créneaux disponibles seront supprimés, les rendez-vous déjà réservés par les patients seront conservés.');"
