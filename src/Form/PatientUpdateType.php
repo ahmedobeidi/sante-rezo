@@ -96,7 +96,7 @@ class PatientUpdateType extends AbstractType
                 'constraints' => [
                     new Regex([
                         'pattern' => '/^(?:0[67]\d{8}|0[67](?:\s\d{2}){4}|\+33[67]\d{8}|\+33\s[67](?:\s\d{2}){4}|0033[67]\d{8}|0033\s[67](?:\s\d{2}){4}|00\s33\s[67](?:\s\d{2}){4})$/',
-                        'message' => 'Veuillez entrer un numéro de téléphone mobile français valide (ex: 06 12 34 56 78 ou +33 6 12 34 56 78)'
+                        'message' => 'Veuillez entrer un numéro de téléphone français valide (ex: 06 12 34 56 78)'
                     ])
                 ],
             ]);
