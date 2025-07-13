@@ -10,7 +10,6 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -18,8 +17,6 @@ class DoctorAppointmentBulkType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $today = new \DateTime();
-
         $builder
             ->add('start_date', DateType::class, [
                 'label' => 'Date de début',
@@ -155,10 +152,6 @@ class DoctorAppointmentBulkType extends AbstractType
                         'class' => 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'
                     ];
                 },
-                // Remove duplicate label_attr - this is what's causing issues
-                // 'label_attr' => [
-                //     'class' => 'ml-2 text-sm text-gray-700'
-                // ],
                 'row_attr' => [
                     'class' => 'flex flex-wrap gap-4'
                 ],
