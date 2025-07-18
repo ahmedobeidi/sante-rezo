@@ -1,13 +1,25 @@
-<h1>Bienvenue sur SantéRézo !</h1>
+{% extends 'registration/base_email.html.twig' %}
 
-<p>
-    Veuillez confirmer votre adresse e-mail en cliquant sur le lien suivant : <br><br>
-    <a href="{{ signedUrl }}">Confirmer mon adresse e-mail</a>
-    <br>
-    Ce lien expirera dans {{ expiresAtMessageKey|trans(expiresAtMessageData, 'VerifyEmailBundle') }}.
-</p>
-
-<p>
-    À bientôt !<br>
-    L'équipe SantéRézo
-</p>
+{% block body %}
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">    
+    <h1 style="color: #3490dc; text-align: center;">Bienvenue sur SantéRézo !</h1>
+    
+    <p>Bonjour,</p>
+    
+    <p>Merci de vous être inscrit sur la plateforme SantéRézo.</p>
+    
+    <p>Pour finaliser votre inscription et confirmer votre adresse e-mail, veuillez cliquer sur le bouton ci-dessous :</p>
+    
+    <p style="text-align: center; margin: 30px 0;">
+        <a href="{{ signedUrl }}" style="background-color: #3490dc; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">Confirmer mon adresse e-mail</a>
+    </p>
+    
+    <p>Ce lien expirera dans {{ expiresAtMessageKey|trans(expiresAtMessageData, 'VerifyEmailBundle') }}.</p>
+    
+    <p>Une fois votre email confirmé, vous pourrez vous connecter et commencer à utiliser la plateforme.</p>
+    
+    <p>Si vous n'avez pas demandé cette inscription, veuillez ignorer cet email ou contacter notre support.</p>
+    
+    <p>Cordialement,<br>L'équipe SantéRézo</p>
+</div>
+{% endblock %}
