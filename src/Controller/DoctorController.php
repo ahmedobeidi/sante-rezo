@@ -623,7 +623,7 @@ final class DoctorController extends AbstractController
         }
 
         // Redirect back to the upcoming appointments page
-        return $this->redirectToRoute('app_doctor_appointments_upcoming');
+        return $this->redirectToRoute('app_doctor_appointments_available');
     }
 
     #[Route('/doctor/appointments/add-bulk', name: 'app_doctor_appointments_add_bulk', methods: ['POST'])]
