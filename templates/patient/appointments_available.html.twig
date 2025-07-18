@@ -51,7 +51,7 @@
 </div>
 
 <!-- Available Appointments - Only show if search or filters were applied -->
-{% set searchApplied = searchQuery is not emptd or specialtyId is not empty or cityFilter is not empty or dateFilter is not empty %}
+{% set searchApplied = searchQuery is not empty or specialtyId is not empty or cityFilter is not empty or dateFilter is not empty %}
 
 {% if searchApplied %}
   {% if doctors is defined and doctors|length > 0 %}
