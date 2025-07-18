@@ -397,32 +397,32 @@ final class PatientController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-        $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
-
+        
         // Redirect if the user does not have ROLE_PATIENT
         if (!in_array('ROLE_PATIENT', $user->getRoles())) {
             $this->addFlash('error', 'Vous devez compléter votre profil pour accéder à cette page.');
             return $this->redirectToRoute('app_patient_profile');
         }
-
+        
         // Fetch booked appointments
-        $bookedAppointments = $entityManager->getRepository(Appointment::class)->findBy(['patient' => $patient]);
+        // $patient = $entityManager->getRepository(Patient::class)->findOneBy(['user' => $user]);
+        // $bookedAppointments = $entityManager->getRepository(Appointment::class)->findBy(['patient' => $patient]);
 
         // Handle search query
-        $searchQuery = $request->query->get('search', '');
+        // $searchQuery = $request->query->get('search', '');
 
-        $availableAppointments = [];
+        // $availableAppointments = [];
 
-        if (!empty($searchQuery)) {
-            $availableAppointments = $entityManager->getRepository(Appointment::class)->createQueryBuilder('a')
-                ->join('a.doctor', 'd')
-                ->where('a.status = :status')
-                ->andWhere('LOWER(d.firstName) LIKE :search OR LOWER(d.lastName) LIKE :search')
-                ->setParameter('status', 'disponible')
-                ->setParameter('search', '%' . strtolower($searchQuery) . '%')
-                ->getQuery()
-                ->getResult();
-        }
+        // if (!empty($searchQuery)) {
+        //     $availableAppointments = $entityManager->getRepository(Appointment::class)->createQueryBuilder('a')
+        //         ->join('a.doctor', 'd')
+        //         ->where('a.status = :status')
+        //         ->andWhere('LOWER(d.firstName) LIKE :search OR LOWER(d.lastName) LIKE :search')
+        //         ->setParameter('status', 'disponible')
+        //         ->setParameter('search', '%' . strtolower($searchQuery) . '%')
+        //         ->getQuery()
+        //         ->getResult();
+        // }
 
         // return $this->render('patient/appointments.html.twig', [
         //     'bookedAppointments' => $bookedAppointments,
