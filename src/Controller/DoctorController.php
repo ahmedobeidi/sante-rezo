@@ -596,7 +596,7 @@ final class DoctorController extends AbstractController
             if ($patient) {
                 // Send notification email to the patient
                 $patientEmail = $patient->getUser()->getEmail();
-                $doctorName = $doctor->getFirstName() . ' ' . $doctor->getLastName();
+                // $doctorName = $doctor->getFirstName() . ' ' . $doctor->getLastName();
 
                 $email = (new Email())
                     ->from('no-reply@santerezo.fr')
@@ -623,7 +623,7 @@ final class DoctorController extends AbstractController
         }
 
         // Redirect back to the upcoming appointments page
-        return $this->redirectToRoute('app_doctor_appointments_available');
+        return $this->redirectToRoute('app_doctor_appointments_upcoming');
     }
 
     #[Route('/doctor/appointments/add-bulk', name: 'app_doctor_appointments_add_bulk', methods: ['POST'])]
