@@ -65,10 +65,6 @@ class PatientUpdateProfileTest extends WebTestCase
         // Follow redirect
         $this->client->followRedirect();
 
-        // Assert success message exists
-        // $this->assertSelectorExists('.flash-success');
-        // $this->assertSelectorTextContains('.flash-success', 'Profil mis à jour avec succès');
-
         // Verify data in the database
         $updatedPatient = $this->entityManager
             ->getRepository(Patient::class)
@@ -80,5 +76,17 @@ class PatientUpdateProfileTest extends WebTestCase
         $this->assertEquals('123 Rue de Test', $updatedPatient->getAddress());
     }
 
-
+    protected function tearDown(): void
+    {
+        // Clean up database after each test
+        $this->entityManager->createQuery('DELETE FROM App\Entity\Appointment a')->execute();
+        $this->entityManager->createQuery('DELETE FROM App\Entity\Patient p')->execute();
+        $this->entityManager->createQuery('DELETE FROM App\Entity\User u')->execute();
+        
+        // Close the entity manager to free up resources
+        $this->entityManager->close();
+        $this->entityManager = null;
+        
+        parent::tearDown();
+    }
 }
