@@ -1,5 +1,4 @@
 <?php
-// filepath: c:\Users\Dev404\Documents\Developer\Ahmed\Projects\Symfony\SantéRézo\src\Form\DoctorProfileImageType.php
 
 namespace App\Form;
 

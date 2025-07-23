@@ -208,6 +208,14 @@ final class DoctorController extends AbstractController
             $profileImage = $form->get('profileImage')->getData();
 
             if ($profileImage) {
+
+                // Step 1: Ensure it is a real image
+                $imageInfo = @getimagesize($profileImage->getPathname());
+                if ($imageInfo === false) {
+                    $this->addFlash('error', 'Le fichier n\'est pas une vraie image.');
+                    return $this->redirectToRoute('app_doctor_profile');
+                }
+
                 $originalFilename = pathinfo($profileImage->getClientOriginalName(), PATHINFO_FILENAME);
                 $safeFilename = $slugger->slug($originalFilename);
                 $newFilename = $safeFilename . '-' . uniqid() . '.' . $profileImage->guessExtension();
